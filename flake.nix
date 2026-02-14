@@ -23,8 +23,37 @@
         pkgs = nixpkgs.legacyPackages.${system};
         naerskLib = pkgs.callPackages naersk { };
 
-        base_lib = with pkgs; [
-        ];
+        linux_libs =
+          if pkgs.stdenv.isLinux then
+            with pkgs;
+            [
+
+              xorg.libX11
+              xorg.libXcursor
+              xorg.libXi
+              xorg.libXrandr
+              libxkbcommon
+
+              alsa-lib
+              xorg.libX11
+              wayland # To use the wayland feature
+            ]
+          else
+            [
+
+            ];
+        base_lib =
+          with pkgs;
+          [
+            expat
+            fontconfig
+            freetype
+            freetype.dev
+            libGL
+            pkg-config
+
+          ]
+          ++ linux_libs;
 
         std_bin = with pkgs; [
           glfw
