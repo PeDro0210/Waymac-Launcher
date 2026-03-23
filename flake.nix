@@ -4,91 +4,116 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     naersk.url = "github:nix-community/naersk";
-
-    flake-utils.url = "github:numtide/flake-utils";
   };
 
   outputs =
     {
       nixpkgs,
       naersk,
-      flake-utils,
       ...
     }:
 
-    flake-utils.lib.eachDefaultSystem (
-      system:
-      let
+    let
+      supportedSystems = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "aarch64-darwin"
+      ];
+      forEachSupportedSystem =
+        f:
+        nixpkgs.lib.genAttrs supportedSystems (
+          system:
+          let
+            pkgs = import nixpkgs {
+              inherit system;
+            };
+          in
+          f {
 
-        pkgs = nixpkgs.legacyPackages.${system};
-        naerskLib = pkgs.callPackages naersk { };
+            inherit system pkgs;
+            packages = with pkgs; [
+              cargo
+              clippy
+              rustfmt
+              bacon
+              taplo # lsp for cargo.toml
+            ];
+          }
+        );
 
-        linux_libs =
-          if pkgs.stdenv.isLinux then
+    in
+    {
+      packages = forEachSupportedSystem (
+        {
+          pkgs,
+          ...
+        }:
+        let
+          naerskLib = pkgs.callPackages naersk { };
+          targetSpecificBuildInputs =
+            #TODO: check if xorg can be checked and wayland
+            if pkgs.stdenv.isLinux then
+              with pkgs;
+              [
+                xorg.libX11
+                xorg.libXcursor
+                xorg.libXi
+                xorg.libXrandr
+                libxkbcommon
+
+                alsa-lib
+                xorg.libX11
+                wayland # To use the wayland feature
+              ]
+            else
+              [
+
+              ];
+
+          buildInputs =
             with pkgs;
             [
-
-              xorg.libX11
-              xorg.libXcursor
-              xorg.libXi
-              xorg.libXrandr
-              libxkbcommon
-
-              alsa-lib
-              xorg.libX11
-              wayland # To use the wayland feature
+              expat
+              fontconfig
+              freetype
+              freetype.dev
+              libGL
+              pkg-config
             ]
-          else
-            [
+            ++ targetSpecificBuildInputs;
 
-            ];
-        base_lib =
-          with pkgs;
-          [
-            expat
-            fontconfig
-            freetype
-            freetype.dev
-            libGL
+          nativeBuildInputs = with pkgs; [
+            glfw
+            cmake
+            clang
             pkg-config
 
-          ]
-          ++ linux_libs;
+            rustc
+            rust-analyzer
+          ];
 
-        std_bin = with pkgs; [
-          glfw
-          cmake
-          clang
-          pkg-config
-          cargo
-          bacon
-          rustc
-          rust-analyzer
-          clippy
-          rustfmt
-          taplo # lsp for cargo.toml
-          bacon
-        ];
+        in
+        {
+          default = naerskLib.buildPackage {
+            inherit nativeBuildInputs buildInputs;
 
-        link_flag = base_lib ++ std_bin;
-      in
-      {
+            src = ./.;
+            env.RUSTFLAGS = "-C link-args=-Wl,-rpath,${pkgs.lib.makeLibraryPath buildInputs}";
 
-        # declaring the build with the naerskLib flake
-        packages.default = naerskLib.buildPackage {
-          src = ./.;
-          buildInputs = base_lib;
-          nativeBuildInputs = std_bin;
+          };
+        }
+      );
 
-          env.RUSTFLAGS = "-C link-args=-Wl,-rpath,${pkgs.lib.makeLibraryPath link_flag}";
-        };
+      templates.default.path = ./.;
 
-        templates.default.path = ./.;
+      devShells = forEachSupportedSystem (
+        { pkgs, packages, ... }:
+        {
+          default = pkgs.mkShell {
+            inherit packages;
+          };
+        }
+      );
 
-        devShell = pkgs.mkShell {
-          packages = std_bin;
-        };
-
-      }
-    );
+    };
 }
