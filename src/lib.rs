@@ -2,7 +2,6 @@ mod common;
 mod display_servers;
 
 pub mod logger;
-pub mod utils;
 
 use std::error::Error as StdError;
 
