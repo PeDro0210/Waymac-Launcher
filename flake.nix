@@ -42,7 +42,8 @@
             [
 
             ];
-        base_lib =
+
+        buildInputs =
           with pkgs;
           [
             expat
@@ -55,38 +56,43 @@
           ]
           ++ linux_libs;
 
-        std_bin = with pkgs; [
+        nativeBuildInputs = with pkgs; [
           glfw
           cmake
           clang
-          pkg-config
           cargo
-          bacon
           rustc
-          rust-analyzer
-          clippy
-          rustfmt
-          taplo # lsp for cargo.toml
-          bacon
         ];
 
-        link_flag = base_lib ++ std_bin;
+        linkFlag = nativeBuildInputs ++ buildInputs;
       in
       {
 
         # declaring the build with the naerskLib flake
         packages.default = naerskLib.buildPackage {
+          inherit nativeBuildInputs buildInputs;
           src = ./.;
-          buildInputs = base_lib;
-          nativeBuildInputs = std_bin;
 
-          env.RUSTFLAGS = "-C link-args=-Wl,-rpath,${pkgs.lib.makeLibraryPath link_flag}";
+          env.RUSTFLAGS = "-C link-args=-Wl,-rpath,${pkgs.lib.makeLibraryPath linkFlag}";
+          LD_LIBRARY_PATH = builtins.foldl' (a: b: "${a}:${b}/lib") "${pkgs.vulkan-loader}/lib" buildInputs;
+
         };
 
         templates.default.path = ./.;
 
         devShell = pkgs.mkShell {
-          packages = std_bin;
+          inherit nativeBuildInputs buildInputs;
+
+          packages = with pkgs; [
+            cargo
+            bacon
+            rust-analyzer
+            clippy
+            rustfmt
+            taplo # lsp for cargo.toml
+          ];
+          LD_LIBRARY_PATH = builtins.foldl' (a: b: "${a}:${b}/lib") "${pkgs.vulkan-loader}/lib" buildInputs;
+
         };
 
       }
