@@ -7,4 +7,8 @@ edition = "2024"
 iced = "0.13.1"
 log = "0.4.29"
 ftail = "0.3.1"
+clap = "4.6.0"
+
+
+[target.'cfg(target_os = "linux")'.dependencies]
 iced_layershell = "0.13.7"
