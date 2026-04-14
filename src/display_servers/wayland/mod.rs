@@ -3,7 +3,7 @@ use std::error::Error as StdError;
 use iced::{Element, Task, Theme};
 use iced_layershell::application;
 
-use crate::common::{LauncherState, Message, update, view};
+use crate::common::{update, view, LauncherState, Message};
 
 pub struct WaylandApp;
 

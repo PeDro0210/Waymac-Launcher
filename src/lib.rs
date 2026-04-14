@@ -5,12 +5,29 @@ mod logger;
 
 use std::{env, error::Error as StdError};
 
-pub struct WayXDaemon;
+use log::info;
 
-impl WayXDaemon {
+use crate::{
+    display_servers::{wayland::WaylandApp, xorg::XorgApp},
+    logger::init_logger,
+};
+
+pub struct WayXApp;
+
+impl WayXApp {
     pub fn init() -> Result<(), Box<dyn StdError>> {
-        if env::var_os("XDG_SESSION_TYPE").is_some() {
+        //TODO: pass the log file
+        logger::init_logger(None)?;
+
+        info!(
+            "XDG_SESSION_TYPE: {:?}",
+            env::var_os("XDG_SESSION_TYPE").unwrap_or_default()
+        );
+
+        if env::var_os("XDG_SESSION_TYPE").unwrap_or_default() == "wayland" {
+            WaylandApp::run()?;
         } else {
+            XorgApp::run()?;
         }
 
         Ok(())
