@@ -23,41 +23,81 @@
         pkgs = nixpkgs.legacyPackages.${system};
         naerskLib = pkgs.callPackages naersk { };
 
-        base_lib = with pkgs; [
-        ];
+        linux_libs =
+          if pkgs.stdenv.isLinux then
+            with pkgs;
+            [
 
-        std_bin = with pkgs; [
+              libX11
+              libXcursor
+              libXi
+              libXrandr
+              libxkbcommon
+              libX11
+
+              alsa-lib
+              wayland # To use the wayland feature
+            ]
+          else
+            [
+
+            ];
+
+        buildInputs =
+          with pkgs;
+          [
+            expat
+            fontconfig
+            freetype
+            freetype.dev
+            libGL
+            pkg-config
+
+          ]
+          ++ linux_libs;
+
+        nativeBuildInputs = with pkgs; [
           glfw
           cmake
           clang
-          pkg-config
           cargo
-          bacon
           rustc
-          rust-analyzer
-          clippy
-          rustfmt
-          taplo # lsp for cargo.toml
-          bacon
         ];
 
-        link_flag = base_lib ++ std_bin;
+        linkFlag = nativeBuildInputs ++ buildInputs;
+
+        LD_LIBRARY_PATH =
+          if pkgs.stdenv.isLinux then
+            builtins.foldl' (a: b: "${a}:${b}/lib") "${pkgs.vulkan-loader}/lib" buildInputs
+          else
+            "";
+
       in
       {
 
         # declaring the build with the naerskLib flake
         packages.default = naerskLib.buildPackage {
+          inherit nativeBuildInputs buildInputs LD_LIBRARY_PATH;
           src = ./.;
-          buildInputs = base_lib;
-          nativeBuildInputs = std_bin;
 
-          env.RUSTFLAGS = "-C link-args=-Wl,-rpath,${pkgs.lib.makeLibraryPath link_flag}";
+          env.RUSTFLAGS = "-C link-args=-Wl,-rpath,${pkgs.lib.makeLibraryPath linkFlag}";
+
         };
 
         templates.default.path = ./.;
 
         devShell = pkgs.mkShell {
-          packages = std_bin;
+          inherit nativeBuildInputs buildInputs LD_LIBRARY_PATH;
+
+          packages = with pkgs; [
+            cargo
+            bacon
+            rust-analyzer
+            clippy
+            rustfmt
+            taplo # lsp for cargo.toml
+          ];
+
         };
 
       }
