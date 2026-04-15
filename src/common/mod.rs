@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use log::error;
+
 use iced::{Element, window::Id as IcedId};
 
 #[cfg(target_os = "linux")]
@@ -8,11 +10,11 @@ use iced_layershell::to_layer_message;
 
 /* GLOBAL UPDATE AND VIEW*/
 pub fn update(state: &mut LauncherState, msg: Message) {
-    todo!()
+    todo!("General update function not implemeneted")
 }
 
 pub fn view(state: &LauncherState) -> Element<Message> {
-    todo!()
+    todo!("General view function not implemeneted")
 }
 
 //TODO: declare GlobalNamespace fields
