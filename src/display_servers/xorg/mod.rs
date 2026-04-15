@@ -2,14 +2,14 @@ use std::error::Error as StdError;
 
 use iced::{Size, application};
 
-use crate::common::{LauncherState, update, view};
+use crate::common::{LauncherState, boot, update, view};
 
 pub struct XorgApp;
 
 impl XorgApp {
     pub fn run() -> Result<(), Box<dyn StdError>> {
         //TODO: setup correctly for config take in mind
-        application(LauncherState::default, update, view)
+        application(boot, update, view)
             .decorations(false)
             .window_size(Size {
                 width: 350.,

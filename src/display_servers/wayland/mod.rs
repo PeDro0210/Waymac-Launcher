@@ -5,11 +5,11 @@ use iced::{Element, Task, Theme};
 #[cfg(target_os = "linux")]
 use iced_layershell::{
     Settings, application,
-    reexport::Layer::Top,
+    reexport::{Anchor, Layer::Top},
     settings::{LayerShellSettings, StartMode},
 };
 
-use crate::common::{LauncherState, Message, update, view};
+use crate::common::{LauncherState, Message, boot, update, view};
 
 pub struct WaylandApp;
 
@@ -17,9 +17,8 @@ pub struct WaylandApp;
 // Implementation for the just initialzation for the daemon
 impl WaylandApp {
     pub fn run() -> Result<(), Box<dyn StdError>> {
-        //FOr knowing in which screen to output
+        //For knowing in which screen to output
 
-        use iced_layershell::reexport::Anchor;
         let binded_output_name = std::env::args().nth(1);
         let start_mode = match binded_output_name {
             Some(output) => StartMode::TargetScreen(output),
@@ -28,7 +27,7 @@ impl WaylandApp {
 
         //TODO: setup correctly for config take in mind
         application(
-            LauncherState::default,
+            boot,
             WaylandApp::namespace,
             WaylandApp::update,
             WaylandApp::view,
