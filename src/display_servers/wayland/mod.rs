@@ -5,7 +5,7 @@ use iced::{Element, Task, Theme};
 #[cfg(target_os = "linux")]
 use iced_layershell::{
     Settings, application,
-    reexport::Anchor,
+    reexport::Layer::Top,
     settings::{LayerShellSettings, StartMode},
 };
 
@@ -18,6 +18,8 @@ pub struct WaylandApp;
 impl WaylandApp {
     pub fn run() -> Result<(), Box<dyn StdError>> {
         //FOr knowing in which screen to output
+
+        use iced_layershell::reexport::Anchor;
         let binded_output_name = std::env::args().nth(1);
         let start_mode = match binded_output_name {
             Some(output) => StartMode::TargetScreen(output),
@@ -34,9 +36,10 @@ impl WaylandApp {
         //TODO: pass launcher config to the layer settings
         .settings(Settings {
             layer_settings: LayerShellSettings {
-                size: Some((0, 400)),
+                layer: Top,
+                size: Some((350, 350)),
                 exclusive_zone: 400,
-                anchor: Anchor::Bottom | Anchor::Left | Anchor::Right,
+                anchor: Anchor::Left | Anchor::Right,
                 start_mode,
                 ..Default::default()
             },
