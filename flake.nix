@@ -65,23 +65,29 @@
         ];
 
         linkFlag = nativeBuildInputs ++ buildInputs;
+
+        LD_LIBRARY_PATH =
+          if pkgs.stdenv.isLinux then
+            builtins.foldl' (a: b: "${a}:${b}/lib") "${pkgs.vulkan-loader}/lib" buildInputs
+          else
+            "";
+
       in
       {
 
         # declaring the build with the naerskLib flake
         packages.default = naerskLib.buildPackage {
-          inherit nativeBuildInputs buildInputs;
+          inherit nativeBuildInputs buildInputs LD_LIBRARY_PATH;
           src = ./.;
 
           env.RUSTFLAGS = "-C link-args=-Wl,-rpath,${pkgs.lib.makeLibraryPath linkFlag}";
-          LD_LIBRARY_PATH = builtins.foldl' (a: b: "${a}:${b}/lib") "${pkgs.vulkan-loader}/lib" buildInputs;
 
         };
 
         templates.default.path = ./.;
 
         devShell = pkgs.mkShell {
-          inherit nativeBuildInputs buildInputs;
+          inherit nativeBuildInputs buildInputs LD_LIBRARY_PATH;
 
           packages = with pkgs; [
             cargo
@@ -91,7 +97,6 @@
             rustfmt
             taplo # lsp for cargo.toml
           ];
-          LD_LIBRARY_PATH = builtins.foldl' (a: b: "${a}:${b}/lib") "${pkgs.vulkan-loader}/lib" buildInputs;
 
         };
 

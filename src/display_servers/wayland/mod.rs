@@ -1,6 +1,8 @@
 use std::error::Error as StdError;
 
 use iced::{Element, Task, Theme};
+
+#[cfg(target_os = "linux")]
 use iced_layershell::{
     Settings, application,
     reexport::Anchor,
@@ -11,6 +13,7 @@ use crate::common::{LauncherState, Message, update, view};
 
 pub struct WaylandApp;
 
+#[cfg(target_os = "linux")]
 // Implementation for the just initialzation for the daemon
 impl WaylandApp {
     pub fn run() -> Result<(), Box<dyn StdError>> {

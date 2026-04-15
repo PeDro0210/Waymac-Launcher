@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use iced::{Element, window::Id as IcedId};
 
+#[cfg(target_os = "linux")]
 use iced_layershell::to_layer_message;
 //TODO: refactor this in the future
 

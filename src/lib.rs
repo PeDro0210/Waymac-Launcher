@@ -25,6 +25,7 @@ impl WayXApp {
         );
 
         if env::var_os("XDG_SESSION_TYPE").unwrap_or_default() == "wayland" {
+            #[cfg(target_os = "linux")]
             WaylandApp::run()?;
         } else {
             XorgApp::run()?;
