@@ -2,7 +2,7 @@ use std::error::Error as StdError;
 
 use iced::{Size, application};
 
-use crate::common::{LauncherState, boot, update, view};
+use crate::common::{LauncherState, boot, subscription, update, view};
 
 pub struct XorgApp;
 
@@ -15,6 +15,7 @@ impl XorgApp {
                 width: 350.,
                 height: 350.,
             })
+            .subscription(subscription)
             .resizable(false)
             .run()?;
         Ok(())

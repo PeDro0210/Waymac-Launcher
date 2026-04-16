@@ -5,11 +5,11 @@ use iced::{Element, Task, Theme};
 #[cfg(target_os = "linux")]
 use iced_layershell::{
     Settings, application,
-    reexport::{Anchor, Layer::Top},
+    reexport::{Anchor, KeyboardInteractivity, Layer::Top},
     settings::{LayerShellSettings, StartMode},
 };
 
-use crate::common::{LauncherState, Message, boot, update, view};
+use crate::common::{LauncherState, Message, boot, subscription, update, view};
 
 pub struct WaylandApp;
 
@@ -32,13 +32,15 @@ impl WaylandApp {
             WaylandApp::update,
             WaylandApp::view,
         )
+        .subscription(subscription)
         //TODO: pass launcher config to the layer settings
         .settings(Settings {
             layer_settings: LayerShellSettings {
                 layer: Top,
                 size: Some((350, 350)),
-                exclusive_zone: 400,
+                exclusive_zone: 350,
                 anchor: Anchor::Left | Anchor::Right,
+                keyboard_interactivity: KeyboardInteractivity::OnDemand,
                 start_mode,
                 ..Default::default()
             },
