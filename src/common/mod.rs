@@ -1,7 +1,8 @@
 use std::process::exit;
 
-use iced::advanced::widget::operation::focusable::{Count, count};
+use iced::advanced::widget::operation::focusable::{Count, count, find_focused};
 use iced::keyboard::{self, key};
+use iced::widget::operation::is_focused;
 use iced::widget::{Id as IcedId, column, container, operation::focus, text, text_input};
 use iced::{Element, Subscription, Task};
 
@@ -38,9 +39,14 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                 if key == Key::Character("q".into()) {
                     // trying to exit through iced::exit (didn't worked btw)
                     exit(1);
-                } else {
-                    Task::none()
                 }
+                if key == Key::Character("f".into()) {
+                    info!(
+                        "is text_input focused: {:?}",
+                        is_focused(IcedId::new(LAUNCHER_TEXT_INPUT_ID))
+                    );
+                }
+                Task::none()
             }
             _ => Task::none(),
         },
