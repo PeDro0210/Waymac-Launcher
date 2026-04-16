@@ -1,6 +1,6 @@
 use std::error::Error as StdError;
 
-use iced::{Size, application};
+use iced::{Size, application, window::Level::AlwaysOnTop};
 
 use crate::common::{LauncherState, boot, subscription, update, view};
 
@@ -16,6 +16,7 @@ impl XorgApp {
                 height: 350.,
             })
             .subscription(subscription)
+            .level(AlwaysOnTop)
             .resizable(false)
             .run()?;
         Ok(())

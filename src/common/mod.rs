@@ -33,18 +33,13 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
             focus::<IcedId>(IcedId::new(LAUNCHER_TEXT_INPUT_ID));
             Task::none()
         }
+        //TODO: implement correct key handleling
         Message::KeyboardEvent(key_event) => match key_event {
             KeyPressed { key, .. } => {
                 info!("key pressed{key:?}");
-                if key == Key::Character("q".into()) {
+                if key == Key::Named(Named::Escape) {
                     // trying to exit through iced::exit (didn't worked btw)
                     exit(1);
-                }
-                if key == Key::Character("f".into()) {
-                    info!(
-                        "is text_input focused: {:?}",
-                        is_focused(IcedId::new(LAUNCHER_TEXT_INPUT_ID))
-                    );
                 }
                 Task::none()
             }
