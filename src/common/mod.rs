@@ -4,7 +4,8 @@ use iced::advanced::widget::operation::focusable::{Count, count, find_focused};
 use iced::keyboard::{self, key};
 use iced::widget::operation::is_focused;
 use iced::widget::{Id as IcedId, column, container, operation::focus, text, text_input};
-use iced::{Element, Subscription, Task};
+use iced::widget::{scrollable, space};
+use iced::{Element, Length, Subscription, Task};
 
 use iced::{
     Event,
@@ -52,9 +53,11 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
 pub fn view(state: &LauncherState) -> Element<Message> {
     //TODO: implement view function
     container(column![
+        //TODO: Separate launcher  widgets in different functions
         text_input("", &state.user_input)
             .on_input(Message::UserInputChanged)
             .id(LAUNCHER_TEXT_INPUT_ID),
+        scrollable(column!["Demo 0", space().height(3000), "Demo 1", "Demo 2"]).width(Length::Fill)
     ])
     .id(LAUNCHER_CONTAINER_ID)
     .into()
