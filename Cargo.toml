@@ -12,4 +12,5 @@ clap = "4.6.0"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 iced_layershell = { git = "https://github.com/waycrate/exwlshelleventloop.git" }
+freedesktop-file-parser = "0.3.1"
 xdg = "3.0.0"

@@ -1,7 +1,7 @@
 mod utils;
 
 use std::{
-    fs::{ReadDir, read_dir},
+    fs::{File, ReadDir, read_dir},
     io::Error as StdError,
     path::{Path, PathBuf},
     vec::Vec,
@@ -16,11 +16,13 @@ use utils::*;
 pub struct DesktopEntry {
     pub name: String,
     pub desktop_entry_path: Box<PathBuf>,
-    pub application_image: Box<Path>,
+    pub icon: String,
 }
 
 //TODO: make matching for XDG and Macos
 pub fn get_desktop_entry() -> Result<Vec<DesktopEntry>, Error> {
+    let mut desktop_entries = Vec::new();
+
     return match get_desktop_entry_target() {
         DesktopEntriesTarget::XDG => {
             let mut xdg_data_dir = BaseDirectories::new().data_dirs;
@@ -45,25 +47,19 @@ pub fn get_desktop_entry() -> Result<Vec<DesktopEntry>, Error> {
                             .into_string()
                             .unwrap_or_default()
                             .contains("applications"),
-                        Err(_) => false,
+                        Err(_) => false, //fallback in weird case of not being able to open
                     });
 
                     for application_dir_result in application_dir_results {
-                        if let Ok(application_dir) = application_dir_result {
-                            let dir_contents = read_dir(application_dir.path()).into_iter();
-                            for dir in dir_contents {
-                                info!("dir path: {:?}", dir);
-                            }
-                        }
+                        // append each different application entry in the big desktop_entries
+                        desktop_entries.append(&mut get_dir_entries(application_dir_result));
                     }
-
-                    // we'll just have one entry
                 }
 
                 // we open each of the desktop entrys and parse them to the struct
             }
 
-            Ok(Vec::new())
+            Ok(desktop_entries)
         }
         DesktopEntriesTarget::MacOS => {
             todo!()
