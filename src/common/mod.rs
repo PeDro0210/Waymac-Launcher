@@ -84,7 +84,6 @@ pub struct LauncherState {
 } // cause of the pattern that layer_shell uses, we need to declare an
 // struct which get's in charge of most of our variables.
 
-//TODO: added needed message requests
 #[cfg_attr(target_os = "linux", to_layer_message(multi))]
 #[derive(Debug, Clone)]
 pub enum Message {

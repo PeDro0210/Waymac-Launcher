@@ -3,7 +3,7 @@
 
   inputs = {
     self.submodules = true;
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-25.11";
     crane.url = "github:ipetkov/crane";
 
     flake-utils.url = "github:numtide/flake-utils";
@@ -29,12 +29,11 @@
             with pkgs;
             [
 
-              libX11
-              libXcursor
-              libXi
-              libXrandr
+              xorg.libX11
+              xorg.libXcursor
+              xorg.libXi
+              xorg.libXrandr
               libxkbcommon
-              libX11
 
               alsa-lib
               wayland # To use the wayland feature
@@ -88,7 +87,7 @@
         templates.default.path = ./.;
 
         devShell = pkgs.mkShell {
-          inherit LD_LIBRARY_PATH;
+          inherit nativeBuildInputs buildInputs LD_LIBRARY_PATH;
 
           packages = with pkgs; [
             cargo

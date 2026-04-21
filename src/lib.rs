@@ -1,4 +1,3 @@
-mod app_launcher;
 mod common;
 mod data;
 mod display_servers;
@@ -7,7 +6,7 @@ mod logger;
 
 use std::{any::Any, env, error::Error as StdError};
 
-use iced::{ widget::Id};
+use iced::widget::Id;
 use log::info;
 
 use crate::{
