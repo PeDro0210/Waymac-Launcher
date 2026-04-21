@@ -17,7 +17,7 @@ use iced::{
 use iced_layershell::to_layer_message;
 use log::info;
 
-use crate::app_launcher::get_desktop_entry;
+use crate::app_launcher::{DesktopEntry, get_desktop_entry};
 use crate::data::{LAUNCHER_CONTAINER_ID, LAUNCHER_TEXT_INPUT_ID};
 //TODO: refactor this in the future
 
@@ -65,9 +65,11 @@ pub fn view(state: &LauncherState) -> Element<Message> {
 }
 
 pub fn boot() -> (LauncherState, Task<Message>) {
-    get_desktop_entry();
     (
-        LauncherState::default(),
+        LauncherState {
+            desktop_entries: get_desktop_entry(),
+            ..Default::default()
+        },
         focus(IcedId::new(LAUNCHER_TEXT_INPUT_ID)),
     )
 }
@@ -83,6 +85,7 @@ pub fn subscription(_: &LauncherState) -> Subscription<Message> {
 #[derive(Default)]
 pub struct LauncherState {
     user_input: String,
+    desktop_entries: Vec<DesktopEntry>,
 } // cause of the pattern that layer_shell uses, we need to declare an
 // struct which get's in charge of most of our variables.
 

@@ -20,7 +20,7 @@ pub struct DesktopEntry {
 }
 
 //TODO: make matching for XDG and Macos
-pub fn get_desktop_entry() -> Result<Vec<DesktopEntry>, Error> {
+pub fn get_desktop_entry() -> Vec<DesktopEntry> {
     let mut desktop_entries = Vec::new();
 
     return match get_desktop_entry_target() {
@@ -59,7 +59,7 @@ pub fn get_desktop_entry() -> Result<Vec<DesktopEntry>, Error> {
                 // we open each of the desktop entrys and parse them to the struct
             }
 
-            Ok(desktop_entries)
+            desktop_entries
         }
         DesktopEntriesTarget::MacOS => {
             todo!()
