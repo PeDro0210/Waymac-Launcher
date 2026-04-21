@@ -2,8 +2,9 @@
   description = "A nix flake for working with vanilla rust";
 
   inputs = {
+    self.submodules = true;
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    naersk.url = "github:nix-community/naersk";
+    crane.url = "github:ipetkov/crane";
 
     flake-utils.url = "github:numtide/flake-utils";
   };
@@ -11,7 +12,7 @@
   outputs =
     {
       nixpkgs,
-      naersk,
+      crane,
       flake-utils,
       ...
     }:
@@ -21,7 +22,7 @@
       let
 
         pkgs = nixpkgs.legacyPackages.${system};
-        naerskLib = pkgs.callPackages naersk { };
+        craneLib = crane.mkLib pkgs;
 
         linux_libs =
           if pkgs.stdenv.isLinux then
@@ -52,6 +53,7 @@
             freetype.dev
             libGL
             pkg-config
+            vulkan-loader
 
           ]
           ++ linux_libs;
@@ -64,30 +66,29 @@
           rustc
         ];
 
-        linkFlag = nativeBuildInputs ++ buildInputs;
+        linkFlag = buildInputs;
 
-        LD_LIBRARY_PATH =
-          if pkgs.stdenv.isLinux then
-            builtins.foldl' (a: b: "${a}:${b}/lib") "${pkgs.vulkan-loader}/lib" buildInputs
-          else
-            "";
-
+        LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath linkFlag}";
       in
       {
 
         # declaring the build with the naerskLib flake
-        packages.default = naerskLib.buildPackage {
+        packages.default = craneLib.buildPackage {
           inherit nativeBuildInputs buildInputs LD_LIBRARY_PATH;
           src = ./.;
 
-          env.RUSTFLAGS = "-C link-args=-Wl,-rpath,${pkgs.lib.makeLibraryPath linkFlag}";
+          gitSubModules = true;
+
+          env = {
+            RUSTFLAGS = "-C link-args=-Wl,-rpath,${pkgs.lib.makeLibraryPath linkFlag}";
+          };
 
         };
 
         templates.default.path = ./.;
 
         devShell = pkgs.mkShell {
-          inherit nativeBuildInputs buildInputs LD_LIBRARY_PATH;
+          inherit LD_LIBRARY_PATH;
 
           packages = with pkgs; [
             cargo
