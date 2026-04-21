@@ -21,8 +21,4 @@ impl XorgApp {
             .run()?;
         Ok(())
     }
-
-    fn namespace() -> String {
-        String::from("XWay - Xorg App")
-    }
 }

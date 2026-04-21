@@ -1,5 +1,3 @@
-use std::error::Error as StdError;
-
 use iced::{Element, Task, Theme};
 
 #[cfg(target_os = "linux")]
