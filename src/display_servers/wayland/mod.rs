@@ -1,4 +1,6 @@
-use iced::{Element, Task, Theme};
+use std::error::Error as StdError;
+
+use iced::{Element, Task};
 
 #[cfg(target_os = "linux")]
 use iced_layershell::{
