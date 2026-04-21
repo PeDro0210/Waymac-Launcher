@@ -17,6 +17,7 @@ use iced::{
 use iced_layershell::to_layer_message;
 use log::info;
 
+use crate::app_launcher::get_desktop_entry;
 use crate::data::{LAUNCHER_CONTAINER_ID, LAUNCHER_TEXT_INPUT_ID};
 //TODO: refactor this in the future
 
@@ -64,6 +65,7 @@ pub fn view(state: &LauncherState) -> Element<Message> {
 }
 
 pub fn boot() -> (LauncherState, Task<Message>) {
+    get_desktop_entry();
     (
         LauncherState::default(),
         focus(IcedId::new(LAUNCHER_TEXT_INPUT_ID)),
