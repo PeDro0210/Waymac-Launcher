@@ -12,7 +12,10 @@ use log::info;
 
 use crate::{
     data::LAUNCHER_TEXT_INPUT_ID,
-    display_servers::{wayland::WaylandApp, xorg::XorgApp},
+    display_servers::{
+        SupportedDisplayServer, get_supported_display_server_target, wayland::WaylandApp,
+        xorg::XorgApp,
+    },
 };
 
 pub struct WayXApp;
@@ -27,13 +30,9 @@ impl WayXApp {
             env::var_os("XDG_SESSION_TYPE").unwrap_or_default()
         );
 
-        //focusing the launcher text_input just at start
-
-        if env::var_os("XDG_SESSION_TYPE").unwrap_or_default() == "wayland" {
-            #[cfg(target_os = "linux")]
-            WaylandApp::run()?;
-        } else {
-            XorgApp::run()?;
+        match get_supported_display_server_target() {
+            SupportedDisplayServer::Wayland => WaylandApp::run()?,
+            SupportedDisplayServer::Xorg => XorgApp::run()?,
         }
 
         Ok(())
