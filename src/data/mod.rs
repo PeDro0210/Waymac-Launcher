@@ -9,6 +9,6 @@ pub const LAUNCHER_CONTAINER_ID: &str = "LauncherID";
 
 // being 2 levels normally and the third one for the Content dir
 // for checking application directories
-pub const MAX_DEPTH_APPLICATION_DIR: usize = 3;
+pub const MAX_DEPTH_APPLICATION_DIR: usize = 5;
 
 /* Mac related */

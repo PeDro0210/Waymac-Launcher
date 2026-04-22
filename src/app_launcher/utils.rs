@@ -71,15 +71,15 @@ pub fn get_application_desktop_entry(path: &Path) -> Vec<DesktopEntry> {
 
     for entry in walker {
         if let Ok(entry) = entry {
-            info!("path without taking account extension: {:?}", entry.path());
-
-            if !entry.path().is_dir() {
+            if entry.path().is_dir() {
                 continue;
             }
-            if let Some(ext) = path.extension() {
-                if ext == "app" {
-                    info!("path: {:?}", entry.path());
+            if let Some(ext) = entry.path().extension() {
+                if ext != "plist" {
+                    continue;
                 }
+
+                info!("path: {:?}", entry.path());
             }
         }
     }
