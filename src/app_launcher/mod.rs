@@ -15,10 +15,11 @@ use xdg::BaseDirectories;
 
 use utils::*;
 
+#[derive(Debug)]
 pub struct DesktopEntry {
     pub name: String,
     pub desktop_entry_path: Box<PathBuf>,
-    pub icon: String,
+    pub icon: Option<String>,
 }
 
 //TODO: make matching for XDG and Macos
@@ -72,7 +73,12 @@ pub fn get_desktop_entry() -> Vec<DesktopEntry> {
             );
             desktop_entries
         }
+        // TODO: add different paths for different dir with applications
         #[cfg(target_os = "macos")]
-        DesktopEntriesTarget::MacOS => get_application_desktop_entry(Path::new("/Applications")),
+        DesktopEntriesTarget::MacOS => {
+            let gen_apps = get_application_desktop_entry(Path::new("/Applications"));
+            info!("gen_apps entries {:?}", gen_apps);
+            gen_apps
+        }
     };
 }

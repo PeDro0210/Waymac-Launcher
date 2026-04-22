@@ -75,11 +75,20 @@ pub fn get_application_desktop_entry(path: &Path) -> Vec<DesktopEntry> {
                 continue;
             }
             if let Some(ext) = entry.path().extension() {
+                use apple_bundles::DirectoryBundle;
+
                 if ext != "app" {
                     continue;
                 }
 
-                info!("path: {:?}", entry.path());
+                let dir_bundle = DirectoryBundle::new_from_path(entry.path()).unwrap();
+
+                application_dir_entries.push(DesktopEntry {
+                    name: dir_bundle.name().replace(".app", ""),
+                    desktop_entry_path: Box::new(dir_bundle.info_plist_path()),
+                    //TODO: search icons file for rendering
+                    icon: None,
+                });
             }
         }
     }

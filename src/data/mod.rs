@@ -11,4 +11,6 @@ pub const LAUNCHER_CONTAINER_ID: &str = "LauncherID";
 // for checking application directories
 pub const MAX_DEPTH_APPLICATION_DIR: usize = 2;
 
+// this is for general apps for macos
+pub const MAX_DEPTH_MACOS_APPLICATION_DIR: usize = 1;
 /* Mac related */
