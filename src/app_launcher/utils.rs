@@ -49,11 +49,10 @@ pub fn get_xdg_dir_entries(dir_result: Result<DirEntry, Error>) -> Vec<DesktopEn
 
                     dir_desktop_entries.push(DesktopEntry {
                         name: desktop_file.entry.name.default,
-                        icon: desktop_file.entry.icon.unwrap_or_default().content,
+                        //TODO: available another process to fetch icons
+                        icon: None,
                         desktop_entry_path: Box::new(desktop_entry.path()),
                     });
-
-                    info!("file for {:?}: {:?}", desktop_entry.path(), file_contents);
                 }
             }
         }

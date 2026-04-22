@@ -14,11 +14,11 @@ use log::{debug, info, warn};
 use xdg::BaseDirectories;
 
 use utils::*;
-
 #[derive(Debug)]
 pub struct DesktopEntry {
     pub name: String,
     pub desktop_entry_path: Box<PathBuf>,
+    // TODO: search a way for fetching icons on demand and not in load
     pub icon: Option<String>,
 }
 
@@ -26,7 +26,7 @@ pub struct DesktopEntry {
 pub fn get_desktop_entry() -> Vec<DesktopEntry> {
     let mut desktop_entries: Vec<DesktopEntry> = Vec::new();
 
-    return match get_desktop_entry_target() {
+    match get_desktop_entry_target() {
         DesktopEntriesTarget::XDG => {
             #[cfg(target_os = "linux")]
             {
@@ -65,20 +65,27 @@ pub fn get_desktop_entry() -> Vec<DesktopEntry> {
                     // we open each of the desktop entrys and parse them to the struct
                 }
 
-                desktop_entries
+                info!("desktop_entries s {:?}", desktop_entries);
+
+                return desktop_entries;
             }
 
-            warn!(
+            panic!(
                 "Desktop entry target was selected as XDG, when target linux is not being supported."
             );
-            desktop_entries
         }
         // TODO: add different paths for different dir with applications
-        #[cfg(target_os = "macos")]
         DesktopEntriesTarget::MacOS => {
-            let gen_apps = get_application_desktop_entry(Path::new("/Applications"));
-            info!("gen_apps entries {:?}", gen_apps);
-            gen_apps
+            #[cfg(target_os = "macos")]
+            {
+                let gen_apps = get_application_desktop_entry(Path::new("/Applications"));
+                info!("gen_apps entries {:?}", gen_apps);
+                return gen_apps;
+            }
+
+            panic!(
+                "Desktop entry target was selected as Macos, when target Macos is not being supported."
+            );
         }
     };
 }
