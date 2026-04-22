@@ -78,9 +78,11 @@ pub async fn get_desktop_entry() -> Vec<DesktopEntry> {
         DesktopEntriesTarget::MacOS => {
             #[cfg(target_os = "macos")]
             {
-                let gen_apps = get_application_desktop_entry(Path::new("/Applications"));
-                info!("gen_apps entries {:?}", gen_apps);
-                return gen_apps;
+                for path in vec!["/Applications", "/System/Applications"] {
+                    desktop_entries.append(&mut get_application_desktop_entry(Path::new(path)));
+                }
+
+                return desktop_entries;
             }
 
             panic!(
