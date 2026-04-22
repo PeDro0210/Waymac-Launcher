@@ -3,7 +3,12 @@ use std::{
     fs::{DirEntry, File, ReadDir, read_dir},
     io::{Error, Read},
     panic,
+    path::Path,
 };
+
+use walkdir::WalkDir;
+
+use crate::data::MAX_DEPTH_APPLICATION_DIR;
 
 use log::{error, info, warn};
 
@@ -22,7 +27,8 @@ pub fn get_desktop_entry_target() -> DesktopEntriesTarget {
     }
 }
 
-pub fn get_dir_entries(dir_result: Result<DirEntry, Error>) -> Vec<DesktopEntry> {
+#[cfg(target_os = "linux")]
+pub fn get_xdg_dir_entries(dir_result: Result<DirEntry, Error>) -> Vec<DesktopEntry> {
     let mut dir_desktop_entries = Vec::new();
 
     if let Ok(dir) = dir_result {
@@ -55,4 +61,27 @@ pub fn get_dir_entries(dir_result: Result<DirEntry, Error>) -> Vec<DesktopEntry>
     }
 
     panic!("dir result couldn't be open");
+}
+
+#[cfg(target_os = "macos")]
+pub fn get_application_desktop_entry(path: &Path) -> Vec<DesktopEntry> {
+    let mut application_dir_entries = Vec::new();
+
+    let walker = WalkDir::new(path).max_depth(MAX_DEPTH_APPLICATION_DIR);
+
+    for entry in walker {
+        if let Ok(entry) = entry {
+            info!("path without taking account extension: {:?}", entry.path());
+
+            if !entry.path().is_dir() {
+                continue;
+            }
+            if let Some(ext) = path.extension() {
+                if ext == "app" {
+                    info!("path: {:?}", entry.path());
+                }
+            }
+        }
+    }
+    application_dir_entries
 }

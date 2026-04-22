@@ -31,7 +31,11 @@ impl WayXApp {
         );
 
         match get_supported_display_server_target() {
-            SupportedDisplayServer::Wayland => WaylandApp::run()?,
+            SupportedDisplayServer::Wayland =>
+            {
+                #[cfg(target_os = "linux")]
+                WaylandApp::run()?
+            }
             SupportedDisplayServer::Xorg => XorgApp::run()?,
         }
 
