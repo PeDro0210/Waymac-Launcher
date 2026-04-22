@@ -4,7 +4,7 @@ use iced::advanced::widget::operation::focusable::{Count, count, find_focused};
 use iced::keyboard::{self, key};
 use iced::widget::operation::is_focused;
 use iced::widget::{Id as IcedId, column, container, operation::focus, text, text_input};
-use iced::widget::{scrollable, space};
+use iced::widget::{keyed_column, scrollable, space};
 use iced::{Element, Length, Subscription, Task, window};
 
 use iced::{
@@ -16,7 +16,7 @@ use iced::{
 
 #[cfg(target_os = "linux")]
 use iced_layershell::to_layer_message;
-use log::info;
+use log::{debug, info};
 
 use crate::app_launcher::{DesktopEntry, get_desktop_entry};
 use crate::data::{LAUNCHER_CONTAINER_ID, LAUNCHER_TEXT_INPUT_ID};
@@ -28,7 +28,6 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
 
     match msg {
         Message::DesktopEntriesFetched(desktop_entries) => {
-            debug!("desktop_entries: {:?}", desktop_entries);
             state.desktop_entries = Some(desktop_entries);
             Task::none()
         }
@@ -54,20 +53,35 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
             _ => Task::none(),
         },
         Message::OnOpen(win_event) => match win_event {
-            Opened => Task::perform(get_desktop_entry(), Message::DesktopEntriesFetched),
+            Opened { .. } => Task::perform(get_desktop_entry(), Message::DesktopEntriesFetched),
+            _ => Task::none(),
         },
         _ => Task::none(),
     }
 }
 
+//TODO: implement view function
 pub fn view(state: &LauncherState) -> Element<Message> {
-    //TODO: implement view function
     container(column![
         //TODO: Separate launcher  widgets in different functions
         text_input("", &state.user_input)
             .on_input(Message::UserInputChanged)
             .id(LAUNCHER_TEXT_INPUT_ID),
-        scrollable(column!["Demo 0", space().height(3000), "Demo 1", "Demo 2"]).width(Length::Fill)
+        scrollable(column(
+            state
+                .desktop_entries
+                .as_ref()
+                .unwrap_or(&mut Vec::new())
+                .iter()
+                .filter_map(|entry| {
+                    if entry.name.is_empty() {
+                        None
+                    } else {
+                        Some(text(entry.name.clone()).into())
+                    }
+                }),
+        ))
+        .width(Length::Fill)
     ])
     .id(LAUNCHER_CONTAINER_ID)
     .into()
