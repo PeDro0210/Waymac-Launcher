@@ -57,8 +57,7 @@ impl WaylandApp {
     }
 
     fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
-        update(state, msg);
-        Task::none()
+        update(state, msg)
     }
 
     fn view(state: &LauncherState) -> Element<Message> {

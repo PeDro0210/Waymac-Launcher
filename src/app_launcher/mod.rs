@@ -14,7 +14,7 @@ use log::{debug, info, warn};
 use xdg::BaseDirectories;
 
 use utils::*;
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct DesktopEntry {
     pub name: String,
     pub desktop_entry_path: Box<PathBuf>,
@@ -23,7 +23,7 @@ pub struct DesktopEntry {
 }
 
 //TODO: make matching for XDG and Macos
-pub fn get_desktop_entry() -> Vec<DesktopEntry> {
+pub async fn get_desktop_entry() -> Vec<DesktopEntry> {
     let mut desktop_entries: Vec<DesktopEntry> = Vec::new();
 
     match get_desktop_entry_target() {
