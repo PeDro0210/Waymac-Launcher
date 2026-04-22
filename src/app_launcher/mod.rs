@@ -1,11 +1,6 @@
 mod utils;
 
-use std::{
-    fs::{File, ReadDir, read_dir},
-    io::Error as StdError,
-    path::{Path, PathBuf},
-    vec::Vec,
-};
+use std::{path::PathBuf, vec::Vec};
 
 use iced::Error;
 use log::{debug, info, warn};
