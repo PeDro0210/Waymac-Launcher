@@ -1,3 +1,4 @@
+use std::future;
 use std::process::exit;
 
 use iced::advanced::widget::operation::focusable::{Count, count, find_focused};
@@ -33,20 +34,32 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
         }
         // this match statemente will get out of hands LMAO
         Message::UserInputChanged(user_input) => {
-            state.user_input = user_input;
-            Task::none()
+            state.user_input = user_input.clone();
+
+            let desktop_entries_borrowed = state.desktop_entries.to_owned();
+
+            Task::future(async move {
+                let desktop_entries = desktop_entries_borrowed
+                    .clone()
+                    .unwrap_or_default()
+                    .into_iter()
+                    .filter(|entry| entry.name.contains(&user_input.clone()))
+                    .collect();
+                Message::DesktopEntriesFetched(desktop_entries)
+            })
         }
         Message::UserInputFocus => {
-            focus::<IcedId>(IcedId::new(LAUNCHER_TEXT_INPUT_ID));
+            let _ = focus::<IcedId>(IcedId::new(LAUNCHER_TEXT_INPUT_ID));
             Task::none()
         }
         //TODO: implement correct key handleling
         Message::KeyboardEvent(key_event) => match key_event {
             KeyPressed { key, .. } => {
-                info!("key pressed{key:?}");
-                if key == Key::Named(Named::Escape) {
-                    // trying to exit through iced::exit (didn't worked btw)
-                    exit(1);
+                match key {
+                    Key::Named(Named::Escape) => {
+                        exit(1);
+                    }
+                    _ => {}
                 }
                 Task::none()
             }
