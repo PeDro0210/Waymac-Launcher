@@ -14,12 +14,15 @@ use log::{debug, info, warn};
 use xdg::BaseDirectories;
 
 use utils::*;
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct DesktopEntry {
     pub name: String,
     pub desktop_entry_path: Box<PathBuf>,
     // TODO: search a way for fetching icons on demand and not in load
     pub icon: Option<String>,
+
+    // for ease of managing the DesktopEntry state in the view
+    pub is_focus: bool,
 }
 
 //TODO: make matching for XDG and Macos

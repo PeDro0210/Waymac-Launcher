@@ -1,9 +1,25 @@
 /*Widgets Ids*/
 
+use iced::Color;
+
 pub const LAUNCHER_TEXT_INPUT_ID: &str = "LauncherTextInputID";
 pub const LAUNCHER_CONTAINER_ID: &str = "LauncherID";
 
+pub const LAUNCHER_SCROLLABLE_ID: &str = "LauncherScrollableID";
+
 /*Widgets Ids*/
+
+/*Widgets Colors*/
+
+//TODO: implement config color toggle
+pub const COLOR_TOGGLE_COLOR: Color = Color {
+    r: 1.,
+    b: 0.2,
+    g: 0.5,
+    a: 1.,
+};
+
+/*Widgets Colors*/
 
 /* Mac related */
 

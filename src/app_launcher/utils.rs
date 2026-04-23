@@ -50,8 +50,8 @@ pub fn get_xdg_dir_entries(dir_result: Result<DirEntry, Error>) -> Vec<DesktopEn
                     dir_desktop_entries.push(DesktopEntry {
                         name: desktop_file.entry.name.default,
                         //TODO: available another process to fetch icons
-                        icon: None,
                         desktop_entry_path: Box::new(desktop_entry.path()),
+                        ..Default::default()
                     });
                 }
             }
@@ -86,7 +86,7 @@ pub fn get_application_desktop_entry(path: &Path) -> Vec<DesktopEntry> {
                     name: dir_bundle.name().replace(".app", ""),
                     desktop_entry_path: Box::new(dir_bundle.info_plist_path()),
                     //TODO: search icons file for rendering
-                    icon: None,
+                    ..Default::default()
                 });
             }
         }
