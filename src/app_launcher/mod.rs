@@ -39,7 +39,7 @@ pub async fn get_desktop_entry() -> Vec<DesktopEntry> {
                 let xdg_data_home_dir = BaseDirectories::new().data_home.unwrap_or_default();
                 xdg_data_dir.push(xdg_data_home_dir);
 
-                info!("xdg data dirs: {:?}", xdg_data_dir);
+                debug!("xdg data dirs: {:?}", xdg_data_dir);
 
                 // LMAO, THIS IS TO NESTED
                 // we iterate over all the applications for have a pretty robust entry
@@ -68,7 +68,7 @@ pub async fn get_desktop_entry() -> Vec<DesktopEntry> {
                     // we open each of the desktop entrys and parse them to the struct
                 }
 
-                info!("desktop_entries s {:?}", desktop_entries);
+                debug!("desktop_entries s {:?}", desktop_entries);
 
                 return desktop_entries;
             }

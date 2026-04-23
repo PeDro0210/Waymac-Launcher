@@ -2,8 +2,11 @@ use std::process::exit;
 use std::thread::spawn;
 
 use iced::widget::scrollable;
-use iced::widget::{Id as IcedId, column, container, operation::focus, text, text_input};
 use iced::{Element, Length, Subscription, Task};
+use iced::{
+    keyboard::key,
+    widget::{Id as IcedId, column, container, operation::focus, text, text_input, toggler},
+};
 
 use iced::{
     event,
