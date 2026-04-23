@@ -3,7 +3,6 @@ use std::process::exit;
 
 use iced::advanced::widget::operation::focusable::{Count, count, find_focused};
 use iced::keyboard::{self, key};
-use iced::widget::operation::is_focused;
 use iced::widget::{Id as IcedId, column, container, operation::focus, text, text_input};
 use iced::widget::{keyed_column, scrollable, space};
 use iced::{Element, Length, Subscription, Task, window};
@@ -29,7 +28,13 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
 
     match msg {
         Message::DesktopEntriesFetched(desktop_entries) => {
-            state.desktop_entries = Some(desktop_entries);
+            state.desktop_entries = Some(desktop_entries.clone());
+            state.cached_desktop_entries = Some(desktop_entries);
+
+            Task::none()
+        }
+        Message::DesktopEntriesChanged(new_desktop_entries) => {
+            state.cached_desktop_entries = Some(new_desktop_entries);
             Task::none()
         }
         // this match statemente will get out of hands LMAO
@@ -43,11 +48,17 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                     .clone()
                     .unwrap_or_default()
                     .into_iter()
-                    .filter(|entry| entry.name.contains(&user_input.clone()))
+                    .filter(|entry| {
+                        entry
+                            .name
+                            .to_lowercase()
+                            .contains(&user_input.to_lowercase().clone())
+                    })
                     .collect();
-                Message::DesktopEntriesFetched(desktop_entries)
+                Message::DesktopEntriesChanged(desktop_entries)
             })
         }
+
         Message::UserInputFocus => {
             let _ = focus::<IcedId>(IcedId::new(LAUNCHER_TEXT_INPUT_ID));
             Task::none()
@@ -82,7 +93,7 @@ pub fn view(state: &LauncherState) -> Element<Message> {
             .id(LAUNCHER_TEXT_INPUT_ID),
         scrollable(column(
             state
-                .desktop_entries
+                .cached_desktop_entries
                 .as_ref()
                 .unwrap_or(&mut Vec::new())
                 .iter()
@@ -120,6 +131,7 @@ pub fn subscription(_: &LauncherState) -> Subscription<Message> {
 pub struct LauncherState {
     user_input: String,
     desktop_entries: Option<Vec<DesktopEntry>>,
+    cached_desktop_entries: Option<Vec<DesktopEntry>>,
 } // cause of the pattern that layer_shell uses, we need to declare an
 // struct which get's in charge of most of our variables.
 
@@ -127,6 +139,7 @@ pub struct LauncherState {
 #[derive(Debug, Clone)]
 pub enum Message {
     DesktopEntriesFetched(Vec<DesktopEntry>),
+    DesktopEntriesChanged(Vec<DesktopEntry>),
 
     UserInputChanged(String),
     UserInputFocus,
