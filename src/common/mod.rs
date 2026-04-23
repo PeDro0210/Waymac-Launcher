@@ -130,14 +130,13 @@ pub fn view(state: &LauncherState) -> Element<Message> {
             state
                 .cached_desktop_entries
                 .as_ref()
-                .unwrap_or(&mut Vec::new())
+                .unwrap()
                 .iter()
                 .enumerate()
                 .filter_map(|(key, entry)| {
                     if entry.name.is_empty() {
                         None
                     } else {
-                        //TODO: highlight container in case of focus
                         Some(container(entry.name.as_str()).into())
                     }
                 }),
