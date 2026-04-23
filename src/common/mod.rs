@@ -37,7 +37,10 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
             state.filtering_cached_entry = false;
             state.cached_desktop_entries = Some(new_desktop_entries);
 
-            Task::done(Message::FocusDesktopEntry(MAIN_ENTRY_FOCUS_IDX))
+            Task::done(Message::ToogleFocusDesktopEntry(
+                state.focus_desktop_entry_id,
+                true,
+            ))
         }
         // this match statemente will get out of hands LMAO
         Message::UserInputChanged(user_input) => {
@@ -75,13 +78,13 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
             Task::none()
         }
 
-        Message::FocusDesktopEntry(key) => {
+        Message::ToogleFocusDesktopEntry(key, focus) => {
             // get the specific DesktopEntry and copying it
             let mut selected_entry = state.cached_desktop_entries.as_ref().unwrap().get(key);
 
             if let Some(entry) = selected_entry {
                 let mut entry_owned = entry.to_owned();
-                entry_owned.is_focus = true;
+                entry_owned.is_focus = focus;
 
                 info!("entry is: {selected_entry:?}");
                 let mut desktop_entries_with_focus_owned =
@@ -91,19 +94,76 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
 
                 state.cached_desktop_entries = Some(desktop_entries_with_focus_owned);
             }
+
             Task::none()
         }
 
         //TODO: implement correct key handleling
         Message::KeyboardEvent(key_event) => match key_event {
             KeyPressed { key, modifiers, .. } => {
+                let limit_entry_id = |state_clone: &LauncherState, offset: i32| match (state
+                    .focus_desktop_entry_id
+                    as i32
+                    + offset)
+                {
+                    val if val < 0 => state
+                        .cached_desktop_entries
+                        .clone()
+                        .unwrap_or(Vec::new())
+                        .len(),
+                    val if val
+                        > state
+                            .cached_desktop_entries
+                            .clone()
+                            .unwrap_or(Vec::new())
+                            .len() as i32 =>
+                    {
+                        0
+                    }
+                    _ => (state.focus_desktop_entry_id as i32 + offset) as usize,
+                };
+
                 //TODO: implement modifier keys
                 // for managing different modifiers
                 if modifiers.control() {
                     match key.clone() {
                         Key::Character(key) => {
-                            if key == "p" {}
-                            if key == "n" {}
+                            // Dunno how convienent is being DRY in here, like I don't want just by
+                            // pressing the moddifier to pass thorugh all this process
+                            if key == "n" {
+                                let old_focus_desktop_entry_id = state.focus_desktop_entry_id;
+                                state.focus_desktop_entry_id = limit_entry_id(state, 1);
+
+                                info!("entry num: {}", state.focus_desktop_entry_id);
+
+                                return Task::batch(vec![
+                                    Task::done(Message::ToogleFocusDesktopEntry(
+                                        old_focus_desktop_entry_id,
+                                        false,
+                                    )),
+                                    Task::done(Message::ToogleFocusDesktopEntry(
+                                        state.focus_desktop_entry_id,
+                                        true,
+                                    )),
+                                ]);
+                            }
+                            if key == "p" {
+                                let old_focus_desktop_entry_id = state.focus_desktop_entry_id;
+                                state.focus_desktop_entry_id = limit_entry_id(state, -1);
+
+                                info!("entry num: {}", state.focus_desktop_entry_id);
+
+                                return Task::batch(vec![
+                                    Task::done(Message::ToogleFocusDesktopEntry(
+                                        old_focus_desktop_entry_id,
+                                        false,
+                                    )),
+                                    Task::done(Message::ToogleFocusDesktopEntry(
+                                        state.focus_desktop_entry_id,
+                                        true,
+                                    )),
+                                ]);
+                            }
                         }
                         _ => {}
                     }
@@ -126,7 +186,10 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
         Message::OnOpen(win_event) => match win_event {
             Opened { .. } => Task::batch(vec![
                 Task::perform(get_desktop_entry(), Message::DesktopEntriesFetched),
-                Task::done(Message::FocusDesktopEntry(MAIN_ENTRY_FOCUS_IDX)),
+                Task::done((|| {
+                    state.focus_desktop_entry_id = MAIN_ENTRY_FOCUS_IDX;
+                    Message::ToogleFocusDesktopEntry(MAIN_ENTRY_FOCUS_IDX, true)
+                })()),
             ]),
             _ => Task::none(),
         },
@@ -183,6 +246,7 @@ pub fn subscription(_: &LauncherState) -> Subscription<Message> {
 pub struct LauncherState {
     user_input: String,
     filtering_cached_entry: bool,
+    focus_desktop_entry_id: usize,
     desktop_entries: Option<Vec<DesktopEntry>>,
     cached_desktop_entries: Option<Vec<DesktopEntry>>,
 } // cause of the pattern that layer_shell uses, we need to declare an
@@ -200,5 +264,5 @@ pub enum Message {
     KeyboardEvent(iced::keyboard::Event),
     OnOpen(iced::window::Event),
 
-    FocusDesktopEntry(usize),
+    ToogleFocusDesktopEntry(usize, bool),
 }
