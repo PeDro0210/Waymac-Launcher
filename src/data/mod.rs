@@ -9,10 +9,16 @@ pub const LAUNCHER_SCROLLABLE_ID: &str = "LauncherScrollableID";
 
 /*Widgets Ids*/
 
+/*Widgets various*/
+
+pub const MAIN_ENTRY_FOCUS_IDX: usize = 0;
+
+/*Widgets various*/
+
 /*Widgets Colors*/
 
 //TODO: implement config color toggle
-pub const COLOR_TOGGLE_COLOR: Color = Color {
+pub const ENTRY_FOCUS_COLOR: Color = Color {
     r: 1.,
     b: 0.2,
     g: 0.5,

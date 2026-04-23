@@ -1,9 +1,9 @@
 use std::process::exit;
 use std::thread::spawn;
 
-use iced::widget::scrollable;
 use iced::widget::{Id as IcedId, column, container, operation::focus, text, text_input};
-use iced::{Element, Length, Subscription, Task};
+use iced::widget::{Text, scrollable};
+use iced::{Color, Element, Length, Subscription, Task};
 
 use iced::{
     event,
@@ -16,7 +16,10 @@ use iced_layershell::to_layer_message;
 use log::info;
 
 use crate::app_launcher::{DesktopEntry, get_desktop_entry};
-use crate::data::{LAUNCHER_CONTAINER_ID, LAUNCHER_SCROLLABLE_ID, LAUNCHER_TEXT_INPUT_ID};
+use crate::data::{
+    ENTRY_FOCUS_COLOR, LAUNCHER_CONTAINER_ID, LAUNCHER_SCROLLABLE_ID, LAUNCHER_TEXT_INPUT_ID,
+    MAIN_ENTRY_FOCUS_IDX,
+};
 //TODO: refactor this in the future
 
 /* GLOBAL UPDATE AND VIEW*/
@@ -32,9 +35,9 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
         }
         Message::DesktopEntriesChanged(new_desktop_entries) => {
             state.filtering_cached_entry = false;
-
             state.cached_desktop_entries = Some(new_desktop_entries);
-            Task::none()
+
+            Task::done(Message::FocusDesktopEntry(MAIN_ENTRY_FOCUS_IDX))
         }
         // this match statemente will get out of hands LMAO
         Message::UserInputChanged(user_input) => {
@@ -61,7 +64,6 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
 
             if !state.filtering_cached_entry {
                 state.filtering_cached_entry = true;
-
                 return Task::future(async move { desktop_filter_join.join().unwrap() });
             }
 
@@ -73,24 +75,22 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
             Task::none()
         }
 
-        Message::FocusDesktopEntry((is_checked, key)) => {
+        Message::FocusDesktopEntry(key) => {
             // get the specific DesktopEntry and copying it
-            let mut selected_entry = state
-                .cached_desktop_entries
-                .as_ref()
-                .unwrap()
-                .get(key)
-                .unwrap()
-                .to_owned();
+            let mut selected_entry = state.cached_desktop_entries.as_ref().unwrap().get(key);
 
-            selected_entry.is_focus = is_checked;
+            if let Some(entry) = selected_entry {
+                let mut entry_owned = entry.to_owned();
+                entry_owned.is_focus = true;
 
-            let mut desktop_entries_with_focus_owned =
-                state.cached_desktop_entries.to_owned().unwrap();
+                info!("entry is: {selected_entry:?}");
+                let mut desktop_entries_with_focus_owned =
+                    state.cached_desktop_entries.to_owned().unwrap();
 
-            desktop_entries_with_focus_owned[key] = selected_entry;
+                desktop_entries_with_focus_owned[key] = entry_owned.clone();
 
-            state.cached_desktop_entries = Some(desktop_entries_with_focus_owned);
+                state.cached_desktop_entries = Some(desktop_entries_with_focus_owned);
+            }
             Task::none()
         }
 
@@ -99,15 +99,15 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
             KeyPressed { key, modifiers, .. } => {
                 //TODO: implement modifier keys
                 // for managing different modifiers
-                //if modifiers.control() {
-                //    match key.clone() {
-                //        Key::Character(key) => {
-                //            if key == "p" {}
-                //            if key == "n" {}
-                //        }
-                //        _ => {}
-                //    }
-                //}
+                if modifiers.control() {
+                    match key.clone() {
+                        Key::Character(key) => {
+                            if key == "p" {}
+                            if key == "n" {}
+                        }
+                        _ => {}
+                    }
+                }
                 match key {
                     Key::Named(Named::Escape) => {
                         exit(1);
@@ -124,7 +124,10 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
             _ => Task::none(),
         },
         Message::OnOpen(win_event) => match win_event {
-            Opened { .. } => Task::perform(get_desktop_entry(), Message::DesktopEntriesFetched),
+            Opened { .. } => Task::batch(vec![
+                Task::perform(get_desktop_entry(), Message::DesktopEntriesFetched),
+                Task::done(Message::FocusDesktopEntry(MAIN_ENTRY_FOCUS_IDX)),
+            ]),
             _ => Task::none(),
         },
         _ => Task::none(),
@@ -132,7 +135,7 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
 }
 
 //TODO: implement view function
-pub fn view(state: &LauncherState) -> Element<Message> {
+pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
     container(column![
         //TODO: Separate launcher  widgets in different functions
         text_input("", &state.user_input)
@@ -145,11 +148,13 @@ pub fn view(state: &LauncherState) -> Element<Message> {
                 .unwrap_or(&mut Vec::new())
                 .iter()
                 .filter_map(|entry| {
-                    if entry.name.is_empty() {
-                        None
-                    } else {
-                        Some(text(entry.name.clone()).into())
+                    let desktop_entry_text: Text = text(entry.name.clone()).into();
+
+                    if entry.is_focus {
+                        return Some(desktop_entry_text.color(ENTRY_FOCUS_COLOR).into());
                     }
+
+                    Some(desktop_entry_text.into())
                 }),
         ))
         .width(Length::Fill)
@@ -195,5 +200,5 @@ pub enum Message {
     KeyboardEvent(iced::keyboard::Event),
     OnOpen(iced::window::Event),
 
-    FocusDesktopEntry((bool, usize)),
+    FocusDesktopEntry(usize),
 }

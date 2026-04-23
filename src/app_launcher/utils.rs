@@ -47,6 +47,11 @@ pub fn get_xdg_dir_entries(dir_result: Result<DirEntry, Error>) -> Vec<DesktopEn
                     let desktop_file =
                         freedesktop_file_parser::parse(file_contents).unwrap_or_default();
 
+                    // for removing applications without a explict name
+                    if desktop_file.entry.name.default.is_empty() {
+                        continue;
+                    }
+
                     dir_desktop_entries.push(DesktopEntry {
                         name: desktop_file.entry.name.default,
                         //TODO: available another process to fetch icons

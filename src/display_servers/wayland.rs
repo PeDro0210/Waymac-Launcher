@@ -9,6 +9,8 @@ use iced_layershell::{
     settings::{LayerShellSettings, StartMode},
 };
 
+use iced::{Renderer, Theme};
+
 use crate::common::{LauncherState, Message, boot, subscription, update, view};
 
 pub struct WaylandApp;
@@ -30,7 +32,7 @@ impl WaylandApp {
             boot,
             WaylandApp::namespace,
             WaylandApp::update,
-            WaylandApp::view,
+            WaylandApp::view::<Theme, Renderer>,
         )
         .subscription(subscription)
         //TODO: pass launcher config to the layer settings
@@ -60,7 +62,7 @@ impl WaylandApp {
         update(state, msg)
     }
 
-    fn view(state: &LauncherState) -> Element<Message> {
-        view(state)
+    fn view<Theme, Renderer>(state: &LauncherState) -> Element<Message> {
+        view::<Theme, Renderer>(state)
     }
 }
