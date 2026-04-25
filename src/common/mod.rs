@@ -67,6 +67,7 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
 
             if !state.filtering_cached_entry {
                 state.filtering_cached_entry = true;
+                state.focus_desktop_entry_id = MAIN_ENTRY_FOCUS_IDX;
                 return Task::future(async move { desktop_filter_join.join().unwrap() });
             }
 
