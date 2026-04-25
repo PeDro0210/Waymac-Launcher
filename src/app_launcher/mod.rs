@@ -8,7 +8,8 @@ use std::{
     vec::Vec,
 };
 
-use iced::Error;
+use std::process::Command;
+
 use log::{debug, info, warn};
 
 #[cfg(target_os = "linux")]
@@ -101,8 +102,6 @@ pub fn launch_application(entry: &DesktopEntry) {
         DesktopEntriesTarget::XDG => {
             #[cfg(target_os = "linux")]
             {
-                use std::process::Command;
-
                 let _ = Command::new("bash")
                     .arg("-c")
                     .arg(format!(
@@ -114,7 +113,15 @@ pub fn launch_application(entry: &DesktopEntry) {
         }
         DesktopEntriesTarget::MacOS => {
             #[cfg(target_os = "macos")]
-            {}
+            {
+                let _ = Command::new("bash")
+                    .arg("-c")
+                    .arg(format!(
+                        "$(open '{}')",
+                        entry.desktop_entry_path.to_str().unwrap()
+                    ))
+                    .spawn();
+            }
         }
     }
     exit(1);

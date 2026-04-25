@@ -85,11 +85,13 @@ pub fn get_application_desktop_entry(path: &Path) -> Vec<DesktopEntry> {
                     continue;
                 }
 
+                // kinda of a overkilled approach for just fetching the dir name, but for the
+                // moment it will work
                 let dir_bundle = DirectoryBundle::new_from_path(entry.path()).unwrap();
 
                 application_dir_entries.push(DesktopEntry {
                     name: dir_bundle.name().replace(".app", ""),
-                    desktop_entry_path: Box::new(dir_bundle.info_plist_path()),
+                    desktop_entry_path: Box::new(dir_bundle.root_dir().to_path_buf()),
                     //TODO: search icons file for rendering
                     ..Default::default()
                 });
