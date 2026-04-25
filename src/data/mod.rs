@@ -13,6 +13,8 @@ pub const LAUNCHER_SCROLLABLE_ID: &str = "LauncherScrollableID";
 
 pub const MAIN_ENTRY_FOCUS_IDX: usize = 0;
 
+pub const ENTRY_ELEMENTS_HEIGHT: f32 = 25.;
+
 /*Widgets various*/
 
 /*Widgets Colors*/

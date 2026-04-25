@@ -1,6 +1,8 @@
 use std::process::exit;
 use std::thread::spawn;
 
+use iced::advanced::widget::operation::scrollable::scroll_to;
+use iced::widget::operation::AbsoluteOffset;
 use iced::widget::{Id as IcedId, column, container, operation::focus, text, text_input};
 use iced::widget::{Text, scrollable};
 use iced::{Color, Element, Length, Subscription, Task};
@@ -17,8 +19,8 @@ use log::info;
 
 use crate::app_launcher::{DesktopEntry, get_desktop_entry, launch_application};
 use crate::data::{
-    ENTRY_FOCUS_COLOR, LAUNCHER_CONTAINER_ID, LAUNCHER_SCROLLABLE_ID, LAUNCHER_TEXT_INPUT_ID,
-    MAIN_ENTRY_FOCUS_IDX,
+    ENTRY_ELEMENTS_HEIGHT, ENTRY_FOCUS_COLOR, LAUNCHER_CONTAINER_ID, LAUNCHER_SCROLLABLE_ID,
+    LAUNCHER_TEXT_INPUT_ID, MAIN_ENTRY_FOCUS_IDX,
 };
 //TODO: refactor this in the future
 
@@ -135,6 +137,14 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                                 let old_focus_desktop_entry_id = state.focus_desktop_entry_id;
                                 state.focus_desktop_entry_id = limit_entry_id(state, 1);
 
+                                let _ = scroll_to::<f32>(
+                                    IcedId::new(LAUNCHER_SCROLLABLE_ID),
+                                    AbsoluteOffset {
+                                        x: Some(0.),
+                                        y: Some(ENTRY_ELEMENTS_HEIGHT),
+                                    },
+                                );
+
                                 info!("entry num: {}", state.focus_desktop_entry_id);
 
                                 return Task::batch(vec![
@@ -153,6 +163,14 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                                 state.focus_desktop_entry_id = limit_entry_id(state, -1);
 
                                 info!("entry num: {}", state.focus_desktop_entry_id);
+
+                                let _ = scroll_to::<f32>(
+                                    IcedId::new(LAUNCHER_SCROLLABLE_ID),
+                                    AbsoluteOffset {
+                                        x: Some(0.),
+                                        y: Some(-ENTRY_ELEMENTS_HEIGHT),
+                                    },
+                                );
 
                                 return Task::batch(vec![
                                     Task::done(Message::ToogleFocusDesktopEntry(
@@ -174,7 +192,7 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                         exit(1);
                     }
                     Key::Named(Named::Enter) => {
-                        let mut selected_entry = state
+                        let selected_entry = state
                             .cached_desktop_entries
                             .as_ref()
                             .unwrap()
@@ -224,7 +242,9 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
                 .unwrap_or(&mut Vec::new())
                 .iter()
                 .filter_map(|entry| {
-                    let desktop_entry_text: Text = text(entry.name.clone()).into();
+                    let desktop_entry_text: Text = text(entry.name.clone())
+                        .height(Length::Fixed(ENTRY_ELEMENTS_HEIGHT))
+                        .into();
 
                     if entry.is_focus {
                         return Some(desktop_entry_text.color(ENTRY_FOCUS_COLOR).into());
@@ -233,6 +253,7 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
                     Some(desktop_entry_text.into())
                 }),
         ))
+        .id(LAUNCHER_SCROLLABLE_ID)
         .width(Length::Fill)
     ])
     .id(LAUNCHER_CONTAINER_ID)
