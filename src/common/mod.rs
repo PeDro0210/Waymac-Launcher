@@ -1,9 +1,12 @@
 use std::process::exit;
 use std::thread::spawn;
 
-use iced::advanced::widget::operation::scrollable::scroll_to;
 use iced::widget::operation::AbsoluteOffset;
-use iced::widget::{Id as IcedId, column, container, operation::focus, text, text_input};
+use iced::widget::{
+    Id as IcedId, column, container,
+    operation::{focus, scroll_by},
+    text, text_input,
+};
 use iced::widget::{Text, scrollable};
 use iced::{Color, Element, Length, Subscription, Task};
 
@@ -109,19 +112,15 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                     as i32
                     + offset)
                 {
-                    val if val < 0 => state
-                        .cached_desktop_entries
-                        .clone()
-                        .unwrap_or(Vec::new())
-                        .len(),
-                    val if val
-                        > state
-                            .cached_desktop_entries
-                            .clone()
-                            .unwrap_or(Vec::new())
-                            .len() as i32 =>
+                    val if (val < 0
+                        || val
+                            > state
+                                .cached_desktop_entries
+                                .clone()
+                                .unwrap_or(Vec::new())
+                                .len() as i32) =>
                     {
-                        0
+                        (state.focus_desktop_entry_id as i32) as usize
                     }
                     _ => (state.focus_desktop_entry_id as i32 + offset) as usize,
                 };
@@ -137,14 +136,6 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                                 let old_focus_desktop_entry_id = state.focus_desktop_entry_id;
                                 state.focus_desktop_entry_id = limit_entry_id(state, 1);
 
-                                let _ = scroll_to::<f32>(
-                                    IcedId::new(LAUNCHER_SCROLLABLE_ID),
-                                    AbsoluteOffset {
-                                        x: Some(0.),
-                                        y: Some(ENTRY_ELEMENTS_HEIGHT),
-                                    },
-                                );
-
                                 info!("entry num: {}", state.focus_desktop_entry_id);
 
                                 return Task::batch(vec![
@@ -156,6 +147,14 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                                         state.focus_desktop_entry_id,
                                         true,
                                     )),
+                                    //TODO: make this snap_to instead of just scrolling by
+                                    scroll_by(
+                                        IcedId::new(LAUNCHER_SCROLLABLE_ID),
+                                        AbsoluteOffset {
+                                            x: 0.,
+                                            y: ENTRY_ELEMENTS_HEIGHT,
+                                        },
+                                    ),
                                 ]);
                             }
                             if key == "p" {
@@ -164,14 +163,6 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
 
                                 info!("entry num: {}", state.focus_desktop_entry_id);
 
-                                let _ = scroll_to::<f32>(
-                                    IcedId::new(LAUNCHER_SCROLLABLE_ID),
-                                    AbsoluteOffset {
-                                        x: Some(0.),
-                                        y: Some(-ENTRY_ELEMENTS_HEIGHT),
-                                    },
-                                );
-
                                 return Task::batch(vec![
                                     Task::done(Message::ToogleFocusDesktopEntry(
                                         old_focus_desktop_entry_id,
@@ -181,6 +172,13 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                                         state.focus_desktop_entry_id,
                                         true,
                                     )),
+                                    scroll_by(
+                                        IcedId::new(LAUNCHER_SCROLLABLE_ID),
+                                        AbsoluteOffset {
+                                            x: 0.,
+                                            y: -ENTRY_ELEMENTS_HEIGHT,
+                                        },
+                                    ),
                                 ]);
                             }
                         }
