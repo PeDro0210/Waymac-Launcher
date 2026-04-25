@@ -4,6 +4,7 @@ use std::{
     fs::{File, ReadDir, read_dir},
     io::Error as StdError,
     path::{Path, PathBuf},
+    process::exit,
     vec::Vec,
 };
 
@@ -93,4 +94,28 @@ pub async fn get_desktop_entry() -> Vec<DesktopEntry> {
             );
         }
     };
+}
+
+pub fn launch_application(entry: &DesktopEntry) {
+    match get_desktop_entry_target() {
+        DesktopEntriesTarget::XDG => {
+            #[cfg(target_os = "linux")]
+            {
+                use std::process::Command;
+
+                let _ = Command::new("bash")
+                    .arg("-c")
+                    .arg(format!(
+                        "$(dex --term $TERMINAL {})",
+                        entry.desktop_entry_path.to_str().unwrap()
+                    ))
+                    .spawn();
+            }
+        }
+        DesktopEntriesTarget::MacOS => {
+            #[cfg(target_os = "macos")]
+            {}
+        }
+    }
+    exit(1);
 }

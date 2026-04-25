@@ -15,7 +15,7 @@ use iced::{
 use iced_layershell::to_layer_message;
 use log::info;
 
-use crate::app_launcher::{DesktopEntry, get_desktop_entry};
+use crate::app_launcher::{DesktopEntry, get_desktop_entry, launch_application};
 use crate::data::{
     ENTRY_FOCUS_COLOR, LAUNCHER_CONTAINER_ID, LAUNCHER_SCROLLABLE_ID, LAUNCHER_TEXT_INPUT_ID,
     MAIN_ENTRY_FOCUS_IDX,
@@ -172,6 +172,18 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                 match key {
                     Key::Named(Named::Escape) => {
                         exit(1);
+                    }
+                    Key::Named(Named::Enter) => {
+                        let mut selected_entry = state
+                            .cached_desktop_entries
+                            .as_ref()
+                            .unwrap()
+                            .get(state.focus_desktop_entry_id);
+                        //TODO: manage if not valid
+
+                        if let Some(selected_entry) = selected_entry {
+                            let _ = launch_application(selected_entry);
+                        }
                     }
                     Key::Named(Named::Backspace) => {
                         // for not looking at the user_input while deleating
