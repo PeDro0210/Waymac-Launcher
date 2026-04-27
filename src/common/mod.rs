@@ -1,14 +1,18 @@
+use std::default;
 use std::process::exit;
 use std::thread::spawn;
 
+use iced::mouse::ScrollDelta;
+use iced::widget::container::Style;
 use iced::widget::operation::AbsoluteOffset;
+use iced::widget::scrollable::{AutoScroll, Direction, Rail, Scrollbar, Style as ScrollableStyle};
 use iced::widget::{
     Id as IcedId, column, container,
     operation::{focus, scroll_by},
     text, text_input,
 };
 use iced::widget::{Text, scrollable};
-use iced::{Element, Length, Subscription, Task};
+use iced::{Border, Element, Length, Subscription, Task};
 
 use iced::{
     event,
@@ -30,6 +34,48 @@ use crate::data::{
 /* GLOBAL UPDATE AND VIEW*/
 pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
     //TODO: implement update function
+
+    let limit_entry_id =
+        |state: &LauncherState, offset: i32| match state.focus_desktop_entry_id as i32 + offset {
+            val if (val < 0
+                || val
+                    > (state
+                        .cached_desktop_entries
+                        .clone()
+                        .unwrap_or(Vec::new())
+                        .len() as i32)
+                        - 1) =>
+            {
+                (state.focus_desktop_entry_id as i32) as usize
+            }
+            _ => (state.focus_desktop_entry_id as i32 + offset) as usize,
+        };
+
+    let change_focus = |state: &mut LauncherState, offset: i32| {
+        let old_focus_desktop_entry_id = state.focus_desktop_entry_id;
+        state.focus_desktop_entry_id = limit_entry_id(&state, offset);
+
+        info!("entry num: {}", state.focus_desktop_entry_id);
+
+        return Task::batch(vec![
+            Task::done(Message::ToogleFocusDesktopEntry(
+                old_focus_desktop_entry_id,
+                false,
+            )),
+            Task::done(Message::ToogleFocusDesktopEntry(
+                state.focus_desktop_entry_id,
+                true,
+            )),
+            //TODO: make this snap_to instead of just scrolling by
+            scroll_by(
+                IcedId::new(LAUNCHER_SCROLLABLE_ID),
+                AbsoluteOffset {
+                    x: 0.,
+                    y: offset as f32 * ENTRY_ELEMENTS_HEIGHT,
+                },
+            ),
+        ]);
+    };
 
     match msg {
         Message::DesktopEntriesFetched(desktop_entries) => {
@@ -107,79 +153,20 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
         //TODO: implement correct key handleling
         Message::KeyboardEvent(key_event) => match key_event {
             KeyPressed { key, modifiers, .. } => {
-                let limit_entry_id =
-                    |offset: i32| match state.focus_desktop_entry_id as i32 + offset {
-                        val if (val < 0
-                            || val
-                                > (state
-                                    .cached_desktop_entries
-                                    .clone()
-                                    .unwrap_or(Vec::new())
-                                    .len() as i32)
-                                    - 1) =>
-                        {
-                            (state.focus_desktop_entry_id as i32) as usize
-                        }
-                        _ => (state.focus_desktop_entry_id as i32 + offset) as usize,
-                    };
-
                 //TODO: implement modifier keys
                 // for managing different modifiers
                 if modifiers.control() {
                     match key.clone() {
                         Key::Character(key) => {
-                            // Dunno how convienent is being DRY in here, like I don't want just by
                             // pressing the moddifier to pass thorugh all this process
                             if key == "n" {
-                                let old_focus_desktop_entry_id = state.focus_desktop_entry_id;
-                                state.focus_desktop_entry_id = limit_entry_id(1);
-
-                                info!("entry num: {}", state.focus_desktop_entry_id);
-
-                                return Task::batch(vec![
-                                    Task::done(Message::ToogleFocusDesktopEntry(
-                                        old_focus_desktop_entry_id,
-                                        false,
-                                    )),
-                                    Task::done(Message::ToogleFocusDesktopEntry(
-                                        state.focus_desktop_entry_id,
-                                        true,
-                                    )),
-                                    //TODO: make this snap_to instead of just scrolling by
-                                    scroll_by(
-                                        IcedId::new(LAUNCHER_SCROLLABLE_ID),
-                                        AbsoluteOffset {
-                                            x: 0.,
-                                            y: ENTRY_ELEMENTS_HEIGHT,
-                                        },
-                                    ),
-                                ]);
+                                return change_focus(state, 1);
                             }
                             if key == "p" {
-                                let old_focus_desktop_entry_id = state.focus_desktop_entry_id;
-                                state.focus_desktop_entry_id = limit_entry_id(-1);
-
-                                info!("entry num: {}", state.focus_desktop_entry_id);
-
-                                return Task::batch(vec![
-                                    Task::done(Message::ToogleFocusDesktopEntry(
-                                        old_focus_desktop_entry_id,
-                                        false,
-                                    )),
-                                    Task::done(Message::ToogleFocusDesktopEntry(
-                                        state.focus_desktop_entry_id,
-                                        true,
-                                    )),
-                                    scroll_by(
-                                        IcedId::new(LAUNCHER_SCROLLABLE_ID),
-                                        AbsoluteOffset {
-                                            x: 0.,
-                                            y: -ENTRY_ELEMENTS_HEIGHT,
-                                        },
-                                    ),
-                                ]);
+                                return change_focus(state, -1);
                             }
                         }
+
                         _ => {}
                     }
                 }
@@ -204,6 +191,12 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                         info!("ignoring input backspace");
                         return Task::none();
                     }
+                    Key::Named(Named::ArrowUp) => {
+                        return change_focus(state, -1);
+                    }
+                    Key::Named(Named::ArrowDown) => {
+                        return change_focus(state, 1);
+                    }
                     _ => {}
                 }
                 Task::none()
@@ -220,6 +213,7 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
             ]),
             _ => Task::none(),
         },
+
         _ => Task::none(),
     }
 }
@@ -249,6 +243,7 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
                     Some(desktop_entry_text.into())
                 }),
         ))
+        .direction(Direction::Vertical(Scrollbar::hidden()))
         .id(LAUNCHER_SCROLLABLE_ID)
         .width(Length::Fill)
     ])
