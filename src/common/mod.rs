@@ -8,7 +8,7 @@ use iced::widget::{
     text, text_input,
 };
 use iced::widget::{Text, scrollable};
-use iced::{Color, Element, Length, Subscription, Task};
+use iced::{Element, Length, Subscription, Task};
 
 use iced::{
     event,
@@ -107,23 +107,21 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
         //TODO: implement correct key handleling
         Message::KeyboardEvent(key_event) => match key_event {
             KeyPressed { key, modifiers, .. } => {
-                let limit_entry_id = |state_clone: &LauncherState, offset: i32| match (state
-                    .focus_desktop_entry_id
-                    as i32
-                    + offset)
-                {
-                    val if (val < 0
-                        || val
-                            > state
-                                .cached_desktop_entries
-                                .clone()
-                                .unwrap_or(Vec::new())
-                                .len() as i32) =>
-                    {
-                        (state.focus_desktop_entry_id as i32) as usize
-                    }
-                    _ => (state.focus_desktop_entry_id as i32 + offset) as usize,
-                };
+                let limit_entry_id =
+                    |offset: i32| match state.focus_desktop_entry_id as i32 + offset {
+                        val if (val < 0
+                            || val
+                                > (state
+                                    .cached_desktop_entries
+                                    .clone()
+                                    .unwrap_or(Vec::new())
+                                    .len() as i32)
+                                    - 1) =>
+                        {
+                            (state.focus_desktop_entry_id as i32) as usize
+                        }
+                        _ => (state.focus_desktop_entry_id as i32 + offset) as usize,
+                    };
 
                 //TODO: implement modifier keys
                 // for managing different modifiers
@@ -134,7 +132,7 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                             // pressing the moddifier to pass thorugh all this process
                             if key == "n" {
                                 let old_focus_desktop_entry_id = state.focus_desktop_entry_id;
-                                state.focus_desktop_entry_id = limit_entry_id(state, 1);
+                                state.focus_desktop_entry_id = limit_entry_id(1);
 
                                 info!("entry num: {}", state.focus_desktop_entry_id);
 
@@ -159,7 +157,7 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                             }
                             if key == "p" {
                                 let old_focus_desktop_entry_id = state.focus_desktop_entry_id;
-                                state.focus_desktop_entry_id = limit_entry_id(state, -1);
+                                state.focus_desktop_entry_id = limit_entry_id(-1);
 
                                 info!("entry num: {}", state.focus_desktop_entry_id);
 
