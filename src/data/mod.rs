@@ -1,6 +1,5 @@
-/*Widgets Ids*/
-
 use iced::Color;
+/*Widgets Ids*/
 
 pub const LAUNCHER_TEXT_INPUT_ID: &str = "LauncherTextInputID";
 pub const LAUNCHER_CONTAINER_ID: &str = "LauncherID";
@@ -26,6 +25,9 @@ pub const ENTRY_FOCUS_COLOR: Color = Color {
     g: 0.5,
     a: 1.,
 };
+
+// TODO: make it default
+pub const LAUNCHER_PROPORTION: u32 = 350;
 
 /*Widgets Colors*/
 

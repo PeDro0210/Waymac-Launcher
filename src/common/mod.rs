@@ -27,8 +27,8 @@ use log::info;
 
 use crate::app_launcher::{DesktopEntry, get_desktop_entry, launch_application};
 use crate::data::{
-    ENTRY_ELEMENTS_HEIGHT, ENTRY_FOCUS_COLOR, LAUNCHER_CONTAINER_ID, LAUNCHER_SCROLLABLE_ID,
-    LAUNCHER_TEXT_INPUT_ID, MAIN_ENTRY_FOCUS_IDX,
+    ENTRY_ELEMENTS_HEIGHT, ENTRY_FOCUS_COLOR, LAUNCHER_CONTAINER_ID, LAUNCHER_PROPORTION,
+    LAUNCHER_SCROLLABLE_ID, LAUNCHER_TEXT_INPUT_ID, MAIN_ENTRY_FOCUS_IDX,
 };
 //TODO: refactor this in the future
 
@@ -216,27 +216,8 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
             _ => Task::none(),
         },
         Message::MouseEvent(mouse_event) => match mouse_event {
-            CursorLeft => {
-                state.outside_launcher = true;
-                Task::none()
-            }
-            CursorEntered => {
-                state.outside_launcher = false;
-                Task::none()
-            }
-            ButtonPressed(but) => match but {
-                Button::Left => {
-                    // first checking if out of window
-                    if state.outside_launcher {
-                        exit(1)
-                    }
-                    Task::none()
-                }
-                _ => Task::none(),
-            },
             _ => Task::none(),
         },
-
         _ => Task::none(),
     }
 }
@@ -270,6 +251,8 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
         .id(LAUNCHER_SCROLLABLE_ID)
         .width(Length::Fill)
     ])
+    .max_height(LAUNCHER_PROPORTION)
+    .max_width(LAUNCHER_PROPORTION)
     .id(LAUNCHER_CONTAINER_ID)
     .into()
 }
@@ -294,7 +277,6 @@ pub fn subscription(_: &LauncherState) -> Subscription<Message> {
 #[derive(Default)]
 pub struct LauncherState {
     user_input: String,
-    outside_launcher: bool,
     filtering_cached_entry: bool,
     focus_desktop_entry_id: usize,
     desktop_entries: Option<Vec<DesktopEntry>>,
