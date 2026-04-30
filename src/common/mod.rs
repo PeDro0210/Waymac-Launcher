@@ -2,7 +2,7 @@ use std::default;
 use std::process::exit;
 use std::thread::spawn;
 
-use iced::mouse::ScrollDelta;
+use iced::mouse::{Button, ScrollDelta};
 use iced::widget::container::Style;
 use iced::widget::operation::AbsoluteOffset;
 use iced::widget::scrollable::{AutoScroll, Direction, Rail, Scrollbar, Style as ScrollableStyle};
@@ -17,7 +17,8 @@ use iced::{Border, Element, Length, Subscription, Task};
 use iced::{
     event,
     keyboard::{Event::KeyPressed, Key, key::Named},
-    window::Event::Opened,
+    mouse::Event::{ButtonPressed, CursorEntered, CursorLeft},
+    window::Event::{Opened, Unfocused},
 };
 
 #[cfg(target_os = "linux")]
@@ -203,7 +204,7 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
             }
             _ => Task::none(),
         },
-        Message::OnOpen(win_event) => match win_event {
+        Message::WindowEvent(win_event) => match win_event {
             Opened { .. } => Task::batch(vec![
                 Task::perform(get_desktop_entry(), Message::DesktopEntriesFetched),
                 Task::done((|| {
@@ -211,6 +212,28 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                     Message::ToogleFocusDesktopEntry(MAIN_ENTRY_FOCUS_IDX, true)
                 })()),
             ]),
+
+            _ => Task::none(),
+        },
+        Message::MouseEvent(mouse_event) => match mouse_event {
+            CursorLeft => {
+                state.outside_launcher = true;
+                Task::none()
+            }
+            CursorEntered => {
+                state.outside_launcher = false;
+                Task::none()
+            }
+            ButtonPressed(but) => match but {
+                Button::Left => {
+                    // first checking if out of window
+                    if state.outside_launcher {
+                        exit(1)
+                    }
+                    Task::none()
+                }
+                _ => Task::none(),
+            },
             _ => Task::none(),
         },
 
@@ -260,8 +283,9 @@ pub fn boot() -> (LauncherState, Task<Message>) {
 
 pub fn subscription(_: &LauncherState) -> Subscription<Message> {
     event::listen_with(|event, _status, _id| match event {
-        iced::Event::Keyboard(k) => Some(Message::KeyboardEvent(k)),
-        iced::Event::Window(e) => Some(Message::OnOpen(e)),
+        iced::Event::Keyboard(e) => Some(Message::KeyboardEvent(e)),
+        iced::Event::Window(e) => Some(Message::WindowEvent(e)),
+        iced::Event::Mouse(e) => Some(Message::MouseEvent(e)),
         _ => None,
     })
 }
@@ -270,6 +294,7 @@ pub fn subscription(_: &LauncherState) -> Subscription<Message> {
 #[derive(Default)]
 pub struct LauncherState {
     user_input: String,
+    outside_launcher: bool,
     filtering_cached_entry: bool,
     focus_desktop_entry_id: usize,
     desktop_entries: Option<Vec<DesktopEntry>>,
@@ -287,7 +312,8 @@ pub enum Message {
     UserInputFocus,
 
     KeyboardEvent(iced::keyboard::Event),
-    OnOpen(iced::window::Event),
+    WindowEvent(iced::window::Event),
+    MouseEvent(iced::mouse::Event),
 
     ToogleFocusDesktopEntry(usize, bool),
 }
