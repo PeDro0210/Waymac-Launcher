@@ -12,7 +12,7 @@ use iced::widget::{
     text, text_input,
 };
 use iced::widget::{Text, scrollable};
-use iced::{Border, Element, Length, Subscription, Task};
+use iced::{Alignment, Border, Color, Element, Length, Subscription, Task};
 
 use iced::{
     event,
@@ -224,36 +224,45 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
 
 //TODO: implement view function
 pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
-    container(column![
-        //TODO: Separate launcher  widgets in different functions
-        text_input("", &state.user_input)
-            .on_input(Message::UserInputChanged)
-            .id(LAUNCHER_TEXT_INPUT_ID),
-        scrollable(column(
-            state
-                .cached_desktop_entries
-                .as_ref()
-                .unwrap_or(&mut Vec::new())
-                .iter()
-                .filter_map(|entry| {
-                    let desktop_entry_text: Text = text(entry.name.clone())
-                        .height(Length::Fixed(ENTRY_ELEMENTS_HEIGHT))
-                        .into();
+    container(
+        container(column![
+            //TODO: Separate launcher  widgets in different functions
+            text_input("", &state.user_input)
+                // TODO: implement style per config
+                .on_input(Message::UserInputChanged)
+                .id(LAUNCHER_TEXT_INPUT_ID),
+            scrollable(column(
+                state
+                    .cached_desktop_entries
+                    .as_ref()
+                    .unwrap_or(&mut Vec::new())
+                    .iter()
+                    .filter_map(|entry| {
+                        let desktop_entry_text: Text = text(entry.name.clone())
+                            .height(Length::Fixed(ENTRY_ELEMENTS_HEIGHT))
+                            .into();
 
-                    if entry.is_focus {
-                        return Some(desktop_entry_text.color(ENTRY_FOCUS_COLOR).into());
-                    }
+                        if entry.is_focus {
+                            return Some(desktop_entry_text.color(ENTRY_FOCUS_COLOR).into());
+                        }
 
-                    Some(desktop_entry_text.into())
-                }),
-        ))
-        .direction(Direction::Vertical(Scrollbar::hidden()))
-        .id(LAUNCHER_SCROLLABLE_ID)
-        .width(Length::Fill)
-    ])
-    .max_height(LAUNCHER_PROPORTION)
-    .max_width(LAUNCHER_PROPORTION)
-    .id(LAUNCHER_CONTAINER_ID)
+                        Some(desktop_entry_text.into())
+                    }),
+            ))
+            .direction(Direction::Vertical(Scrollbar::hidden()))
+            .id(LAUNCHER_SCROLLABLE_ID)
+            .width(Length::Fill)
+        ])
+        //TODO: set up background color per config
+        .style(|theme| container::background(theme.palette().background))
+        .max_height(LAUNCHER_PROPORTION)
+        .max_width(LAUNCHER_PROPORTION)
+        .id(LAUNCHER_CONTAINER_ID),
+    )
+    .align_x(Alignment::Center)
+    .align_y(Alignment::Center)
+    .height(Length::Fill)
+    .width(Length::Fill)
     .into()
 }
 

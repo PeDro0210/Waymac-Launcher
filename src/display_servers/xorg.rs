@@ -11,6 +11,8 @@ use iced::window::Position::Centered;
 
 pub struct XorgApp;
 
+//TODO: implement this for using the rendererer directly instead of passing through the application
+//abstraction
 impl XorgApp {
     pub fn run() -> Result<(), Box<dyn StdError>> {
         // most of burned settings are for simulating a layer with a window
