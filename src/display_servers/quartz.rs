@@ -6,9 +6,9 @@ use crate::common::{LauncherState, boot, subscription, update, view};
 
 use iced::{Renderer, Theme};
 
-pub struct XorgApp;
+pub struct QuartzApp;
 
-impl XorgApp {
+impl QuartzApp {
     pub fn run() -> Result<(), Box<dyn StdError>> {
         //TODO: setup correctly for config take in mind
         application(boot, update, view::<Theme, Renderer>)

@@ -1,11 +1,12 @@
 use std::env::{self, consts::OS};
 
+pub mod quartz;
 pub mod wayland;
-pub mod xorg;
 
 pub enum SupportedDisplayServer {
     Wayland,
     Xorg, // will also map for the macos target
+    Quartz,
 }
 
 pub fn get_supported_display_server_target() -> SupportedDisplayServer {
@@ -20,7 +21,7 @@ pub fn get_supported_display_server_target() -> SupportedDisplayServer {
         _ => {
             return match OS {
                 "linux" => panic!("Couldn't get valid XDG_SESSION_TYPE on linux target"),
-                "macos" => SupportedDisplayServer::Xorg, // will treat it as an XORG app
+                "macos" => SupportedDisplayServer::Quartz, // will treat it as an XORG app
                 _ => panic!("OS not supported"),
             };
         }
