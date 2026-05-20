@@ -14,6 +14,7 @@ toml = "1.1.2"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 apple-bundles = "0.21.0"
+core-graphics = "0.25.0"
 
 
 [target.'cfg(target_os = "linux")'.dependencies]

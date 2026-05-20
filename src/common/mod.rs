@@ -2,6 +2,7 @@ use std::default;
 use std::process::exit;
 use std::thread::spawn;
 
+use iced::Length::Fill;
 use iced::mouse::ScrollDelta;
 use iced::widget::container::Style;
 use iced::widget::operation::AbsoluteOffset;
@@ -12,7 +13,7 @@ use iced::widget::{
     text, text_input,
 };
 use iced::widget::{Text, scrollable};
-use iced::{Border, Element, Length, Subscription, Task};
+use iced::{Border, Color, Element, Length, Subscription, Task};
 
 use iced::{
     event,
@@ -248,6 +249,14 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
         .width(Length::Fill)
     ])
     .id(LAUNCHER_CONTAINER_ID)
+    //TODO: make config place the height and width
+    .width(350.)
+    .height(350.)
+    //TODO: make text_color being exchangble for the toml config
+    .style(|_| Style {
+        background: Some(iced::Background::Color(Color::BLACK)),
+        ..Default::default()
+    })
     .into()
 }
 
