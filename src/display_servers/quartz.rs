@@ -6,10 +6,12 @@ use crate::common::{boot, subscription, update, view};
 
 use iced::{Renderer, Theme};
 
+#[cfg(target_os = "macos")]
 use core_graphics::display::CGDisplay;
 
 pub struct QuartzApp;
 
+#[cfg(target_os = "macos")]
 impl QuartzApp {
     pub fn run() -> Result<(), Box<dyn StdError>> {
         let display_pre_info = CGDisplay::main();

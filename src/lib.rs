@@ -8,7 +8,7 @@ mod logger;
 use std::{any::Any, env, error::Error as StdError};
 
 use iced::widget::Id;
-use log::{info, warn};
+use log::{error, info, warn};
 
 use crate::{
     data::LAUNCHER_TEXT_INPUT_ID,
@@ -37,12 +37,14 @@ impl WayXApp {
                 WaylandApp::run()?
             }
             SupportedDisplayServer::Xorg => {
-                warn!("Xorg is not supported directly, fallbacking to Quartz app build");
-                #[cfg(target_os = "linux")]
-                WaylandApp::run()?
+                error!("Xorg is not supported directly, fallbacking to Quartz app build");
             }
 
-            SupportedDisplayServer::Quartz => QuartzApp::run()?,
+            SupportedDisplayServer::Quartz =>
+            {
+                #[cfg(target_os = "macos")]
+                QuartzApp::run()?
+            }
         }
 
         Ok(())
