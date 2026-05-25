@@ -1,11 +1,12 @@
 use std::process::exit;
 use std::thread::spawn;
 
+use iced::Length::Fill;
 use iced::widget::container::Style;
 use iced::widget::scrollable::{Direction, Scrollbar};
 use iced::widget::{Id as IcedId, column, container, operation::focus, text, text_input};
 use iced::widget::{Text, scrollable};
-use iced::{Color, Element, Length, Subscription, Task};
+use iced::{Color, Element, Length, Size, Subscription, Task};
 
 use iced::{
     event,
@@ -158,10 +159,11 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
             _ => Task::none(),
         },
         Message::OnOpen(win_event) => match win_event {
-            Opened { .. } => Task::batch(vec![
+            Opened { size, .. } => Task::batch(vec![
                 Task::perform(get_desktop_entry(), Message::DesktopEntriesFetched),
                 Task::done((|| {
                     state.focus_desktop_entry_id = MAIN_ENTRY_FOCUS_IDX;
+                    state.window_size = size;
                     Message::ToogleFocusDesktopEntry(MAIN_ENTRY_FOCUS_IDX, true)
                 })()),
             ]),
@@ -174,42 +176,48 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
 
 //TODO: implement view function
 pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
-    container(column![
-        //TODO: Separate launcher  widgets in different functions
-        text_input("", &state.user_input)
-            .on_input(Message::UserInputChanged)
-            .id(LAUNCHER_TEXT_INPUT_ID),
-        scrollable(column(
-            state
-                .cached_desktop_entries
-                .as_ref()
-                .unwrap_or(&mut Vec::new())
-                .iter()
-                .filter_map(|entry| {
-                    let desktop_entry_text: Text = text(entry.name.clone())
-                        .height(Length::Fixed(ENTRY_ELEMENTS_HEIGHT))
-                        .into();
+    container(
+        container(column![
+            //TODO: Separate launcher  widgets in different functions
+            text_input("", &state.user_input)
+                .on_input(Message::UserInputChanged)
+                .id(LAUNCHER_TEXT_INPUT_ID),
+            scrollable(column(
+                state
+                    .cached_desktop_entries
+                    .as_ref()
+                    .unwrap_or(&mut Vec::new())
+                    .iter()
+                    .filter_map(|entry| {
+                        let desktop_entry_text: Text = text(entry.name.clone())
+                            .height(Length::Fixed(ENTRY_ELEMENTS_HEIGHT))
+                            .into();
 
-                    if entry.is_focus {
-                        return Some(desktop_entry_text.color(ENTRY_FOCUS_COLOR).into());
-                    }
+                        if entry.is_focus {
+                            return Some(desktop_entry_text.color(ENTRY_FOCUS_COLOR).into());
+                        }
 
-                    Some(desktop_entry_text.into())
-                }),
-        ))
-        .direction(Direction::Vertical(Scrollbar::hidden()))
-        .id(LAUNCHER_SCROLLABLE_ID)
-        .width(Length::Fill)
-    ])
-    .id(LAUNCHER_CONTAINER_ID)
-    //TODO: make config place the height and width
-    .width(350.)
-    .height(350.)
-    //TODO: make text_color being exchangble for the toml config
-    .style(|_| Style {
-        background: Some(iced::Background::Color(Color::BLACK)),
-        ..Default::default()
-    })
+                        Some(desktop_entry_text.into())
+                    }),
+            ))
+            .direction(Direction::Vertical(Scrollbar::hidden()))
+            .id(LAUNCHER_SCROLLABLE_ID)
+            .width(Length::Fill)
+        ])
+        .id(LAUNCHER_CONTAINER_ID)
+        //TODO: make config place the height and width
+        .width(350.)
+        .height(350.)
+        //TODO: make text_color being exchangble for the toml config
+        .style(|_| Style {
+            background: Some(iced::Background::Color(Color::BLACK)),
+            ..Default::default()
+        }),
+    )
+    .width(Fill)
+    .height(Fill)
+    .center_x(state.window_size.width)
+    .center_y(state.window_size.height)
     .into()
 }
 
@@ -236,6 +244,7 @@ pub struct LauncherState {
     focus_desktop_entry_id: usize,
     desktop_entries: Option<Vec<DesktopEntry>>,
     cached_desktop_entries: Option<Vec<DesktopEntry>>,
+    window_size: Size,
 } // cause of the pattern that layer_shell uses, we need to declare an
 // struct which get's in charge of most of our variables.
 
