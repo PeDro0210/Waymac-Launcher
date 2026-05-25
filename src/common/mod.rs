@@ -1,19 +1,11 @@
-use std::default;
 use std::process::exit;
 use std::thread::spawn;
 
-use iced::Length::Fill;
-use iced::mouse::ScrollDelta;
 use iced::widget::container::Style;
-use iced::widget::operation::AbsoluteOffset;
-use iced::widget::scrollable::{AutoScroll, Direction, Rail, Scrollbar, Style as ScrollableStyle};
-use iced::widget::{
-    Id as IcedId, column, container,
-    operation::{focus, scroll_by},
-    text, text_input,
-};
+use iced::widget::scrollable::{Direction, Scrollbar};
+use iced::widget::{Id as IcedId, column, container, operation::focus, text, text_input};
 use iced::widget::{Text, scrollable};
-use iced::{Border, Color, Element, Length, Subscription, Task};
+use iced::{Color, Element, Length, Subscription, Task};
 
 use iced::{
     event,
@@ -26,57 +18,18 @@ use iced_layershell::to_layer_message;
 use log::info;
 
 use crate::app_launcher::{DesktopEntry, get_desktop_entry, launch_application};
+use crate::common::util::change_focus;
 use crate::data::{
     ENTRY_ELEMENTS_HEIGHT, ENTRY_FOCUS_COLOR, LAUNCHER_CONTAINER_ID, LAUNCHER_SCROLLABLE_ID,
     LAUNCHER_TEXT_INPUT_ID, MAIN_ENTRY_FOCUS_IDX,
 };
+
+mod util;
 //TODO: refactor this in the future
 
 /* GLOBAL UPDATE AND VIEW*/
 pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
     //TODO: implement update function
-
-    let limit_entry_id =
-        |state: &LauncherState, offset: i32| match state.focus_desktop_entry_id as i32 + offset {
-            val if (val < 0
-                || val
-                    > (state
-                        .cached_desktop_entries
-                        .clone()
-                        .unwrap_or(Vec::new())
-                        .len() as i32)
-                        - 1) =>
-            {
-                (state.focus_desktop_entry_id as i32) as usize
-            }
-            _ => (state.focus_desktop_entry_id as i32 + offset) as usize,
-        };
-
-    let change_focus = |state: &mut LauncherState, offset: i32| {
-        let old_focus_desktop_entry_id = state.focus_desktop_entry_id;
-        state.focus_desktop_entry_id = limit_entry_id(&state, offset);
-
-        info!("entry num: {}", state.focus_desktop_entry_id);
-
-        return Task::batch(vec![
-            Task::done(Message::ToogleFocusDesktopEntry(
-                old_focus_desktop_entry_id,
-                false,
-            )),
-            Task::done(Message::ToogleFocusDesktopEntry(
-                state.focus_desktop_entry_id,
-                true,
-            )),
-            //TODO: make this snap_to instead of just scrolling by
-            scroll_by(
-                IcedId::new(LAUNCHER_SCROLLABLE_ID),
-                AbsoluteOffset {
-                    x: 0.,
-                    y: offset as f32 * ENTRY_ELEMENTS_HEIGHT,
-                },
-            ),
-        ]);
-    };
 
     match msg {
         Message::DesktopEntriesFetched(desktop_entries) => {
@@ -133,7 +86,7 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
 
         Message::ToogleFocusDesktopEntry(key, focus) => {
             // get the specific DesktopEntry and copying it
-            let mut selected_entry = state.cached_desktop_entries.as_ref().unwrap().get(key);
+            let selected_entry = state.cached_desktop_entries.as_ref().unwrap().get(key);
 
             if let Some(entry) = selected_entry {
                 let mut entry_owned = entry.to_owned();

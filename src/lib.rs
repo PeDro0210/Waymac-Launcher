@@ -5,17 +5,13 @@ mod display_servers;
 
 mod logger;
 
-use std::{any::Any, env, error::Error as StdError};
+use std::{env, error::Error as StdError};
 
-use iced::widget::Id;
-use log::{error, info, warn};
+use log::{error, info};
 
-use crate::{
-    data::LAUNCHER_TEXT_INPUT_ID,
-    display_servers::{
-        SupportedDisplayServer, get_supported_display_server_target, quartz::QuartzApp,
-        wayland::WaylandApp,
-    },
+use crate::display_servers::{
+    SupportedDisplayServer, get_supported_display_server_target, quartz::QuartzApp,
+    wayland::WaylandApp,
 };
 
 pub struct WayXApp;
