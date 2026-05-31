@@ -14,9 +14,9 @@ use crate::display_servers::{
     wayland::WaylandApp,
 };
 
-pub struct WayXApp;
+pub struct WayMacApp;
 
-impl WayXApp {
+impl WayMacApp {
     pub fn init() -> Result<(), Box<dyn StdError>> {
         //TODO: pass the log file
         logger::init_logger(None)?;

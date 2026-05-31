@@ -1,8 +1,8 @@
 use std::error::Error as StdError;
 
-use waymac_launcher::WayXApp;
+use waymac_launcher::WayMacApp;
 
 fn main() -> Result<(), Box<dyn StdError>> {
-    WayXApp::init()?;
+    WayMacApp::init()?;
     Ok(())
 }
