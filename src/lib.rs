@@ -1,5 +1,6 @@
 mod app_launcher;
 mod common;
+mod config;
 mod data;
 mod display_servers;
 
