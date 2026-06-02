@@ -14,9 +14,13 @@ pub enum ContainerType {
     MainWindow {
         // location depending the layer
         location: Location,
+        padding: f32,
+        spacing: f32,
     },
     InputBar,
-    Entry,
+    Entry {
+        focus_text_color: Color,
+    },
 }
 
 pub enum Location {
@@ -30,9 +34,6 @@ pub enum Location {
 // describes the behavoir of WayMac components
 pub struct ContainerConfig {
     pub size: Size,
-
-    pub padding: f32,
-    pub spacing: f32,
 
     pub text_color: Color,
     pub font: Font,

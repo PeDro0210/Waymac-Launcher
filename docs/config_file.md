@@ -2,7 +2,7 @@
 
 WayMac uses TOML (Tom's Obvious, Minimal Language) for it's config file format, which will be expected to be specified on ~/.config/wayx/config.toml. (at the first startup it will be created if possible)
 
-Simple costumization is kind of a pretty importat point for WayMac, but take in mind that is mostly made for accomodate my needs (which are not very complicate it), that means pretty specific configs will not be taken in mind for the moment as I'm writing this document.
+Simple customization is kind of a pretty important point for WayMac, but take in mind that is mostly made for accommodate my needs (which are not very complicate it), that means pretty specific configs will not be taken in mind for the moment as I'm writing this document.
 
 ## Fields
 
@@ -14,7 +14,7 @@ Simple costumization is kind of a pretty importat point for WayMac, but take in 
   - spacing: unsigned number
 
   - text-color: hex-val (cascades)
-  - font: <font name in system> (cascade and it will fallback to system font)
+  - font: <font name in system> (cascades and it will fallback to system font)
 
   - location: "center" | "top" | "bottom" | "right" | "left" (can be chained together)
 
@@ -45,7 +45,6 @@ Simple costumization is kind of a pretty importat point for WayMac, but take in 
   - text-color: hex-val
   - focus-text-color: hex-val (recommended to be different than text-color)
 
-  - font-sizes: hex-val
   - font: <font name in system> (will fallback to system font)
 
   - background-image: <path to image> (optional, can be use in case of wanting gradients)
@@ -55,4 +54,7 @@ Simple costumization is kind of a pretty importat point for WayMac, but take in 
   - border-radius: unsigned number
 
 > [about dimensions]
-> most number values which accomodate for a proportion or anything similar are restrain by iced way of handling
+> most number values which accommodate for a proportion or anything similar are restrain by iced way of handling
+
+> [about hex value]
+> color most be represented in  RGB
