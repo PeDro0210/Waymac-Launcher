@@ -25,12 +25,11 @@ Simple customization is kind of a pretty important point for WayMac, but take in
   - border-radius: unsigned number
 
 - inputbar:
-  - height: unsigned number
-  - width: unsigned number
+  - height: unsigned number (limited by main_window)
+  - width: unsigned number (limited by main_window)
 
   - text-color: hex-val
   - font-sizes: hex-val
-  - font: <font name in system> (will fallback to system font)
 
   - background-image: <path to image> (optional, can be use in case of wanting gradients)
   - background-color: hex-val (solid color)
@@ -39,13 +38,12 @@ Simple customization is kind of a pretty important point for WayMac, but take in
   - border-radius: unsigned number
 
 - entry:
-  - height: unsigned number
-  - width: unsigned number
+  - height: unsigned number (limited by main_window)
+  - width: unsigned number (limited by main_window)
+
 
   - text-color: hex-val
   - focus-text-color: hex-val (recommended to be different than text-color)
-
-  - font: <font name in system> (will fallback to system font)
 
   - background-image: <path to image> (optional, can be use in case of wanting gradients)
   - background-color: hex-val (solid color)

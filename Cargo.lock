@@ -3968,6 +3968,7 @@ dependencies = [
  "iced",
  "iced_layershell",
  "log",
+ "serde",
  "toml",
  "walkdir",
  "xdg 3.0.0",

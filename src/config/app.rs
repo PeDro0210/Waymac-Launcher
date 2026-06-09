@@ -1,4 +1,5 @@
 use iced::{Background, Color, Font, Size, advanced::graphics::Image};
+use serde::Deserialize;
 
 // config struct for using directly in WayMacApp
 pub struct WayMacConfig {
@@ -23,6 +24,7 @@ pub enum ContainerType {
     },
 }
 
+#[derive(Deserialize)]
 pub enum Location {
     Center,
     Top,
@@ -40,7 +42,7 @@ pub struct ContainerConfig {
 
     pub background: Background,
 
-    pub border_image: Option<Image>,
+    pub border_color: Option<Color>,
     pub border_radius: f32,
 
     // other configs depending which container is it
