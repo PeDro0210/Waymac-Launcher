@@ -35,6 +35,4 @@ pub const ENTRY_FOCUS_COLOR: Color = Color {
 // for checking application directories
 pub const MAX_DEPTH_APPLICATION_DIR: usize = 2;
 
-// this is for general apps for macos
-pub const MAX_DEPTH_MACOS_APPLICATION_DIR: usize = 1;
 /* Mac related */

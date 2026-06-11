@@ -15,6 +15,10 @@ use crate::display_servers::{
     wayland::WaylandApp,
 };
 
+struct Args {
+    config_path: String,
+}
+
 pub struct WayMacApp;
 
 impl WayMacApp {

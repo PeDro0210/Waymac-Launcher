@@ -10,7 +10,7 @@ ftail = "0.3.1"
 clap = "4.6.0"
 walkdir = "2.5.0"
 toml = "1.1.2"
-serde = "1.0.228"
+serde = { version = "1.0.228", features = ["derive"] }
 
 
 [target.'cfg(target_os = "macos")'.dependencies]
