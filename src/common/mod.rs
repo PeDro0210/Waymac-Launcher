@@ -16,7 +16,7 @@ use iced::{
 
 #[cfg(target_os = "linux")]
 use iced_layershell::to_layer_message;
-use log::info;
+use log::{info, trace};
 
 use crate::Args;
 use crate::app_launcher::{DesktopEntry, get_desktop_entry, launch_application};
@@ -56,7 +56,7 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
 
             let desktop_entries_borrowed = state.desktop_entries.to_owned();
 
-            info!("filted_cached_entry: {}", state.filtering_cached_entry);
+            trace!("filted_cached_entry: {}", state.filtering_cached_entry);
 
             let desktop_filter_join = spawn(move || {
                 let desktop_entries = desktop_entries_borrowed
@@ -95,7 +95,7 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                 let mut entry_owned = entry.to_owned();
                 entry_owned.is_focus = focus;
 
-                info!("entry is: {selected_entry:?}");
+                trace!("entry is: {selected_entry:?}");
                 let mut desktop_entries_with_focus_owned =
                     state.cached_desktop_entries.to_owned().unwrap();
 
@@ -145,7 +145,7 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                     }
                     Key::Named(Named::Backspace) => {
                         // for not looking at the user_input while deleating
-                        info!("ignoring input backspace");
+                        trace!("ignoring input backspace");
                         return Task::none();
                     }
                     Key::Named(Named::ArrowUp) => {
