@@ -18,8 +18,10 @@ use iced::{
 use iced_layershell::to_layer_message;
 use log::info;
 
+use crate::Args;
 use crate::app_launcher::{DesktopEntry, get_desktop_entry, launch_application};
 use crate::common::util::change_focus;
+use crate::config::toml::TomlConfig;
 use crate::data::{
     ENTRY_ELEMENTS_HEIGHT, ENTRY_FOCUS_COLOR, LAUNCHER_CONTAINER_ID, LAUNCHER_SCROLLABLE_ID,
     LAUNCHER_TEXT_INPUT_ID, MAIN_ENTRY_FOCUS_IDX,
@@ -221,7 +223,11 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
     .into()
 }
 
-pub fn boot() -> (LauncherState, Task<Message>) {
+pub fn boot(args: &Args) -> (LauncherState, Task<Message>) {
+    let toml_config = TomlConfig::from_path(args.config_path.as_str());
+
+    //TODO: start parsing toml to app config
+
     (
         LauncherState::default(),
         focus(IcedId::new(LAUNCHER_TEXT_INPUT_ID)),

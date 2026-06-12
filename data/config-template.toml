@@ -13,7 +13,7 @@ location = "Center"
 
 background_color = "#808080"
 
-[input_bar]
+[inputbar]
 height = 25
 width = 350
 

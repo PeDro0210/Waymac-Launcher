@@ -21,7 +21,7 @@ pub struct WaylandApp;
 #[cfg(target_os = "linux")]
 // Implementation for the just initialzation for the daemon
 impl WaylandApp {
-    pub fn run(arg: Args) -> Result<(), Box<dyn StdError>> {
+    pub fn run(arg: &'static Args) -> Result<(), Box<dyn StdError>> {
         //For knowing in which screen to output
 
         let binded_output_name = std::env::args().nth(1);
@@ -32,7 +32,7 @@ impl WaylandApp {
 
         //TODO: setup correctly for config take in mind
         application(
-            boot,
+            move || boot(arg),
             WaylandApp::namespace,
             WaylandApp::update,
             WaylandApp::view::<Theme, Renderer>,
