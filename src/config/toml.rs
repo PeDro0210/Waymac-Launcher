@@ -17,7 +17,15 @@ pub struct TomlConfig {
 impl TomlConfig {
     pub fn from_path(path: &str) -> Self {
         let toml_string_file = &mut String::new();
-        let mut toml_file = File::open(path).unwrap();
+
+        let mut toml_file = if let Ok(mut file) = File::open(path) {
+            let _ = file.read_to_string(toml_string_file);
+            file
+        } else {
+            error!("Couldn't open '{path}'");
+            exit(1);
+        };
+
         let _ = toml_file.read_to_string(toml_string_file);
 
         match toml::from_str::<TomlConfig>(toml_string_file.as_str()) {
