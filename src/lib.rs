@@ -17,7 +17,7 @@ use crate::{
         SupportedDisplayServer, get_supported_display_server_target, quartz::QuartzApp,
         wayland::WaylandApp,
     },
-    util::expand_default_arg_paths,
+    util::expand_args_paths,
 };
 
 /// An app-launcher for Wayland compositor and MacOS
@@ -25,10 +25,10 @@ use crate::{
 #[command(version, about, long_about = None)]
 struct Args {
     /// File path for the file with configuration declarations
-    #[arg(short, long, default_value_t = expand_default_arg_paths(DEFAULT_CONFIG_PATH_EXTENSION))]
+    #[arg(short, long, default_value_t = DEFAULT_CONFIG_PATH_EXTENSION.to_string())]
     config_path: String,
 
-    #[arg(short, long,default_value_t = expand_default_arg_paths(DEFAULT_DEBUG_DUMP_PATH_EXTENSION))]
+    #[arg(short, long,default_value_t = DEFAULT_DEBUG_DUMP_PATH_EXTENSION.to_string())]
     debug_dump_path: String,
 }
 
@@ -36,8 +36,9 @@ pub struct WayMacApp;
 
 impl WayMacApp {
     pub fn init() -> Result<(), Box<dyn StdError>> {
-        let args = Args::parse();
+        let args = expand_args_paths(Args::parse());
 
+        println!("{args:?}");
         logger::init_logger(Some(args.debug_dump_path.as_str()))?;
 
         info!(

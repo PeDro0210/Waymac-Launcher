@@ -1,9 +1,9 @@
 /*Configs default variables*/
 
 // this have take in mind being used with the push method of the PathBuf
-pub const DEFAULT_CONFIG_PATH_EXTENSION: &str = ".config/waymac/waymac.toml";
+pub const DEFAULT_CONFIG_PATH_EXTENSION: &str = "~/.config/waymac/waymac.toml";
 
-pub const DEFAULT_DEBUG_DUMP_PATH_EXTENSION: &str = ".local/state/waymac.log";
+pub const DEFAULT_DEBUG_DUMP_PATH_EXTENSION: &str = "~/.local/state/waymac.log";
 // this have take in mind being used with the push method of the PathBuf
 
 /*Configs default variables*/
