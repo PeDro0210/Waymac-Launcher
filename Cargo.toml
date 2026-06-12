@@ -7,10 +7,11 @@ edition = "2024"
 iced = { version = "0.14", features = ["advanced", "tokio"] }
 log = "0.4.29"
 ftail = "0.3.1"
-clap = "4.6.0"
+clap = { version = "4.6.0", features = ["derive"] }
 walkdir = "2.5.0"
 toml = "1.1.2"
 serde = { version = "1.0.228", features = ["derive"] }
+shellexpand = "3.1.2"
 
 
 [target.'cfg(target_os = "macos")'.dependencies]

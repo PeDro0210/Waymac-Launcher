@@ -11,14 +11,17 @@ use iced_layershell::{
 
 use iced::{Renderer, Theme};
 
-use crate::common::{LauncherState, Message, boot, subscription, update, view};
+use crate::{
+    Args,
+    common::{LauncherState, Message, boot, subscription, update, view},
+};
 
 pub struct WaylandApp;
 
 #[cfg(target_os = "linux")]
 // Implementation for the just initialzation for the daemon
 impl WaylandApp {
-    pub fn run() -> Result<(), Box<dyn StdError>> {
+    pub fn run(arg: Args) -> Result<(), Box<dyn StdError>> {
         //For knowing in which screen to output
 
         let binded_output_name = std::env::args().nth(1);

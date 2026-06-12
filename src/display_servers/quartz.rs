@@ -2,6 +2,8 @@ use std::error::Error as StdError;
 
 use iced::{Color, Size, application, theme::Style, window::Level::AlwaysOnTop};
 
+#[cfg(target_os = "macos")]
+use crate::Args;
 use crate::common::{boot, subscription, update, view};
 
 use iced::{Renderer, Theme};
@@ -13,7 +15,8 @@ pub struct QuartzApp;
 
 #[cfg(target_os = "macos")]
 impl QuartzApp {
-    pub fn run() -> Result<(), Box<dyn StdError>> {
+    //TODO: pass args
+    pub fn run(arg: Args) -> Result<(), Box<dyn StdError>> {
         let display_pre_info = CGDisplay::main();
         //TODO: setup correctly for config take in mind
         application(boot, update, view::<Theme, Renderer>)

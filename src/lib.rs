@@ -1,30 +1,44 @@
 mod app_launcher;
 mod common;
 mod config;
-mod data;
 mod display_servers;
 
+mod data;
 mod logger;
+mod util;
 
-use std::{env, error::Error as StdError};
-
+use clap::Parser as ArgParser;
 use log::{error, info};
+use std::{env, error::Error as StdError, ffi::OsString};
 
-use crate::display_servers::{
-    SupportedDisplayServer, get_supported_display_server_target, quartz::QuartzApp,
-    wayland::WaylandApp,
+use crate::{
+    data::{DEFAULT_CONFIG_PATH_EXTENSION, DEFAULT_DEBUG_DUMP_PATH_EXTENSION},
+    display_servers::{
+        SupportedDisplayServer, get_supported_display_server_target, quartz::QuartzApp,
+        wayland::WaylandApp,
+    },
+    util::expand_default_arg_paths,
 };
 
+/// An app-launcher for Wayland compositor and MacOS
+#[derive(ArgParser, Debug)]
+#[command(version, about, long_about = None)]
 struct Args {
+    /// File path for the file with configuration declarations
+    #[arg(short, long, default_value_t = expand_default_arg_paths(DEFAULT_CONFIG_PATH_EXTENSION))]
     config_path: String,
+
+    #[arg(short, long,default_value_t = expand_default_arg_paths(DEFAULT_DEBUG_DUMP_PATH_EXTENSION))]
+    debug_dump_path: String,
 }
 
 pub struct WayMacApp;
 
 impl WayMacApp {
     pub fn init() -> Result<(), Box<dyn StdError>> {
-        //TODO: pass the log file
-        logger::init_logger(None)?;
+        let args = Args::parse();
+
+        logger::init_logger(Some(args.debug_dump_path.as_str()))?;
 
         info!(
             "XDG_SESSION_TYPE: {:?}",
@@ -35,7 +49,7 @@ impl WayMacApp {
             SupportedDisplayServer::Wayland =>
             {
                 #[cfg(target_os = "linux")]
-                WaylandApp::run()?
+                WaylandApp::run(args)?
             }
             SupportedDisplayServer::Xorg => {
                 error!("Xorg is not supported directly, fallbacking to Quartz app build");
