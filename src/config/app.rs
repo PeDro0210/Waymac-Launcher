@@ -1,7 +1,7 @@
 use iced::{Background, Color, Font, Size, advanced::graphics::Image, font};
 use serde::Deserialize;
 
-use log::warn;
+use log::{error, warn};
 
 use crate::config::toml::TomlConfig;
 use crate::config::util::ColorHEX;
@@ -22,7 +22,7 @@ pub struct WayMacConfig {
 }
 
 impl WayMacConfig {
-    pub fn parse_text_config(toml: TomlConfig) -> Result<TextConfig, AppConfigError> {
+    fn parse_text_config(toml: TomlConfig) -> Result<TextConfig, AppConfigError> {
         let raw_main_font = toml.main_window.font;
         let raw_main_text_color = toml.main_window.text_color;
 
@@ -33,16 +33,15 @@ impl WayMacConfig {
         let text_color = match Color::from_raw_hex(raw_main_text_color.as_str()) {
             Ok(color) => color,
             Err(err) => {
-                warn!(
-                    "{err:?} while trying to parse color: {}, fallbacking to Black",
-                    &raw_main_text_color
+                error!(
+                    "{err:?} while trying to parse color: {}",
+                    raw_main_text_color
                 );
-                //TODO: use a more pleasing color
-                Color::BLACK
+                return Err(AppConfigError::TextConfigParsingError);
             }
         };
 
-        todo!()
+        Ok((main_font, text_color))
     }
     pub fn parse_from_toml(toml: TomlConfig) -> Self {
         todo!()
