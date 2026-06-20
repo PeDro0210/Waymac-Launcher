@@ -4,13 +4,14 @@ use fhex::FromHex;
 use iced::Color;
 use log::error;
 
+#[derive(Debug)]
 pub enum ColorHexError {
     NotPrefix,
     NotCorrectLenght,
     ParseTriplet,
 }
 
-trait ColorHEX {
+pub trait ColorHEX {
     // given an str with the Hex triplet RGB format, return a color
     fn from_raw_hex(raw_hex: &str) -> Result<Color, ColorHexError>;
 }
