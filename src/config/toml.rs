@@ -9,9 +9,9 @@ use crate::config::app::Location;
 // for parsing Toml file to the WayMac config
 #[derive(Deserialize)]
 pub struct TomlConfig {
-    main_window: MainWindow,
-    inputbar: InputBar,
-    entry: Entry,
+    pub main_window: MainWindow,
+    pub inputbar: InputBar,
+    pub entry: Entry,
 }
 
 impl TomlConfig {
@@ -41,7 +41,7 @@ impl TomlConfig {
 // not a simple way to be explicit with things in here
 
 #[derive(Deserialize)]
-struct MainWindow {
+pub struct MainWindow {
     pub height: f32,
     pub width: f32,
 
@@ -62,7 +62,7 @@ struct MainWindow {
 }
 
 #[derive(Deserialize)]
-struct InputBar {
+pub struct InputBar {
     pub height: f32,
     pub width: f32,
 
@@ -79,7 +79,7 @@ struct InputBar {
 }
 
 #[derive(Deserialize)]
-struct Entry {
+pub struct Entry {
     pub height: f32,
     pub width: f32,
 

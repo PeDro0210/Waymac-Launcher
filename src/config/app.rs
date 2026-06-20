@@ -1,5 +1,9 @@
-use iced::{Background, Color, Font, Size, advanced::graphics::Image};
+use iced::{Background, Color, Font, Size, advanced::graphics::Image, font};
 use serde::Deserialize;
+
+use crate::config::toml::TomlConfig;
+
+type TextConfig = (Font, Color);
 
 // config struct for using directly in WayMacApp
 pub struct WayMacConfig {
@@ -8,6 +12,21 @@ pub struct WayMacConfig {
     pub main_window: ContainerConfig,
     pub input_bar: ContainerConfig,
     pub entry: ContainerConfig,
+}
+
+impl WayMacConfig {
+    pub fn parse_text_config(toml: TomlConfig) -> TextConfig {
+        let raw_main_font = toml.main_window.font;
+        let raw_main_text_color = toml.main_window.text_color;
+
+        //TODO: pass dynamic family
+        let main_font = Font::with_name(Box::leak(raw_main_font.into_boxed_str()));
+
+        todo!()
+    }
+    pub fn parse_from_toml(toml: TomlConfig) -> Self {
+        todo!()
+    }
 }
 
 // each different type of container that WayMac has
