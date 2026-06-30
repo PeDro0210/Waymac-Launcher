@@ -1,4 +1,5 @@
 use std::error::Error as StdError;
+use std::process::exit;
 
 use iced::{Element, Task};
 
@@ -16,6 +17,8 @@ use crate::{
     common::{LauncherState, Message, boot, subscription, update, view},
 };
 
+use log::error;
+
 pub struct WaylandApp;
 
 #[cfg(target_os = "linux")]
@@ -24,15 +27,26 @@ impl WaylandApp {
     pub fn run(arg: &'static Args) -> Result<(), Box<dyn StdError>> {
         //For knowing in which screen to output
 
+        use crate::config::{app::WayMacConfig, toml::TomlConfig};
+
         let binded_output_name = std::env::args().nth(1);
         let start_mode = match binded_output_name {
             Some(output) => StartMode::TargetScreen(output),
             None => StartMode::Active,
         };
 
-        //TODO: setup correctly for config take in mind
+        let toml_config = TomlConfig::from_path(arg.config_path.as_str());
+
+        let config = match WayMacConfig::parse_from_toml(toml_config) {
+            Ok(config) => config,
+            Err(err) => {
+                error!("Error: {err:?}");
+                exit(1);
+            }
+        };
+
         application(
-            move || boot(arg),
+            move || boot(&config),
             WaylandApp::namespace,
             WaylandApp::update,
             WaylandApp::view::<Theme, Renderer>,
@@ -42,7 +56,10 @@ impl WaylandApp {
         .settings(Settings {
             layer_settings: LayerShellSettings {
                 layer: Top,
-                size: Some((350, 350)),
+                size: Some((
+                    config.main_window.size.width as u32,
+                    config.main_window.size.height as u32,
+                )),
                 exclusive_zone: 350,
                 anchor: Anchor::Left | Anchor::Right,
                 keyboard_interactivity: KeyboardInteractivity::Exclusive,

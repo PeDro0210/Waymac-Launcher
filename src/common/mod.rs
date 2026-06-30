@@ -16,7 +16,7 @@ use iced::{
 
 #[cfg(target_os = "linux")]
 use iced_layershell::to_layer_message;
-use log::{debug, info, trace};
+use log::{debug, error, info, trace};
 
 use crate::Args;
 use crate::app_launcher::{DesktopEntry, get_desktop_entry, launch_application};
@@ -209,8 +209,8 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
         ])
         .id(LAUNCHER_CONTAINER_ID)
         //TODO: make config place the height and width
-        .width(350.)
-        .height(350.)
+        .width(state.config.main_window.size.width)
+        .height(state.config.main_window.size.height)
         //TODO: make text_color being exchangble for the toml config
         .style(|_| Style {
             background: Some(iced::Background::Color(Color::BLACK)),
@@ -224,15 +224,12 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
     .into()
 }
 
-pub fn boot(args: &Args) -> (LauncherState, Task<Message>) {
-    let toml_config = TomlConfig::from_path(args.config_path.as_str());
-
-    let waymac_config = WayMacConfig::parse_from_toml(toml_config);
-
-    //TODO: start parsing toml to app config
-
+pub fn boot(config: &WayMacConfig) -> (LauncherState, Task<Message>) {
     (
-        LauncherState::default(),
+        LauncherState {
+            config: *config,
+            ..Default::default()
+        },
         focus(IcedId::new(LAUNCHER_TEXT_INPUT_ID)),
     )
 }
@@ -248,6 +245,7 @@ pub fn subscription(_: &LauncherState) -> Subscription<Message> {
 //TODO: declare LauncherState fields
 #[derive(Default)]
 pub struct LauncherState {
+    config: WayMacConfig, // will neve go for the default (TAKE THAT IN MIND)
     user_input: String,
     filtering_cached_entry: bool,
     focus_desktop_entry_id: usize,

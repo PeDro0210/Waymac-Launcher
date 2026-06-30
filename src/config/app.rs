@@ -1,3 +1,5 @@
+use std::default;
+
 use iced::{Background, Color, Font, Size, advanced::graphics::Image, font};
 use serde::Deserialize;
 
@@ -16,6 +18,7 @@ pub enum AppConfigError {
 }
 
 // config struct for using directly in WayMacApp
+#[derive(Default, Clone, Copy)]
 pub struct WayMacConfig {
     pub main_font: Font,
     pub text_color: Color,
@@ -65,8 +68,8 @@ impl WayMacConfig {
 
         Ok(ContainerConfig {
             size: Size {
-                width: toml.width,
-                height: toml.height,
+                width: toml.width as f32,
+                height: toml.height as f32,
             },
             text_color: *text_color,
             //TODO: do the fallback to the main_font
@@ -99,8 +102,8 @@ impl WayMacConfig {
 
         Ok(ContainerConfig {
             size: Size {
-                width: toml.width,
-                height: toml.height,
+                width: toml.width as f32,
+                height: toml.height as f32,
             },
             text_color: *text_color,
             //TODO: do the fallback to the main_font
@@ -133,8 +136,8 @@ impl WayMacConfig {
 
         Ok(ContainerConfig {
             size: Size {
-                width: toml.width,
-                height: toml.height,
+                width: toml.width as f32,
+                height: toml.height as f32,
             },
             text_color: *text_color,
             //TODO: do the fallback to the main_font
@@ -165,6 +168,7 @@ impl WayMacConfig {
 }
 
 // each different type of container that WayMac has
+#[derive(Clone, Copy)]
 pub enum ContainerType {
     MainWindow {
         // location depending the layer
@@ -188,6 +192,7 @@ pub enum Location {
 }
 
 // describes the behavoir of WayMac components
+#[derive(Clone, Copy)]
 pub struct ContainerConfig {
     pub size: Size,
 
@@ -201,4 +206,19 @@ pub struct ContainerConfig {
 
     // other configs depending which container is it
     pub specific: ContainerType,
+}
+
+// just for being compliant for the LauncherState
+impl Default for ContainerConfig {
+    fn default() -> Self {
+        ContainerConfig {
+            size: Size::default(),
+            text_color: Color::BLACK,
+            font: Font::default(),
+            background: Background::Color(Color::default()),
+            border_color: None,
+            border_radius: None,
+            specific: ContainerType::InputBar,
+        }
+    }
 }

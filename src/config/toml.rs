@@ -42,8 +42,8 @@ impl TomlConfig {
 
 #[derive(Deserialize)]
 pub struct MainWindow {
-    pub height: f32,
-    pub width: f32,
+    pub height: u32,
+    pub width: u32,
 
     pub padding: f32,
     pub spacing: f32,
@@ -63,8 +63,8 @@ pub struct MainWindow {
 
 #[derive(Deserialize)]
 pub struct InputBar {
-    pub height: f32,
-    pub width: f32,
+    pub height: u32,
+    pub width: u32,
 
     pub padding: f32,
     pub spacing: f32,
@@ -80,8 +80,8 @@ pub struct InputBar {
 
 #[derive(Deserialize)]
 pub struct Entry {
-    pub height: f32,
-    pub width: f32,
+    pub height: u32,
+    pub width: u32,
 
     pub padding: f32,
     pub spacing: f32,
