@@ -20,14 +20,11 @@ use iced::{
 use iced_layershell::to_layer_message;
 use log::{debug, error, info, trace};
 
-use crate::Args;
 use crate::app_launcher::{DesktopEntry, get_desktop_entry, launch_application};
 use crate::common::util::change_focus;
 use crate::config::app::{ContainerType, WayMacConfig};
-use crate::config::toml::{Entry, InputBar, TomlConfig};
 use crate::data::{
-    ENTRY_ELEMENTS_HEIGHT, ENTRY_FOCUS_COLOR, LAUNCHER_CONTAINER_ID, LAUNCHER_SCROLLABLE_ID,
-    LAUNCHER_TEXT_INPUT_ID, MAIN_ENTRY_FOCUS_IDX,
+    LAUNCHER_CONTAINER_ID, LAUNCHER_SCROLLABLE_ID, LAUNCHER_TEXT_INPUT_ID, MAIN_ENTRY_FOCUS_IDX,
 };
 
 mod util;
@@ -182,6 +179,7 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
 //TODO: implement view function
 pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
     container(
+        // TODO: implement a stack for having image/color as base-layer and the rest above
         container(column![
             //TODO: Separate launcher  widgets in different functions
             text_input("", &state.user_input)

@@ -73,7 +73,7 @@ impl WayMacConfig {
             },
             text_color: *text_color,
             //TODO: do the fallback to the main_font
-            font: *main_font, //for the moment wi'll leave the main_font
+            font: *main_font, //for the moment will leave the main_font
             background,
             border_color,
             border_radius: toml.border_radius,
@@ -107,7 +107,7 @@ impl WayMacConfig {
             },
             text_color: *text_color,
             //TODO: do the fallback to the main_font
-            font: *main_font, //for the moment wi'll leave the main_font
+            font: *main_font, //for the moment will leave the main_font
             background,
             border_color,
             border_radius: toml.border_radius,
