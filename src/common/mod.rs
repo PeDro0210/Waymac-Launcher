@@ -229,6 +229,13 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
                         )
                     }),
             ))
+            .spacing(match state.config.main_window.specific {
+                ContainerType::MainWindow { spacing, .. } => spacing,
+                _ => {
+                    error!("Error while doing specific container type");
+                    exit(1);
+                }
+            })
             .direction(Direction::Vertical(Scrollbar::hidden()))
             .id(LAUNCHER_SCROLLABLE_ID)
             .width(Length::Fill)
@@ -237,6 +244,13 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
         //TODO: make config place the height and width
         .width(state.config.main_window.size.width)
         .height(state.config.main_window.size.height)
+        .padding(match state.config.main_window.specific {
+            ContainerType::MainWindow { padding, .. } => padding,
+            _ => {
+                error!("Error while doing specific container type");
+                exit(1);
+            }
+        })
         //TODO: make text_color being exchangble for the toml config
         .style(|_| Style {
             background: Some(state.config.main_window.background),

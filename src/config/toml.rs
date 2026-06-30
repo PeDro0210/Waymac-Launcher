@@ -66,9 +66,6 @@ pub struct InputBar {
     pub height: u32,
     pub width: u32,
 
-    pub padding: f32,
-    pub spacing: f32,
-
     pub text_color: Option<String>, // will be parse for RGB triplet
 
     pub background_image: Option<String>, // the path of the image will be parsed
@@ -82,9 +79,6 @@ pub struct InputBar {
 pub struct Entry {
     pub height: u32,
     pub width: u32,
-
-    pub padding: f32,
-    pub spacing: f32,
 
     pub text_color: Option<String>, // will be parse for RGB triplet
     pub focus_text_color: Option<String>, // will be parse for RGB triplet

@@ -2,8 +2,8 @@
 height = 350
 width = 350
 
-padding = 0
-spacing = 0
+padding = 2
+spacing = 1
 
 text_color = "#000000"
 
@@ -17,10 +17,6 @@ background_color = "#808080"
 height = 25
 width = 350
 
-padding = 0
-spacing = 0
-
-
 background_color = "#808080"
 border_color = "#ffffff"
 
@@ -28,9 +24,6 @@ border_color = "#ffffff"
 [entry]
 height = 25
 width = 350
-
-padding = 0
-spacing = 0
 
 focus_text_color = "#ff0000"
 
