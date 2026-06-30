@@ -16,11 +16,12 @@ use iced::{
 
 #[cfg(target_os = "linux")]
 use iced_layershell::to_layer_message;
-use log::{info, trace};
+use log::{debug, info, trace};
 
 use crate::Args;
 use crate::app_launcher::{DesktopEntry, get_desktop_entry, launch_application};
 use crate::common::util::change_focus;
+use crate::config::app::WayMacConfig;
 use crate::config::toml::TomlConfig;
 use crate::data::{
     ENTRY_ELEMENTS_HEIGHT, ENTRY_FOCUS_COLOR, LAUNCHER_CONTAINER_ID, LAUNCHER_SCROLLABLE_ID,
@@ -225,6 +226,8 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
 
 pub fn boot(args: &Args) -> (LauncherState, Task<Message>) {
     let toml_config = TomlConfig::from_path(args.config_path.as_str());
+
+    let waymac_config = WayMacConfig::parse_from_toml(toml_config);
 
     //TODO: start parsing toml to app config
 
