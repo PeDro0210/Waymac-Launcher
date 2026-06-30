@@ -46,6 +46,7 @@ impl WayMacConfig {
         let text_color = WayMacConfig::manage_color_parsing(&raw_main_text_color)?;
         Ok((main_font, text_color))
     }
+
     fn parse_main_window(
         toml: &MainWindow,
         main_font: &Font,
@@ -85,14 +86,64 @@ impl WayMacConfig {
         main_font: &Font,
         text_color: &Color,
     ) -> Result<ContainerConfig, AppConfigError> {
-        todo!()
+        //TODO: apply background for images to
+        let background_color =
+            WayMacConfig::manage_color_parsing(toml.background_color.clone().unwrap().as_str())?;
+        let background = Background::Color(background_color);
+
+        let border_color = if let Some(border_color) = toml.border_color.to_owned() {
+            Some(WayMacConfig::manage_color_parsing(border_color.as_str())?)
+        } else {
+            None
+        };
+
+        Ok(ContainerConfig {
+            size: Size {
+                width: toml.width,
+                height: toml.height,
+            },
+            text_color: *text_color,
+            //TODO: do the fallback to the main_font
+            font: *main_font, //for the moment wi'll leave the main_font
+            background,
+            border_color,
+            border_radius: toml.border_radius,
+            specific: ContainerType::InputBar,
+        })
     }
     fn parse_entry(
         toml: &Entry,
         main_font: &Font,
         text_color: &Color,
     ) -> Result<ContainerConfig, AppConfigError> {
-        todo!()
+        //TODO: apply background for images to
+        let background_color =
+            WayMacConfig::manage_color_parsing(toml.background_color.clone().unwrap().as_str())?;
+        let background = Background::Color(background_color);
+
+        let border_color = if let Some(border_color) = toml.border_color.to_owned() {
+            Some(WayMacConfig::manage_color_parsing(border_color.as_str())?)
+        } else {
+            None
+        };
+
+        //TODO: manage option for focus_text_color
+        let focus_text_color =
+            WayMacConfig::manage_color_parsing(&toml.focus_text_color.clone().unwrap().as_str())?;
+
+        Ok(ContainerConfig {
+            size: Size {
+                width: toml.width,
+                height: toml.height,
+            },
+            text_color: *text_color,
+            //TODO: do the fallback to the main_font
+            font: *main_font, //for the moment wi'll leave the main_font
+            background,
+            border_color,
+            border_radius: toml.border_radius,
+            specific: ContainerType::Entry { focus_text_color },
+        })
     }
 
     pub fn parse_from_toml(toml: TomlConfig) -> Result<Self, AppConfigError> {
