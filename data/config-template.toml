@@ -32,7 +32,7 @@ width = 350
 padding = 0
 spacing = 0
 
-focus_text_color = "#ffff00"
+focus_text_color = "#ff0000"
 
 background_color = "#808080"
 border_color = "#ffffff"

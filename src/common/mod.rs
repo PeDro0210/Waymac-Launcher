@@ -4,8 +4,10 @@ use std::thread::spawn;
 use iced::Length::Fill;
 use iced::widget::container::Style;
 use iced::widget::scrollable::{Direction, Scrollbar};
+use iced::widget::text_input::Style as TextInputStyle;
+use iced::widget::text_input::default as text_input_default;
 use iced::widget::{Id as IcedId, column, container, operation::focus, text, text_input};
-use iced::widget::{Text, scrollable};
+use iced::widget::{Text, TextInput, scrollable};
 use iced::{Color, Element, Length, Size, Subscription, Task};
 
 use iced::{
@@ -21,8 +23,8 @@ use log::{debug, error, info, trace};
 use crate::Args;
 use crate::app_launcher::{DesktopEntry, get_desktop_entry, launch_application};
 use crate::common::util::change_focus;
-use crate::config::app::WayMacConfig;
-use crate::config::toml::TomlConfig;
+use crate::config::app::{ContainerType, WayMacConfig};
+use crate::config::toml::{Entry, InputBar, TomlConfig};
 use crate::data::{
     ENTRY_ELEMENTS_HEIGHT, ENTRY_FOCUS_COLOR, LAUNCHER_CONTAINER_ID, LAUNCHER_SCROLLABLE_ID,
     LAUNCHER_TEXT_INPUT_ID, MAIN_ENTRY_FOCUS_IDX,
@@ -184,7 +186,13 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
             //TODO: Separate launcher  widgets in different functions
             text_input("", &state.user_input)
                 .on_input(Message::UserInputChanged)
-                .id(LAUNCHER_TEXT_INPUT_ID),
+                .id(LAUNCHER_TEXT_INPUT_ID)
+                .font(state.config.input_bar.font)
+                .style(|theme, status| TextInputStyle {
+                    background: state.config.input_bar.background,
+                    value: state.config.input_bar.text_color,
+                    ..text_input_default(theme, status)
+                }),
             scrollable(column(
                 state
                     .cached_desktop_entries
@@ -193,14 +201,32 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
                     .iter()
                     .filter_map(|entry| {
                         let desktop_entry_text: Text = text(entry.name.clone())
-                            .height(Length::Fixed(ENTRY_ELEMENTS_HEIGHT))
+                            .font(state.config.entry.font)
+                            .height(Length::Fixed(state.config.entry.size.height))
                             .into();
 
                         if entry.is_focus {
-                            return Some(desktop_entry_text.color(ENTRY_FOCUS_COLOR).into());
+                            return Some(
+                                desktop_entry_text
+                                    .color(match state.config.entry.specific {
+                                        ContainerType::Entry {
+                                            focus_text_color, ..
+                                        } => focus_text_color,
+                                        _ => {
+                                            error!("Error while doing specific container type");
+                                            exit(1);
+                                        }
+                                    })
+                                    .font(state.config.entry.font)
+                                    .into(),
+                            );
                         }
 
-                        Some(desktop_entry_text.into())
+                        Some(
+                            desktop_entry_text
+                                .color(state.config.entry.text_color)
+                                .into(),
+                        )
                     }),
             ))
             .direction(Direction::Vertical(Scrollbar::hidden()))
@@ -213,7 +239,7 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
         .height(state.config.main_window.size.height)
         //TODO: make text_color being exchangble for the toml config
         .style(|_| Style {
-            background: Some(iced::Background::Color(Color::BLACK)),
+            background: Some(state.config.main_window.background),
             ..Default::default()
         }),
     )

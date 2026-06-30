@@ -199,8 +199,10 @@ pub struct ContainerConfig {
     pub text_color: Color,
     pub font: Font,
 
+    //TODO: implement backgrounds
     pub background: Background,
 
+    //TODO: implement border fields
     pub border_color: Option<Color>,
     pub border_radius: Option<f32>,
 
