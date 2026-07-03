@@ -59,7 +59,6 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
             let desktop_filter_join = spawn(move || {
                 let desktop_entries = Box::new(
                     desktop_entries_borrowed
-                        .clone()
                         .unwrap_or_default()
                         .into_iter()
                         .filter(|entry| {
