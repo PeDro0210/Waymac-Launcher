@@ -39,6 +39,8 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
             state.desktop_entries = Some(desktop_entries.to_vec());
             state.cached_desktop_entries = Some(desktop_entries);
 
+            state.ui_desktop_entries = state.cached_desktop_entries.clone();
+
             Task::none()
         }
         Message::DesktopEntriesChanged(new_desktop_entries) => {
@@ -98,6 +100,8 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                 state.cached_desktop_entries.as_mut().unwrap()[key] = entry_owned;
             }
 
+            state.ui_desktop_entries = state.cached_desktop_entries.clone();
+
             Task::none()
         }
 
@@ -127,7 +131,7 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                     }
                     Key::Named(Named::Enter) => {
                         let selected_entry = state
-                            .cached_desktop_entries
+                            .ui_desktop_entries
                             .as_ref()
                             .unwrap()
                             .get(state.focus_desktop_entry_id);
@@ -195,7 +199,7 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
                 }),
             scrollable(column(
                 state
-                    .cached_desktop_entries
+                    .ui_desktop_entries
                     .as_ref()
                     .unwrap_or(&mut Box::new(Vec::new()))
                     .iter()
@@ -296,6 +300,7 @@ pub struct LauncherState {
     focus_desktop_entry_id: usize,
     desktop_entries: Option<Vec<DesktopEntry>>,
     cached_desktop_entries: Option<Box<Vec<DesktopEntry>>>,
+    ui_desktop_entries: Option<Box<Vec<DesktopEntry>>>,
     window_size: Size,
 } // cause of the pattern that layer_shell uses, we need to declare an
 // struct which get's in charge of most of our variables.
