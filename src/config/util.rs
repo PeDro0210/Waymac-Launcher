@@ -33,10 +33,10 @@ impl ColorHEX for Color {
         let r = f32::from_hex(format!("0x{}", &raw_hex_no_prefix[0..2]).as_str())
             .ok_or(ColorHexError::ParseTriplet)?;
 
-        let g = f32::from_hex(format!("0x{}", &raw_hex_no_prefix[3..4]).as_str())
+        let g = f32::from_hex(format!("0x{}", &raw_hex_no_prefix[2..4]).as_str())
             .ok_or(ColorHexError::ParseTriplet)?;
 
-        let b = f32::from_hex(format!("0x{}", &raw_hex_no_prefix[5..6]).as_str())
+        let b = f32::from_hex(format!("0x{}", &raw_hex_no_prefix[4..6]).as_str())
             .ok_or(ColorHexError::ParseTriplet)?;
 
         trace!("raw_hex: {raw_hex}, r: {r}, g: {g}, b: {b}");
