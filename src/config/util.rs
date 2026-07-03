@@ -30,15 +30,15 @@ impl ColorHEX for Color {
             return Err(ColorHexError::NotCorrectLenght);
         }
 
-        let r = f32::from_hex(format!("0x{}", &raw_hex_no_prefix[0..1]).as_str())
+        let r = f32::from_hex(format!("0x{}", &raw_hex_no_prefix[0..2]).as_str())
             .ok_or(ColorHexError::ParseTriplet)?;
 
-        let g = f32::from_hex(format!("0x{}", &raw_hex_no_prefix[2..3]).as_str())
+        let g = f32::from_hex(format!("0x{}", &raw_hex_no_prefix[2..4]).as_str())
             .ok_or(ColorHexError::ParseTriplet)?;
 
-        let b = f32::from_hex(format!("0x{}", &raw_hex_no_prefix[4..5]).as_str())
+        let b = f32::from_hex(format!("0x{}", &raw_hex_no_prefix[5..6]).as_str())
             .ok_or(ColorHexError::ParseTriplet)?;
 
-        Ok(Color::from_rgb(r, g, b))
+        Ok(Color::from_rgb(r / 255., g / 255., b / 255.))
     }
 }
