@@ -13,20 +13,31 @@ location = "Center"
 
 background_color = "#808080"
 
-border_color = "#ff0000"
-border_radius = 1.5
-border_width = 1
+border.color = "#ff0000"
+border.radius = 1.5
+border.width = 1
+
+border.top_left_radius = 0
+border.bottom_left_radius = 0
+border.top_right_radius = 0
+border.bottom_right_radius = 0
+
 
 [inputbar]
 height = 25
 width = 350
 
+border.color = "#ff0000"
+border.radius = 1.5
+border.width = 1
+
+border.top_left_radius = 0
+border.bottom_left_radius = 0
+border.top_right_radius = 0
+border.bottom_right_radius = 0
+
+
 background_color = "#808080"
-
-border_color = "#ff0000"
-border_radius = 1.5
-border_width = 1
-
 
 [entry]
 height = 25

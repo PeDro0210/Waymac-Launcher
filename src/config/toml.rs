@@ -57,9 +57,7 @@ pub struct MainWindow {
     pub background_image: Option<String>, // the path of the image will be parsed
     pub background_color: Option<String>, // same as the text color
 
-    pub border_color: Option<String>,
-    pub border_radius: Option<f32>,
-    pub border_width: Option<f32>,
+    pub border: Option<Border>,
 }
 
 #[derive(Deserialize)]
@@ -72,9 +70,7 @@ pub struct InputBar {
     pub background_image: Option<String>, // the path of the image will be parsed
     pub background_color: Option<String>, // same as the text color
 
-    pub border_color: Option<String>,
-    pub border_radius: Option<f32>,
-    pub border_width: Option<f32>,
+    pub border: Option<Border>,
 }
 
 #[derive(Deserialize)]
@@ -88,7 +84,18 @@ pub struct Entry {
     pub background_image: Option<String>, // the path of the image will be parsed
     pub background_color: Option<String>, // same as the text color
 
-    pub border_color: Option<String>,
-    pub border_radius: Option<f32>,
-    pub border_width: Option<f32>,
+    pub border: Option<Border>,
+}
+
+#[derive(Deserialize)]
+pub struct Border {
+    pub color: String,
+
+    pub radius: f32,
+    pub width: f32,
+
+    pub top_left_radius: f32,
+    pub bottom_left_radius: f32,
+    pub top_right_radius: f32,
+    pub bottom_right_radius: f32,
 }

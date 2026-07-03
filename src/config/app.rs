@@ -65,18 +65,15 @@ impl WayMacConfig {
             None
         };
 
-        let border = if let Some(border_color) = toml.border_color.to_owned()
-            && let Some(border_radius) = toml.border_radius.to_owned()
-            && let Some(border_width) = toml.border_width.to_owned()
-        {
+        let border = if let Some(border) = toml.border.as_ref() {
             Some(Border {
-                color: WayMacConfig::manage_color_parsing(border_color.as_str())?,
-                width: border_width,
+                color: WayMacConfig::manage_color_parsing(border.color.as_str())?,
+                width: border.width,
                 radius: Radius {
-                    top_left: border_radius,
-                    top_right: border_radius,
-                    bottom_right: border_radius,
-                    bottom_left: border_radius,
+                    top_left: border.top_left_radius,
+                    top_right: border.top_right_radius,
+                    bottom_right: border.bottom_right_radius,
+                    bottom_left: border.bottom_left_radius,
                 },
             })
         } else {
@@ -113,18 +110,15 @@ impl WayMacConfig {
             None
         };
 
-        let border = if let Some(border_color) = toml.border_color.to_owned()
-            && let Some(border_radius) = toml.border_radius.to_owned()
-            && let Some(border_width) = toml.border_width.to_owned()
-        {
+        let border = if let Some(border) = toml.border.as_ref() {
             Some(Border {
-                color: WayMacConfig::manage_color_parsing(border_color.as_str())?,
-                width: border_width,
+                color: WayMacConfig::manage_color_parsing(border.color.as_str())?,
+                width: border.width,
                 radius: Radius {
-                    top_left: border_radius,
-                    top_right: border_radius,
-                    bottom_right: border_radius,
-                    bottom_left: border_radius,
+                    top_left: border.top_left_radius,
+                    top_right: border.top_right_radius,
+                    bottom_right: border.bottom_right_radius,
+                    bottom_left: border.bottom_left_radius,
                 },
             })
         } else {
