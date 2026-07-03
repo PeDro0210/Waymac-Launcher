@@ -1,25 +1,41 @@
+use crate::config::app::WayMacConfig;
 use std::error::Error as StdError;
 
 use iced::{Color, Size, application, theme::Style, window::Level::AlwaysOnTop};
 
 #[cfg(target_os = "macos")]
 use crate::Args;
-use crate::common::{boot, subscription, update, view};
+use crate::config::toml::TomlConfig;
 
+use crate::common::{boot, subscription, update, view};
 use iced::{Renderer, Theme};
 
 #[cfg(target_os = "macos")]
 use core_graphics::display::CGDisplay;
+use log::error;
 
 pub struct QuartzApp;
 
 #[cfg(target_os = "macos")]
 impl QuartzApp {
     //TODO: pass args
-    pub fn run(arg: Args) -> Result<(), Box<dyn StdError>> {
+    pub fn run(arg: &'static Args) -> Result<(), Box<dyn StdError>> {
         let display_pre_info = CGDisplay::main();
+
+        let toml_config = TomlConfig::from_path(arg.config_path.as_str());
+
+        let config = match WayMacConfig::parse_from_toml(toml_config) {
+            Ok(config) => config,
+            Err(err) => {
+                use std::process::exit;
+
+                error!("Error: {err:?}");
+                exit(1);
+            }
+        };
+
         //TODO: setup correctly for config take in mind
-        application(boot, update, view::<Theme, Renderer>)
+        application(move || boot(&config), update, view::<Theme, Renderer>)
             .decorations(false)
             .window_size(Size {
                 width: display_pre_info.pixels_wide() as f32,

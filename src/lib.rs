@@ -60,7 +60,7 @@ impl WayMacApp {
             SupportedDisplayServer::Quartz =>
             {
                 #[cfg(target_os = "macos")]
-                QuartzApp::run()?
+                QuartzApp::run(Box::leak(args))?
             }
         }
 
