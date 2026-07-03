@@ -28,7 +28,7 @@ pub struct DesktopEntry {
 }
 
 //TODO: make matching for XDG and Macos
-pub async fn get_desktop_entry() -> Vec<DesktopEntry> {
+pub async fn get_desktop_entry() -> Box<Vec<DesktopEntry>> {
     let mut desktop_entries: Vec<DesktopEntry> = Vec::new();
 
     match get_desktop_entry_target() {
@@ -72,7 +72,7 @@ pub async fn get_desktop_entry() -> Vec<DesktopEntry> {
 
                 debug!("desktop_entries s {:?}", desktop_entries);
 
-                return desktop_entries;
+                return Box::new(desktop_entries);
             }
 
             panic!(
@@ -87,7 +87,7 @@ pub async fn get_desktop_entry() -> Vec<DesktopEntry> {
                     desktop_entries.append(&mut get_application_desktop_entry(Path::new(path)));
                 }
 
-                return desktop_entries;
+                return Box::new(desktop_entries);
             }
 
             panic!(

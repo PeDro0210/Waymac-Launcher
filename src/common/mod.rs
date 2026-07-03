@@ -36,7 +36,7 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
 
     match msg {
         Message::DesktopEntriesFetched(desktop_entries) => {
-            state.desktop_entries = Some(desktop_entries.clone());
+            state.desktop_entries = Some(desktop_entries.to_vec());
             state.cached_desktop_entries = Some(desktop_entries);
 
             Task::none()
@@ -56,20 +56,20 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
 
             let desktop_entries_borrowed = state.desktop_entries.to_owned();
 
-            trace!("filted_cached_entry: {}", state.filtering_cached_entry);
-
             let desktop_filter_join = spawn(move || {
-                let desktop_entries = desktop_entries_borrowed
-                    .clone()
-                    .unwrap_or_default()
-                    .into_iter()
-                    .filter(|entry| {
-                        entry
-                            .name
-                            .to_lowercase()
-                            .contains(&user_input.to_lowercase().clone())
-                    })
-                    .collect();
+                let desktop_entries = Box::new(
+                    desktop_entries_borrowed
+                        .clone()
+                        .unwrap_or_default()
+                        .into_iter()
+                        .filter(|entry| {
+                            entry
+                                .name
+                                .to_lowercase()
+                                .contains(&user_input.to_lowercase().clone())
+                        })
+                        .collect(),
+                );
                 Message::DesktopEntriesChanged(desktop_entries)
             });
 
@@ -87,6 +87,7 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
             Task::none()
         }
 
+        //TODO: make that the selected entry just get's reference and doesn't copy all of them
         Message::ToogleFocusDesktopEntry(key, focus) => {
             // get the specific DesktopEntry and copying it
             let selected_entry = state.cached_desktop_entries.as_ref().unwrap().get(key);
@@ -95,12 +96,7 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                 let mut entry_owned = entry.to_owned();
                 entry_owned.is_focus = focus;
 
-                let mut desktop_entries_with_focus_owned =
-                    state.cached_desktop_entries.to_owned().unwrap();
-
-                desktop_entries_with_focus_owned[key] = entry_owned.clone();
-
-                state.cached_desktop_entries = Some(desktop_entries_with_focus_owned);
+                state.cached_desktop_entries.as_mut().unwrap()[key] = entry_owned;
             }
 
             Task::none()
@@ -136,7 +132,6 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                             .as_ref()
                             .unwrap()
                             .get(state.focus_desktop_entry_id);
-                        //TODO: manage if not valid
 
                         if let Some(selected_entry) = selected_entry {
                             let _ = launch_application(selected_entry);
@@ -194,7 +189,7 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
                 state
                     .cached_desktop_entries
                     .as_ref()
-                    .unwrap_or(&mut Vec::new())
+                    .unwrap_or(&mut Box::new(Vec::new()))
                     .iter()
                     .filter_map(|entry| {
                         let desktop_entry_text: Text = text(entry.name.clone())
@@ -287,7 +282,7 @@ pub struct LauncherState {
     filtering_cached_entry: bool,
     focus_desktop_entry_id: usize,
     desktop_entries: Option<Vec<DesktopEntry>>,
-    cached_desktop_entries: Option<Vec<DesktopEntry>>,
+    cached_desktop_entries: Option<Box<Vec<DesktopEntry>>>,
     window_size: Size,
 } // cause of the pattern that layer_shell uses, we need to declare an
 // struct which get's in charge of most of our variables.
@@ -295,8 +290,8 @@ pub struct LauncherState {
 #[cfg_attr(target_os = "linux", to_layer_message(multi))]
 #[derive(Debug, Clone)]
 pub enum Message {
-    DesktopEntriesFetched(Vec<DesktopEntry>),
-    DesktopEntriesChanged(Vec<DesktopEntry>),
+    DesktopEntriesFetched(Box<Vec<DesktopEntry>>),
+    DesktopEntriesChanged(Box<Vec<DesktopEntry>>),
 
     UserInputChanged(String),
     UserInputFocus,
