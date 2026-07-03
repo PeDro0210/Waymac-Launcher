@@ -7,8 +7,8 @@ use iced::widget::scrollable::{Direction, Scrollbar};
 use iced::widget::text_input::Style as TextInputStyle;
 use iced::widget::text_input::default as text_input_default;
 use iced::widget::{Id as IcedId, column, container, operation::focus, text, text_input};
-use iced::widget::{Text, TextInput, scrollable};
-use iced::{Color, Element, Length, Size, Subscription, Task};
+use iced::widget::{Text, scrollable};
+use iced::{Element, Length, Size, Subscription, Task};
 
 use iced::{
     event,
@@ -18,7 +18,7 @@ use iced::{
 
 #[cfg(target_os = "linux")]
 use iced_layershell::to_layer_message;
-use log::{debug, error, info, trace};
+use log::{error, trace};
 
 use crate::app_launcher::{DesktopEntry, get_desktop_entry, launch_application};
 use crate::common::util::change_focus;
@@ -233,7 +233,6 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
             .width(Length::Fill)
         ])
         .id(LAUNCHER_CONTAINER_ID)
-        //TODO: make config place the height and width
         .width(state.config.main_window.size.width)
         .height(state.config.main_window.size.height)
         .padding(match state.config.main_window.specific {
