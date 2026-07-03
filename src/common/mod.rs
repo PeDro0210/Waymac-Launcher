@@ -95,7 +95,6 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                 let mut entry_owned = entry.to_owned();
                 entry_owned.is_focus = focus;
 
-                trace!("entry is: {selected_entry:?}");
                 let mut desktop_entries_with_focus_owned =
                     state.cached_desktop_entries.to_owned().unwrap();
 
