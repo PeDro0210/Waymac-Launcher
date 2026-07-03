@@ -8,7 +8,7 @@ use iced::widget::text_input::Style as TextInputStyle;
 use iced::widget::text_input::default as text_input_default;
 use iced::widget::{Id as IcedId, column, container, operation::focus, text, text_input};
 use iced::widget::{Text, scrollable};
-use iced::{Element, Length, Size, Subscription, Task};
+use iced::{Background, Border, Color, Element, Length, Size, Subscription, Task};
 
 use iced::{
     event,
@@ -181,7 +181,16 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
                 .id(LAUNCHER_TEXT_INPUT_ID)
                 .font(state.config.input_bar.font)
                 .style(|theme, status| TextInputStyle {
-                    background: state.config.input_bar.background,
+                    background: (|| match state.config.input_bar.background {
+                        Some(bg) => bg,
+                        None => Background::Color(Color::default()),
+                    })(),
+                    border: (|| match state.config.input_bar.border {
+                        Some(bor) => bor,
+                        None => Border {
+                            ..Default::default()
+                        },
+                    })(),
                     value: state.config.input_bar.text_color,
                     ..text_input_default(theme, status)
                 }),
@@ -244,7 +253,13 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
         })
         //TODO: make text_color being exchangble for the toml config
         .style(|_| Style {
-            background: Some(state.config.main_window.background),
+            background: state.config.main_window.background,
+            border: (|| match state.config.main_window.border {
+                Some(bor) => bor,
+                None => Border {
+                    ..Default::default()
+                },
+            })(),
             ..Default::default()
         }),
     )

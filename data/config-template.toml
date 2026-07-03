@@ -13,12 +13,19 @@ location = "Center"
 
 background_color = "#808080"
 
+border_color = "#ff0000"
+border_radius = 1.5
+border_width = 1
+
 [inputbar]
 height = 25
 width = 350
 
 background_color = "#808080"
-border_color = "#ffffff"
+
+border_color = "#ff0000"
+border_radius = 1.5
+border_width = 1
 
 
 [entry]
@@ -28,4 +35,3 @@ width = 350
 focus_text_color = "#ff0000"
 
 background_color = "#808080"
-border_color = "#ffffff"

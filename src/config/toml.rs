@@ -59,6 +59,7 @@ pub struct MainWindow {
 
     pub border_color: Option<String>,
     pub border_radius: Option<f32>,
+    pub border_width: Option<f32>,
 }
 
 #[derive(Deserialize)]
@@ -73,6 +74,7 @@ pub struct InputBar {
 
     pub border_color: Option<String>,
     pub border_radius: Option<f32>,
+    pub border_width: Option<f32>,
 }
 
 #[derive(Deserialize)]
@@ -88,4 +90,5 @@ pub struct Entry {
 
     pub border_color: Option<String>,
     pub border_radius: Option<f32>,
+    pub border_width: Option<f32>,
 }

@@ -1,5 +1,7 @@
 use std::default;
 
+use iced::Border;
+use iced::border::Radius;
 use iced::{Background, Color, Font, Size, advanced::graphics::Image, font};
 use serde::Deserialize;
 
@@ -56,12 +58,27 @@ impl WayMacConfig {
         text_color: &Color,
     ) -> Result<ContainerConfig, AppConfigError> {
         //TODO: apply background for images to
-        let background_color =
-            WayMacConfig::manage_color_parsing(toml.background_color.clone().unwrap().as_str())?;
-        let background = Background::Color(background_color);
+        let background = if let Some(background_color) = toml.background_color.to_owned() {
+            let background_color = WayMacConfig::manage_color_parsing(&background_color)?;
+            Some(Background::Color(background_color))
+        } else {
+            None
+        };
 
-        let border_color = if let Some(border_color) = toml.border_color.to_owned() {
-            Some(WayMacConfig::manage_color_parsing(border_color.as_str())?)
+        let border = if let Some(border_color) = toml.border_color.to_owned()
+            && let Some(border_radius) = toml.border_radius.to_owned()
+            && let Some(border_width) = toml.border_width.to_owned()
+        {
+            Some(Border {
+                color: WayMacConfig::manage_color_parsing(border_color.as_str())?,
+                width: border_width,
+                radius: Radius {
+                    top_left: border_radius,
+                    top_right: border_radius,
+                    bottom_right: border_radius,
+                    bottom_left: border_radius,
+                },
+            })
         } else {
             None
         };
@@ -75,8 +92,7 @@ impl WayMacConfig {
             //TODO: do the fallback to the main_font
             font: *main_font, //for the moment will leave the main_font
             background,
-            border_color,
-            border_radius: toml.border_radius,
+            border,
             specific: ContainerType::MainWindow {
                 location: toml.location,
                 padding: toml.padding,
@@ -90,12 +106,27 @@ impl WayMacConfig {
         text_color: &Color,
     ) -> Result<ContainerConfig, AppConfigError> {
         //TODO: apply background for images to
-        let background_color =
-            WayMacConfig::manage_color_parsing(toml.background_color.clone().unwrap().as_str())?;
-        let background = Background::Color(background_color);
+        let background = if let Some(background_color) = toml.background_color.to_owned() {
+            let background_color = WayMacConfig::manage_color_parsing(&background_color)?;
+            Some(Background::Color(background_color))
+        } else {
+            None
+        };
 
-        let border_color = if let Some(border_color) = toml.border_color.to_owned() {
-            Some(WayMacConfig::manage_color_parsing(border_color.as_str())?)
+        let border = if let Some(border_color) = toml.border_color.to_owned()
+            && let Some(border_radius) = toml.border_radius.to_owned()
+            && let Some(border_width) = toml.border_width.to_owned()
+        {
+            Some(Border {
+                color: WayMacConfig::manage_color_parsing(border_color.as_str())?,
+                width: border_width,
+                radius: Radius {
+                    top_left: border_radius,
+                    top_right: border_radius,
+                    bottom_right: border_radius,
+                    bottom_left: border_radius,
+                },
+            })
         } else {
             None
         };
@@ -109,8 +140,7 @@ impl WayMacConfig {
             //TODO: do the fallback to the main_font
             font: *main_font, //for the moment will leave the main_font
             background,
-            border_color,
-            border_radius: toml.border_radius,
+            border,
             specific: ContainerType::InputBar,
         })
     }
@@ -120,19 +150,19 @@ impl WayMacConfig {
         text_color: &Color,
     ) -> Result<ContainerConfig, AppConfigError> {
         //TODO: apply background for images to
-        let background_color =
-            WayMacConfig::manage_color_parsing(toml.background_color.clone().unwrap().as_str())?;
-        let background = Background::Color(background_color);
-
-        let border_color = if let Some(border_color) = toml.border_color.to_owned() {
-            Some(WayMacConfig::manage_color_parsing(border_color.as_str())?)
+        let background = if let Some(background_color) = toml.background_color.to_owned() {
+            let background_color = WayMacConfig::manage_color_parsing(&background_color)?;
+            Some(Background::Color(background_color))
         } else {
             None
         };
 
         //TODO: manage option for focus_text_color
-        let focus_text_color =
-            WayMacConfig::manage_color_parsing(&toml.focus_text_color.clone().unwrap().as_str())?;
+        let focus_text_color = if let Some(background_color) = toml.focus_text_color.to_owned() {
+            WayMacConfig::manage_color_parsing(&background_color)?
+        } else {
+            *text_color
+        };
 
         Ok(ContainerConfig {
             size: Size {
@@ -143,8 +173,7 @@ impl WayMacConfig {
             //TODO: do the fallback to the main_font
             font: *main_font, //for the moment wi'll leave the main_font
             background,
-            border_color,
-            border_radius: toml.border_radius,
+            border: None,
             specific: ContainerType::Entry { focus_text_color },
         })
     }
@@ -200,11 +229,10 @@ pub struct ContainerConfig {
     pub font: Font,
 
     //TODO: implement backgrounds
-    pub background: Background,
+    pub background: Option<Background>,
 
     //TODO: implement border fields
-    pub border_color: Option<Color>,
-    pub border_radius: Option<f32>,
+    pub border: Option<Border>,
 
     // other configs depending which container is it
     pub specific: ContainerType,
@@ -217,9 +245,8 @@ impl Default for ContainerConfig {
             size: Size::default(),
             text_color: Color::BLACK,
             font: Font::default(),
-            background: Background::Color(Color::default()),
-            border_color: None,
-            border_radius: None,
+            background: Some(Background::Color(Color::default())),
+            border: None,
             specific: ContainerType::InputBar,
         }
     }
