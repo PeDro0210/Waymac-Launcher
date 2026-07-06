@@ -182,6 +182,8 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
             text_input("", &state.user_input)
                 .on_input(Message::UserInputChanged)
                 .id(LAUNCHER_TEXT_INPUT_ID)
+                .line_height(state.config.input_bar.size.height)
+                .width(state.config.input_bar.size.width)
                 .font(state.config.input_bar.font)
                 .style(|theme, status| TextInputStyle {
                     background: (|| match state.config.input_bar.background {
