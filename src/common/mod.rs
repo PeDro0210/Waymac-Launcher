@@ -7,7 +7,7 @@ use iced::widget::scrollable::{Direction, Scrollbar};
 use iced::widget::text_input::Style as TextInputStyle;
 use iced::widget::text_input::default as text_input_default;
 use iced::widget::{Id as IcedId, column, container, operation::focus, text, text_input};
-use iced::widget::{Text, scrollable};
+use iced::widget::{Text, rule, scrollable};
 use iced::{Background, Border, Color, Element, Length, Size, Subscription, Task};
 
 use iced::{
@@ -193,6 +193,7 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
                     border: (|| match state.config.input_bar.border {
                         Some(bor) => bor,
                         None => Border {
+                            width: 0.,
                             ..Default::default()
                         },
                     })(),
@@ -262,6 +263,7 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
             border: (|| match state.config.main_window.border {
                 Some(bor) => bor,
                 None => Border {
+                    width: 0.,
                     ..Default::default()
                 },
             })(),

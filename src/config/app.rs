@@ -7,7 +7,7 @@ use serde::Deserialize;
 
 use log::{debug, error, warn};
 
-use crate::config::toml::{Entry, InputBar, MainWindow, TomlConfig};
+use crate::config::toml::{Border as RawBorder, Entry, InputBar, MainWindow, TomlConfig};
 use crate::config::util::ColorHEX;
 
 type TextConfig = (Font, Color);
@@ -40,6 +40,34 @@ impl WayMacConfig {
         }
     }
 
+    fn parse_background(
+        raw_bg_color: &Option<String>,
+    ) -> Result<Option<Background>, AppConfigError> {
+        if let Some(background_color) = raw_bg_color {
+            let background_color = WayMacConfig::manage_color_parsing(&background_color)?;
+            Ok(Some(Background::Color(background_color)))
+        } else {
+            Ok(None)
+        }
+    }
+
+    fn parse_border(border: &Option<RawBorder>) -> Result<Option<Border>, AppConfigError> {
+        if let Some(border) = border.as_ref() {
+            Ok(Some(Border {
+                color: WayMacConfig::manage_color_parsing(border.color.as_str())?,
+                width: border.width,
+                radius: Radius {
+                    top_left: border.top_left_radius,
+                    top_right: border.top_right_radius,
+                    bottom_right: border.bottom_right_radius,
+                    bottom_left: border.bottom_left_radius,
+                },
+            }))
+        } else {
+            Ok(None)
+        }
+    }
+
     fn parse_text_config(toml: &TomlConfig) -> Result<TextConfig, AppConfigError> {
         let raw_main_font = &toml.main_window.font;
         let raw_main_text_color = &toml.main_window.text_color;
@@ -58,27 +86,9 @@ impl WayMacConfig {
         text_color: &Color,
     ) -> Result<ContainerConfig, AppConfigError> {
         //TODO: apply background for images to
-        let background = if let Some(background_color) = toml.background_color.to_owned() {
-            let background_color = WayMacConfig::manage_color_parsing(&background_color)?;
-            Some(Background::Color(background_color))
-        } else {
-            None
-        };
+        let background = WayMacConfig::parse_background(&toml.background_color)?;
 
-        let border = if let Some(border) = toml.border.as_ref() {
-            Some(Border {
-                color: WayMacConfig::manage_color_parsing(border.color.as_str())?,
-                width: border.width,
-                radius: Radius {
-                    top_left: border.top_left_radius,
-                    top_right: border.top_right_radius,
-                    bottom_right: border.bottom_right_radius,
-                    bottom_left: border.bottom_left_radius,
-                },
-            })
-        } else {
-            None
-        };
+        let border = WayMacConfig::parse_border(&toml.border)?;
 
         Ok(ContainerConfig {
             size: Size {
@@ -103,27 +113,9 @@ impl WayMacConfig {
         text_color: &Color,
     ) -> Result<ContainerConfig, AppConfigError> {
         //TODO: apply background for images to
-        let background = if let Some(background_color) = toml.background_color.to_owned() {
-            let background_color = WayMacConfig::manage_color_parsing(&background_color)?;
-            Some(Background::Color(background_color))
-        } else {
-            None
-        };
+        let background = WayMacConfig::parse_background(&toml.background_color)?;
 
-        let border = if let Some(border) = toml.border.as_ref() {
-            Some(Border {
-                color: WayMacConfig::manage_color_parsing(border.color.as_str())?,
-                width: border.width,
-                radius: Radius {
-                    top_left: border.top_left_radius,
-                    top_right: border.top_right_radius,
-                    bottom_right: border.bottom_right_radius,
-                    bottom_left: border.bottom_left_radius,
-                },
-            })
-        } else {
-            None
-        };
+        let border = WayMacConfig::parse_border(&toml.border)?;
 
         Ok(ContainerConfig {
             size: Size {
@@ -144,12 +136,7 @@ impl WayMacConfig {
         text_color: &Color,
     ) -> Result<ContainerConfig, AppConfigError> {
         //TODO: apply background for images to
-        let background = if let Some(background_color) = toml.background_color.to_owned() {
-            let background_color = WayMacConfig::manage_color_parsing(&background_color)?;
-            Some(Background::Color(background_color))
-        } else {
-            None
-        };
+        let background = WayMacConfig::parse_background(&toml.background_color)?;
 
         //TODO: manage option for focus_text_color
         let focus_text_color = if let Some(background_color) = toml.focus_text_color.to_owned() {
