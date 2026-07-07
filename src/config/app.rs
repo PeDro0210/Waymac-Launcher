@@ -120,7 +120,7 @@ impl WayMacConfig {
         Ok(ContainerConfig {
             size: Size {
                 width: toml.width as f32,
-                height: toml.height as f32,
+                height: toml.line_height as f32,
             },
             text_color: *text_color,
             //TODO: do the fallback to the main_font
