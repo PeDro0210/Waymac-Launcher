@@ -3,7 +3,7 @@ height = 350
 width = 350
 
 padding = 2
-spacing = 1
+spacing = 0
 
 text_color = "#000000"
 

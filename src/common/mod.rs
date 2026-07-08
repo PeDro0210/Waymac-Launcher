@@ -200,52 +200,56 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
                     value: state.config.input_bar.text_color,
                     ..text_input_default(theme, status)
                 }),
-            scrollable(column(
-                state
-                    .ui_desktop_entries
-                    .as_ref()
-                    .unwrap_or(&mut Box::new(Vec::new()))
-                    .iter()
-                    .filter_map(|entry| {
-                        let desktop_entry_text: Text = text(entry.name.clone())
-                            .font(state.config.entry.font)
-                            .height(Length::Fixed(state.config.entry.size.height))
-                            .into();
+            scrollable(
+                column(
+                    state
+                        .ui_desktop_entries
+                        .as_ref()
+                        .unwrap_or(&mut Box::new(Vec::new()))
+                        .iter()
+                        .filter_map(|entry| {
+                            let desktop_entry_text: Text = text(entry.name.clone())
+                                .font(state.config.entry.font)
+                                .height(Length::Fixed(state.config.entry.size.height))
+                                .into();
 
-                        if entry.is_focus {
-                            return Some(
+                            if entry.is_focus {
+                                return Some(
+                                    desktop_entry_text
+                                        .color(match state.config.entry.specific {
+                                            ContainerType::Entry {
+                                                focus_text_color, ..
+                                            } => focus_text_color,
+                                            _ => {
+                                                error!("Error while doing specific container type");
+                                                exit(1);
+                                            }
+                                        })
+                                        .width(Length::Fill)
+                                        .font(state.config.entry.font)
+                                        .into(),
+                                );
+                            }
+
+                            Some(
                                 desktop_entry_text
-                                    .color(match state.config.entry.specific {
-                                        ContainerType::Entry {
-                                            focus_text_color, ..
-                                        } => focus_text_color,
-                                        _ => {
-                                            error!("Error while doing specific container type");
-                                            exit(1);
-                                        }
-                                    })
-                                    .font(state.config.entry.font)
+                                    .color(state.config.entry.text_color)
+                                    .width(Length::Fill)
                                     .into(),
-                            );
-                        }
-
-                        Some(
-                            desktop_entry_text
-                                .color(state.config.entry.text_color)
-                                .into(),
-                        )
-                    }),
-            ))
-            .spacing(match state.config.main_window.specific {
-                ContainerType::MainWindow { spacing, .. } => spacing,
-                _ => {
-                    error!("Error while doing specific container type");
-                    exit(1);
-                }
-            })
+                            )
+                        }),
+                )
+                .spacing(match state.config.main_window.specific {
+                    ContainerType::MainWindow { spacing, .. } => spacing,
+                    _ => {
+                        error!("Error while doing specific container type");
+                        exit(1);
+                    }
+                })
+            )
             .direction(Direction::Vertical(Scrollbar::hidden()))
             .id(LAUNCHER_SCROLLABLE_ID)
-            .width(Length::Fill)
+            .width(state.config.entry.size.width)
         ])
         .id(LAUNCHER_CONTAINER_ID)
         .width(state.config.main_window.size.width)
