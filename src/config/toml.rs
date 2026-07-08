@@ -62,7 +62,7 @@ pub struct MainWindow {
 
 #[derive(Deserialize)]
 pub struct InputBar {
-    pub line_height: u32,
+    pub height: u32,
     pub width: u32,
 
     pub text_color: Option<String>, // will be parse for RGB triplet
@@ -91,11 +91,13 @@ pub struct Entry {
 pub struct Border {
     pub color: String,
 
-    pub radius: f32,
-    pub width: f32,
-
     pub top_left_radius: f32,
     pub bottom_left_radius: f32,
     pub top_right_radius: f32,
     pub bottom_right_radius: f32,
+
+    pub left_width: f32,
+    pub bottom_width: f32,
+    pub top_width: f32,
+    pub right_width: f32,
 }

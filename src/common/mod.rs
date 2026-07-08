@@ -2,12 +2,16 @@ use std::process::exit;
 use std::thread::spawn;
 
 use iced::Length::Fill;
+use iced::border::Radius;
 use iced::widget::container::Style;
 use iced::widget::scrollable::{Direction, Scrollbar};
 use iced::widget::text_input::Style as TextInputStyle;
 use iced::widget::text_input::default as text_input_default;
-use iced::widget::{Id as IcedId, column, container, operation::focus, text, text_input};
-use iced::widget::{Text, rule, scrollable};
+use iced::widget::{
+    Id as IcedId, column, container, operation::focus, row, rule, rule::Style as RuleStyle, text,
+    text_input,
+};
+use iced::widget::{Text, scrollable};
 use iced::{Background, Border, Color, Element, Length, Size, Subscription, Task};
 
 use iced::{
@@ -173,104 +177,286 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
     }
 }
 
+// IK THE UI LOOP LOOKS AWFAUL, I'LL FIX IT
+
 //TODO: implement view function
 pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
     container(
-        // TODO: implement a stack for having image/color as base-layer and the rest above
-        container(column![
-            //TODO: Separate launcher  widgets in different functions
-            text_input("", &state.user_input)
-                .on_input(Message::UserInputChanged)
-                .id(LAUNCHER_TEXT_INPUT_ID)
-                .line_height(state.config.input_bar.size.height)
-                .width(state.config.input_bar.size.width)
-                .font(state.config.input_bar.font)
-                .style(|theme, status| TextInputStyle {
-                    background: (|| match state.config.input_bar.background {
-                        Some(bg) => bg,
-                        None => Background::Color(Color::default()),
+        container(
+            column![
+                rule::horizontal((|| {
+                    match state.config.main_window.border {
+                        Some(bor) => bor.top_width,
+                        None => 0.,
+                    }
+                })())
+                .style(|_| RuleStyle {
+                    color: (|| {
+                        match state.config.input_bar.border {
+                            Some(bor) => bor.color,
+                            None => Color::TRANSPARENT,
+                        }
                     })(),
-                    border: (|| match state.config.input_bar.border {
-                        Some(bor) => bor,
-                        None => Border {
-                            width: 0.,
+                    //TODO: apply radius correctly
+                    radius: Radius {
+                        ..Default::default()
+                    },
+                    fill_mode: rule::FillMode::Full,
+                    snap: true
+                }),
+                row![
+                    rule::vertical((|| {
+                        match state.config.main_window.border {
+                            Some(bor) => bor.left_width,
+                            None => 0.,
+                        }
+                    })())
+                    .style(|_| RuleStyle {
+                        color: (|| {
+                            match state.config.input_bar.border {
+                                Some(bor) => bor.color,
+                                None => Color::TRANSPARENT,
+                            }
+                        })(),
+                        //TODO: apply radius correctly
+                        radius: Radius {
                             ..Default::default()
                         },
-                    })(),
-                    value: state.config.input_bar.text_color,
-                    ..text_input_default(theme, status)
-                }),
-            scrollable(
-                column(
-                    state
-                        .ui_desktop_entries
-                        .as_ref()
-                        .unwrap_or(&mut Box::new(Vec::new()))
-                        .iter()
-                        .filter_map(|entry| {
-                            let desktop_entry_text: Text = text(entry.name.clone())
-                                .font(state.config.entry.font)
-                                .height(Length::Fixed(state.config.entry.size.height))
-                                .into();
+                        fill_mode: rule::FillMode::Full,
+                        snap: true
+                    }),
+                    // TODO: implement a stack for having image/color as base-layer and the rest above
+                    container(column![
+                        //TODO: Separate launcher  widgets in different functions
+                        //TODO: NEED REFACTOR FOR THE TEXT INPUT
+                        column![
+                            rule::horizontal((|| {
+                                match state.config.input_bar.border {
+                                    Some(bor) => bor.top_width,
+                                    None => 0.,
+                                }
+                            })())
+                            .style(|_| RuleStyle {
+                                color: (|| {
+                                    match state.config.input_bar.border {
+                                        Some(bor) => bor.color,
+                                        None => Color::TRANSPARENT,
+                                    }
+                                })(),
+                                //TODO: apply radius correctly
+                                radius: Radius {
+                                    ..Default::default()
+                                },
+                                fill_mode: rule::FillMode::Full,
+                                snap: true
+                            }),
+                            row![
+                                rule::vertical((|| {
+                                    match state.config.input_bar.border {
+                                        Some(bor) => bor.left_width,
+                                        None => 0.,
+                                    }
+                                })())
+                                .style(|_| RuleStyle {
+                                    color: (|| {
+                                        match state.config.input_bar.border {
+                                            Some(bor) => bor.color,
+                                            None => Color::TRANSPARENT,
+                                        }
+                                    })(),
+                                    //TODO: apply radius correctly
+                                    radius: Radius {
+                                        ..Default::default()
+                                    },
+                                    fill_mode: rule::FillMode::Full,
+                                    snap: true
+                                }),
+                                text_input("", &state.user_input)
+                                    .on_input(Message::UserInputChanged)
+                                    .id(LAUNCHER_TEXT_INPUT_ID)
+                                    .width(state.config.input_bar.size.width)
+                                    .font(state.config.input_bar.font)
+                                    .style(|theme, status| TextInputStyle {
+                                        background: (|| match state.config.input_bar.background {
+                                            Some(bg) => bg,
+                                            None => Background::Color(Color::default()),
+                                        })(),
+                                        border: Border {
+                                            width: 0.,
+                                            ..Default::default()
+                                        },
+                                        value: state.config.input_bar.text_color,
+                                        ..text_input_default(theme, status)
+                                    }),
+                                rule::vertical((|| {
+                                    match state.config.input_bar.border {
+                                        Some(bor) => bor.right_width,
+                                        None => 0.,
+                                    }
+                                })())
+                                .style(|_| RuleStyle {
+                                    color: (|| {
+                                        match state.config.input_bar.border {
+                                            Some(bor) => bor.color,
+                                            None => Color::TRANSPARENT,
+                                        }
+                                    })(),
+                                    //TODO: apply radius correctly
+                                    radius: Radius {
+                                        ..Default::default()
+                                    },
+                                    fill_mode: rule::FillMode::Full,
+                                    snap: true
+                                }),
+                            ]
+                            .width(Length::Fill),
+                            rule::horizontal((|| {
+                                match state.config.input_bar.border {
+                                    Some(bor) => bor.bottom_width,
+                                    None => 0.,
+                                }
+                            })())
+                            .style(|_| RuleStyle {
+                                color: (|| {
+                                    match state.config.input_bar.border {
+                                        Some(bor) => bor.color,
+                                        None => Color::TRANSPARENT,
+                                    }
+                                })(),
+                                //TODO: apply radius correctly
+                                radius: Radius {
+                                    ..Default::default()
+                                },
+                                fill_mode: rule::FillMode::Full,
+                                snap: true
+                            }),
+                        ]
+                        .height(
+                            state.config.input_bar.size.height
+                                + (|| {
+                                    match state.config.input_bar.border {
+                                        Some(bor) => bor.bottom_width,
+                                        None => 0.,
+                                    }
+                                })()
+                                + (|| {
+                                    match state.config.input_bar.border {
+                                        Some(bor) => bor.top_width,
+                                        None => 0.,
+                                    }
+                                })()
+                        ),
+                        scrollable(
+                            column(
+                                state
+                                    .ui_desktop_entries
+                                    .as_ref()
+                                    .unwrap_or(&mut Box::new(Vec::new()))
+                                    .iter()
+                                    .filter_map(|entry| {
+                                        let desktop_entry_text: Text = text(entry.name.clone())
+                                            .font(state.config.entry.font)
+                                            .height(Length::Fixed(state.config.entry.size.height))
+                                            .into();
 
-                            if entry.is_focus {
-                                return Some(
-                                    desktop_entry_text
-                                        .color(match state.config.entry.specific {
-                                            ContainerType::Entry {
-                                                focus_text_color, ..
-                                            } => focus_text_color,
-                                            _ => {
-                                                error!("Error while doing specific container type");
-                                                exit(1);
-                                            }
-                                        })
-                                        .width(Length::Fill)
-                                        .font(state.config.entry.font)
-                                        .into(),
-                                );
-                            }
+                                        if entry.is_focus {
+                                            return Some(
+                                        desktop_entry_text
+                                            .color(match state.config.entry.specific {
+                                                ContainerType::Entry {
+                                                    focus_text_color, ..
+                                                } => focus_text_color,
+                                                _ => {
+                                                    error!(
+                                                        "Error while doing specific container type"
+                                                    );
+                                                    exit(1);
+                                                }
+                                            })
+                                            .width(Length::Fill)
+                                            .font(state.config.entry.font)
+                                            .into(),
+                                    );
+                                        }
 
-                            Some(
-                                desktop_entry_text
-                                    .color(state.config.entry.text_color)
-                                    .width(Length::Fill)
-                                    .into(),
+                                        Some(
+                                            desktop_entry_text
+                                                .color(state.config.entry.text_color)
+                                                .width(Length::Fill)
+                                                .into(),
+                                        )
+                                    }),
                             )
-                        }),
-                )
-                .spacing(match state.config.main_window.specific {
-                    ContainerType::MainWindow { spacing, .. } => spacing,
-                    _ => {
-                        error!("Error while doing specific container type");
-                        exit(1);
+                            .spacing(
+                                match state.config.main_window.specific {
+                                    ContainerType::MainWindow { spacing, .. } => spacing,
+                                    _ => {
+                                        error!("Error while doing specific container type");
+                                        exit(1);
+                                    }
+                                }
+                            )
+                        )
+                        .direction(Direction::Vertical(Scrollbar::hidden()))
+                        .id(LAUNCHER_SCROLLABLE_ID)
+                        .width(state.config.entry.size.width)
+                    ]),
+                    rule::vertical((|| {
+                        match state.config.main_window.border {
+                            Some(bor) => bor.left_width,
+                            None => 0.,
+                        }
+                    })())
+                    .style(|_| RuleStyle {
+                        color: (|| {
+                            match state.config.input_bar.border {
+                                Some(bor) => bor.color,
+                                None => Color::TRANSPARENT,
+                            }
+                        })(),
+                        //TODO: apply radius correctly
+                        radius: Radius {
+                            ..Default::default()
+                        },
+                        fill_mode: rule::FillMode::Full,
+                        snap: true
+                    })
+                ],
+                rule::horizontal((|| {
+                    match state.config.main_window.border {
+                        Some(bor) => bor.bottom_width,
+                        None => 0.,
                     }
+                })())
+                .style(|_| RuleStyle {
+                    color: (|| {
+                        match state.config.input_bar.border {
+                            Some(bor) => bor.color,
+                            None => Color::TRANSPARENT,
+                        }
+                    })(),
+                    //TODO: apply radius correctly
+                    radius: Radius {
+                        ..Default::default()
+                    },
+                    fill_mode: rule::FillMode::Full,
+                    snap: true
                 })
-            )
-            .direction(Direction::Vertical(Scrollbar::hidden()))
-            .id(LAUNCHER_SCROLLABLE_ID)
-            .width(state.config.entry.size.width)
-        ])
+            ]
+            .padding(match state.config.main_window.specific {
+                ContainerType::MainWindow { padding, .. } => padding,
+                _ => {
+                    error!("Error while doing specific container type");
+                    exit(1);
+                }
+            }),
+        )
         .id(LAUNCHER_CONTAINER_ID)
         .width(state.config.main_window.size.width)
         .height(state.config.main_window.size.height)
-        .padding(match state.config.main_window.specific {
-            ContainerType::MainWindow { padding, .. } => padding,
-            _ => {
-                error!("Error while doing specific container type");
-                exit(1);
-            }
-        })
         //TODO: make text_color being exchangble for the toml config
         .style(|_| Style {
             background: state.config.main_window.background,
-            border: (|| match state.config.main_window.border {
-                Some(bor) => bor,
-                None => Border {
-                    width: 0.,
-                    ..Default::default()
-                },
-            })(),
             ..Default::default()
         }),
     )

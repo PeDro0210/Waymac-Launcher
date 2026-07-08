@@ -51,17 +51,20 @@ impl WayMacConfig {
         }
     }
 
-    fn parse_border(border: &Option<RawBorder>) -> Result<Option<Border>, AppConfigError> {
+    fn parse_border(border: &Option<RawBorder>) -> Result<Option<BorderInfo>, AppConfigError> {
         if let Some(border) = border.as_ref() {
-            Ok(Some(Border {
+            Ok(Some(BorderInfo {
                 color: WayMacConfig::manage_color_parsing(border.color.as_str())?,
-                width: border.width,
-                radius: Radius {
-                    top_left: border.top_left_radius,
-                    top_right: border.top_right_radius,
-                    bottom_right: border.bottom_right_radius,
-                    bottom_left: border.bottom_left_radius,
-                },
+
+                top_left_radius: border.top_left_radius,
+                top_right_radius: border.top_right_radius,
+                bottom_left_radius: border.bottom_left_radius,
+                bottom_right_radius: border.bottom_left_radius,
+
+                bottom_width: border.bottom_width,
+                top_width: border.top_width,
+                right_width: border.right_width,
+                left_width: border.left_width,
             }))
         } else {
             Ok(None)
@@ -120,7 +123,7 @@ impl WayMacConfig {
         Ok(ContainerConfig {
             size: Size {
                 width: toml.width as f32,
-                height: toml.line_height as f32,
+                height: toml.height as f32,
             },
             text_color: *text_color,
             //TODO: do the fallback to the main_font
@@ -177,6 +180,21 @@ impl WayMacConfig {
     }
 }
 
+#[derive(Clone, Copy)]
+pub struct BorderInfo {
+    pub color: Color,
+
+    pub top_left_radius: f32,
+    pub bottom_left_radius: f32,
+    pub top_right_radius: f32,
+    pub bottom_right_radius: f32,
+
+    pub left_width: f32,
+    pub bottom_width: f32,
+    pub top_width: f32,
+    pub right_width: f32,
+}
+
 // each different type of container that WayMac has
 #[derive(Clone, Copy)]
 pub enum ContainerType {
@@ -213,7 +231,7 @@ pub struct ContainerConfig {
     pub background: Option<Background>,
 
     //TODO: implement border fields
-    pub border: Option<Border>,
+    pub border: Option<BorderInfo>,
 
     // other configs depending which container is it
     pub specific: ContainerType,

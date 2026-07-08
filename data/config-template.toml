@@ -1,6 +1,6 @@
 [main_window]
 height = 350
-width = 350
+width = 357
 
 padding = 2
 spacing = 0
@@ -22,14 +22,24 @@ border.bottom_left_radius = 0
 border.top_right_radius = 0
 border.bottom_right_radius = 0
 
+border.top_width = 1
+border.left_width = 1
+border.right_width = 1
+border.bottom_width = 1
+
 
 [inputbar]
-line_height = 1
+height = 25
 width = 350
 
 border.color = "#ff0000"
 border.radius = 1.5
-border.width = 1
+
+border.top_width = 1
+border.left_width = 1
+border.right_width = 1
+border.bottom_width = 1
+
 
 border.top_left_radius = 0
 border.bottom_left_radius = 0
