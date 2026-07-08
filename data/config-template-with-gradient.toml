@@ -11,7 +11,9 @@ font = "Pixel Code"
 
 location = "Center"
 
-background_colors = ["#808080"]
+gradient_angle = 30
+background_colors = ["#808080", "#AA8080", "#AA8089"]
+
 
 border.color = "#ff0000"
 border.radius = 1.5
@@ -36,8 +38,8 @@ border.bottom_left_radius = 0
 border.top_right_radius = 0
 border.bottom_right_radius = 0
 
-
-background_colors = ["#808080"]
+gradient_angle = 30
+background_colors = ["#808080", "#AA8080", "#AA8089"]
 
 [entry]
 height = 25

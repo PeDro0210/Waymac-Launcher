@@ -1,5 +1,7 @@
 # Config File
 
+#TODO: UPDATE THIS
+
 WayMac uses TOML (Tom's Obvious, Minimal Language) for it's config file format, which will be expected to be specified on ~/.config/wayx/config.toml. (at the first startup it will be created if possible)
 
 Simple customization is kind of a pretty important point for WayMac, but take in mind that is mostly made for accommodate my needs (which are not very complicate it), that means pretty specific configs will not be taken in mind for the moment as I'm writing this document.

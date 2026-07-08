@@ -1,8 +1,9 @@
 use std::default;
 
-use iced::Border;
 use iced::border::Radius;
+use iced::gradient::{ColorStop, Linear};
 use iced::{Background, Color, Font, Size, advanced::graphics::Image, font};
+use iced::{Border, Radians};
 use serde::Deserialize;
 
 use log::{debug, error, warn};
@@ -41,19 +42,44 @@ impl WayMacConfig {
     }
 
     fn parse_background(
-        raw_bg_color: &Option<String>,
+        raw_bg_colors: &Option<Vec<String>>,
+        gradient_angle: &Option<f32>,
     ) -> Result<Option<Background>, AppConfigError> {
-        if let Some(background_color) = raw_bg_color {
-            let background_color = WayMacConfig::manage_color_parsing(&background_color)?;
-            Ok(Some(Background::Color(background_color)))
-        } else {
-            Ok(None)
+        if let Some(background_colors) = raw_bg_colors {
+            if background_colors.len() == 1 {
+                let background_color =
+                    WayMacConfig::manage_color_parsing(&background_colors.first().unwrap())?;
+                return Ok(Some(Background::Color(background_color)));
+            }
+
+            // has to be lower than 8
+            let mut gradient_stops: [Option<ColorStop>; 8] = [None; 8];
+
+            for bg_raw_idx in 0..background_colors.len() {
+                let color = WayMacConfig::manage_color_parsing(
+                    &background_colors.get(bg_raw_idx).unwrap(),
+                )?;
+
+                gradient_stops[bg_raw_idx] = Some(ColorStop {
+                    color,
+                    offset: bg_raw_idx as f32,
+                });
+            }
+
+            return Ok(Some(Background::Gradient(iced::Gradient::Linear(Linear {
+                angle: Radians(match gradient_angle {
+                    Some(gradient_angle) => *gradient_angle,
+                    None => 0.,
+                }),
+                stops: gradient_stops,
+            }))));
         }
+        Ok(None)
     }
 
     fn parse_border(border: &Option<RawBorder>) -> Result<Option<Border>, AppConfigError> {
         if let Some(border) = border.as_ref() {
-            Ok(Some(Border {
+            return Ok(Some(Border {
                 color: WayMacConfig::manage_color_parsing(border.color.as_str())?,
                 width: border.width,
                 radius: Radius {
@@ -62,10 +88,9 @@ impl WayMacConfig {
                     bottom_right: border.bottom_right_radius,
                     bottom_left: border.bottom_left_radius,
                 },
-            }))
-        } else {
-            Ok(None)
+            }));
         }
+        Ok(None)
     }
 
     fn parse_text_config(toml: &TomlConfig) -> Result<TextConfig, AppConfigError> {
@@ -86,7 +111,9 @@ impl WayMacConfig {
         text_color: &Color,
     ) -> Result<ContainerConfig, AppConfigError> {
         //TODO: apply background for images to
-        let background = WayMacConfig::parse_background(&toml.background_color)?;
+
+        let background =
+            WayMacConfig::parse_background(&toml.background_colors, &toml.gradient_angle)?;
 
         let border = WayMacConfig::parse_border(&toml.border)?;
 
@@ -113,7 +140,8 @@ impl WayMacConfig {
         text_color: &Color,
     ) -> Result<ContainerConfig, AppConfigError> {
         //TODO: apply background for images to
-        let background = WayMacConfig::parse_background(&toml.background_color)?;
+        let background =
+            WayMacConfig::parse_background(&toml.background_colors, &toml.gradient_angle)?;
 
         let border = WayMacConfig::parse_border(&toml.border)?;
 
@@ -136,7 +164,8 @@ impl WayMacConfig {
         text_color: &Color,
     ) -> Result<ContainerConfig, AppConfigError> {
         //TODO: apply background for images to
-        let background = WayMacConfig::parse_background(&toml.background_color)?;
+        let background =
+            WayMacConfig::parse_background(&toml.background_colors, &toml.gradient_angle)?;
 
         //TODO: manage option for focus_text_color
         let focus_text_color = if let Some(background_color) = toml.focus_text_color.to_owned() {

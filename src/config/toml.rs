@@ -55,7 +55,10 @@ pub struct MainWindow {
     pub location: Location, // will be parsed after in the "Location Enum"
 
     pub background_image: Option<String>, // the path of the image will be parsed
-    pub background_color: Option<String>, // same as the text color
+
+    pub background_colors: Option<Vec<String>>, // same as the text color
+
+    pub gradient_angle: Option<f32>, // in case of having various colors will be interpreted as a gradient
 
     pub border: Option<Border>,
 }
@@ -68,8 +71,9 @@ pub struct InputBar {
     pub text_color: Option<String>, // will be parse for RGB triplet
 
     pub background_image: Option<String>, // the path of the image will be parsed
-    pub background_color: Option<String>, // same as the text color
+    pub background_colors: Option<Vec<String>>, // same as the text color
 
+    pub gradient_angle: Option<f32>, // in case of having various colors will be interpreted as a gradient    pub border: Option<Border>,
     pub border: Option<Border>,
 }
 
@@ -82,8 +86,9 @@ pub struct Entry {
     pub focus_text_color: Option<String>, // will be parse for RGB triplet
 
     pub background_image: Option<String>, // the path of the image will be parsed
-    pub background_color: Option<String>, // same as the text color
+    pub background_colors: Option<Vec<String>>, // same as the text color
 
+    pub gradient_angle: Option<f32>, // in case of having various colors will be interpreted as a gradient    pub border: Option<Border>,
     pub border: Option<Border>,
 }
 
