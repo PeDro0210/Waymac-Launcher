@@ -182,11 +182,31 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
 //TODO: implement view function
 pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
     container(
-        container(
-            column![
-                rule::horizontal((|| {
+        container(column![
+            rule::horizontal((|| {
+                match state.config.main_window.border {
+                    Some(bor) => bor.top_width,
+                    None => 0.,
+                }
+            })())
+            .style(|_| RuleStyle {
+                color: (|| {
+                    match state.config.input_bar.border {
+                        Some(bor) => bor.color,
+                        None => Color::TRANSPARENT,
+                    }
+                })(),
+                //TODO: apply radius correctly
+                radius: Radius {
+                    ..Default::default()
+                },
+                fill_mode: rule::FillMode::Full,
+                snap: true
+            }),
+            row![
+                rule::vertical((|| {
                     match state.config.main_window.border {
-                        Some(bor) => bor.top_width,
+                        Some(bor) => bor.left_width,
                         None => 0.,
                     }
                 })())
@@ -204,35 +224,35 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
                     fill_mode: rule::FillMode::Full,
                     snap: true
                 }),
-                row![
-                    rule::vertical((|| {
-                        match state.config.main_window.border {
-                            Some(bor) => bor.left_width,
-                            None => 0.,
-                        }
-                    })())
-                    .style(|_| RuleStyle {
-                        color: (|| {
+                // TODO: implement a stack for having image/color as base-layer and the rest above
+                container(column![
+                    //TODO: Separate launcher  widgets in different functions
+                    //TODO: NEED REFACTOR FOR THE TEXT INPUT
+                    column![
+                        rule::horizontal((|| {
                             match state.config.input_bar.border {
-                                Some(bor) => bor.color,
-                                None => Color::TRANSPARENT,
+                                Some(bor) => bor.top_width,
+                                None => 0.,
                             }
-                        })(),
-                        //TODO: apply radius correctly
-                        radius: Radius {
-                            ..Default::default()
-                        },
-                        fill_mode: rule::FillMode::Full,
-                        snap: true
-                    }),
-                    // TODO: implement a stack for having image/color as base-layer and the rest above
-                    container(column![
-                        //TODO: Separate launcher  widgets in different functions
-                        //TODO: NEED REFACTOR FOR THE TEXT INPUT
-                        column![
-                            rule::horizontal((|| {
+                        })())
+                        .style(|_| RuleStyle {
+                            color: (|| {
                                 match state.config.input_bar.border {
-                                    Some(bor) => bor.top_width,
+                                    Some(bor) => bor.color,
+                                    None => Color::TRANSPARENT,
+                                }
+                            })(),
+                            //TODO: apply radius correctly
+                            radius: Radius {
+                                ..Default::default()
+                            },
+                            fill_mode: rule::FillMode::Full,
+                            snap: true
+                        }),
+                        row![
+                            rule::vertical((|| {
+                                match state.config.input_bar.border {
+                                    Some(bor) => bor.left_width,
                                     None => 0.,
                                 }
                             })())
@@ -250,69 +270,26 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
                                 fill_mode: rule::FillMode::Full,
                                 snap: true
                             }),
-                            row![
-                                rule::vertical((|| {
-                                    match state.config.input_bar.border {
-                                        Some(bor) => bor.left_width,
-                                        None => 0.,
-                                    }
-                                })())
-                                .style(|_| RuleStyle {
-                                    color: (|| {
-                                        match state.config.input_bar.border {
-                                            Some(bor) => bor.color,
-                                            None => Color::TRANSPARENT,
-                                        }
+                            text_input("", &state.user_input)
+                                .on_input(Message::UserInputChanged)
+                                .id(LAUNCHER_TEXT_INPUT_ID)
+                                .width(state.config.input_bar.size.width)
+                                .font(state.config.input_bar.font)
+                                .style(|theme, status| TextInputStyle {
+                                    background: (|| match state.config.input_bar.background {
+                                        Some(bg) => bg,
+                                        None => Background::Color(Color::default()),
                                     })(),
-                                    //TODO: apply radius correctly
-                                    radius: Radius {
+                                    border: Border {
+                                        width: 0.,
                                         ..Default::default()
                                     },
-                                    fill_mode: rule::FillMode::Full,
-                                    snap: true
+                                    value: state.config.input_bar.text_color,
+                                    ..text_input_default(theme, status)
                                 }),
-                                text_input("", &state.user_input)
-                                    .on_input(Message::UserInputChanged)
-                                    .id(LAUNCHER_TEXT_INPUT_ID)
-                                    .width(state.config.input_bar.size.width)
-                                    .font(state.config.input_bar.font)
-                                    .style(|theme, status| TextInputStyle {
-                                        background: (|| match state.config.input_bar.background {
-                                            Some(bg) => bg,
-                                            None => Background::Color(Color::default()),
-                                        })(),
-                                        border: Border {
-                                            width: 0.,
-                                            ..Default::default()
-                                        },
-                                        value: state.config.input_bar.text_color,
-                                        ..text_input_default(theme, status)
-                                    }),
-                                rule::vertical((|| {
-                                    match state.config.input_bar.border {
-                                        Some(bor) => bor.right_width,
-                                        None => 0.,
-                                    }
-                                })())
-                                .style(|_| RuleStyle {
-                                    color: (|| {
-                                        match state.config.input_bar.border {
-                                            Some(bor) => bor.color,
-                                            None => Color::TRANSPARENT,
-                                        }
-                                    })(),
-                                    //TODO: apply radius correctly
-                                    radius: Radius {
-                                        ..Default::default()
-                                    },
-                                    fill_mode: rule::FillMode::Full,
-                                    snap: true
-                                }),
-                            ]
-                            .width(Length::Fill),
-                            rule::horizontal((|| {
+                            rule::vertical((|| {
                                 match state.config.input_bar.border {
-                                    Some(bor) => bor.bottom_width,
+                                    Some(bor) => bor.right_width,
                                     None => 0.,
                                 }
                             })())
@@ -331,36 +308,58 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
                                 snap: true
                             }),
                         ]
-                        .height(
-                            state.config.input_bar.size.height
-                                + (|| {
-                                    match state.config.input_bar.border {
-                                        Some(bor) => bor.bottom_width,
-                                        None => 0.,
-                                    }
-                                })()
-                                + (|| {
-                                    match state.config.input_bar.border {
-                                        Some(bor) => bor.top_width,
-                                        None => 0.,
-                                    }
-                                })()
-                        ),
-                        scrollable(
-                            column(
-                                state
-                                    .ui_desktop_entries
-                                    .as_ref()
-                                    .unwrap_or(&mut Box::new(Vec::new()))
-                                    .iter()
-                                    .filter_map(|entry| {
-                                        let desktop_entry_text: Text = text(entry.name.clone())
-                                            .font(state.config.entry.font)
-                                            .height(Length::Fixed(state.config.entry.size.height))
-                                            .into();
+                        .width(Length::Fill),
+                        rule::horizontal((|| {
+                            match state.config.input_bar.border {
+                                Some(bor) => bor.bottom_width,
+                                None => 0.,
+                            }
+                        })())
+                        .style(|_| RuleStyle {
+                            color: (|| {
+                                match state.config.input_bar.border {
+                                    Some(bor) => bor.color,
+                                    None => Color::TRANSPARENT,
+                                }
+                            })(),
+                            //TODO: apply radius correctly
+                            radius: Radius {
+                                ..Default::default()
+                            },
+                            fill_mode: rule::FillMode::Full,
+                            snap: true
+                        }),
+                    ]
+                    .height(
+                        state.config.input_bar.size.height
+                            + (|| {
+                                match state.config.input_bar.border {
+                                    Some(bor) => bor.bottom_width,
+                                    None => 0.,
+                                }
+                            })()
+                            + (|| {
+                                match state.config.input_bar.border {
+                                    Some(bor) => bor.top_width,
+                                    None => 0.,
+                                }
+                            })()
+                    ),
+                    scrollable(
+                        column(
+                            state
+                                .ui_desktop_entries
+                                .as_ref()
+                                .unwrap_or(&mut Box::new(Vec::new()))
+                                .iter()
+                                .filter_map(|entry| {
+                                    let desktop_entry_text: Text = text(entry.name.clone())
+                                        .font(state.config.entry.font)
+                                        .height(Length::Fixed(state.config.entry.size.height))
+                                        .into();
 
-                                        if entry.is_focus {
-                                            return Some(
+                                    if entry.is_focus {
+                                        return Some(
                                         desktop_entry_text
                                             .color(match state.config.entry.specific {
                                                 ContainerType::Entry {
@@ -377,54 +376,38 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
                                             .font(state.config.entry.font)
                                             .into(),
                                     );
-                                        }
-
-                                        Some(
-                                            desktop_entry_text
-                                                .color(state.config.entry.text_color)
-                                                .width(Length::Fill)
-                                                .into(),
-                                        )
-                                    }),
-                            )
-                            .spacing(
-                                match state.config.main_window.specific {
-                                    ContainerType::MainWindow { spacing, .. } => spacing,
-                                    _ => {
-                                        error!("Error while doing specific container type");
-                                        exit(1);
                                     }
-                                }
-                            )
+
+                                    Some(
+                                        desktop_entry_text
+                                            .color(state.config.entry.text_color)
+                                            .width(Length::Fill)
+                                            .into(),
+                                    )
+                                }),
                         )
-                        .direction(Direction::Vertical(Scrollbar::hidden()))
-                        .id(LAUNCHER_SCROLLABLE_ID)
-                        .width(state.config.entry.size.width)
-                    ]),
-                    rule::vertical((|| {
-                        match state.config.main_window.border {
-                            Some(bor) => bor.left_width,
-                            None => 0.,
-                        }
-                    })())
-                    .style(|_| RuleStyle {
-                        color: (|| {
-                            match state.config.input_bar.border {
-                                Some(bor) => bor.color,
-                                None => Color::TRANSPARENT,
+                        .spacing(match state.config.main_window.specific {
+                            ContainerType::MainWindow { spacing, .. } => spacing,
+                            _ => {
+                                error!("Error while doing specific container type");
+                                exit(1);
                             }
-                        })(),
-                        //TODO: apply radius correctly
-                        radius: Radius {
-                            ..Default::default()
-                        },
-                        fill_mode: rule::FillMode::Full,
-                        snap: true
-                    })
-                ],
-                rule::horizontal((|| {
+                        })
+                    )
+                    .direction(Direction::Vertical(Scrollbar::hidden()))
+                    .id(LAUNCHER_SCROLLABLE_ID)
+                    .width(state.config.entry.size.width)
+                ])
+                .padding(match state.config.main_window.specific {
+                    ContainerType::MainWindow { padding, .. } => padding,
+                    _ => {
+                        error!("Error while doing specific container type");
+                        exit(1);
+                    }
+                }),
+                rule::vertical((|| {
                     match state.config.main_window.border {
-                        Some(bor) => bor.bottom_width,
+                        Some(bor) => bor.left_width,
                         None => 0.,
                     }
                 })())
@@ -442,15 +425,28 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
                     fill_mode: rule::FillMode::Full,
                     snap: true
                 })
-            ]
-            .padding(match state.config.main_window.specific {
-                ContainerType::MainWindow { padding, .. } => padding,
-                _ => {
-                    error!("Error while doing specific container type");
-                    exit(1);
+            ],
+            rule::horizontal((|| {
+                match state.config.main_window.border {
+                    Some(bor) => bor.bottom_width,
+                    None => 0.,
                 }
-            }),
-        )
+            })())
+            .style(|_| RuleStyle {
+                color: (|| {
+                    match state.config.input_bar.border {
+                        Some(bor) => bor.color,
+                        None => Color::TRANSPARENT,
+                    }
+                })(),
+                //TODO: apply radius correctly
+                radius: Radius {
+                    ..Default::default()
+                },
+                fill_mode: rule::FillMode::Full,
+                snap: true
+            })
+        ])
         .id(LAUNCHER_CONTAINER_ID)
         .width(state.config.main_window.size.width)
         .height(state.config.main_window.size.height)

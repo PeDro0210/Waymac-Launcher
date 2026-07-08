@@ -1,8 +1,8 @@
 [main_window]
 height = 350
-width = 357
+width = 362
 
-padding = 2
+padding = 4
 spacing = 0
 
 text_color = "#000000"
