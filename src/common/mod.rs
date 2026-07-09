@@ -178,11 +178,6 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
 //TODO: implement view function
 pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
     container(Stack::from_vec(vec![
-        (|| match &state.bg_image_path {
-            Some(path) => image(path),
-            None => image(""),
-        })()
-        .into(),
         container(
             // TODO: implement a stack for having image/color as base-layer and the rest above
             container(column![
@@ -284,6 +279,11 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
                 ..Default::default()
             }),
         )
+        .into(),
+        (|| match &state.bg_image_path {
+            Some(path) => image(shellexpand::tilde(path).to_string()).expand(true),
+            None => image(""),
+        })()
         .into(),
     ]))
     .width(Fill)

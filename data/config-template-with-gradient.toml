@@ -13,7 +13,6 @@ location = "Center"
 
 gradient_angle = 30
 background_colors = ["#808080", "#AA8080", "#AA8089"]
-background_image = "~/Dotfiles/quickshell/images/base-border.png"
 
 
 border.color = "#ff0000"
