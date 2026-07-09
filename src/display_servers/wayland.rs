@@ -37,6 +37,11 @@ impl WaylandApp {
 
         let toml_config = TomlConfig::from_path(arg.config_path.as_str());
 
+        //TODO: implement a big parsing config function
+
+        let bg_image_path = toml_config.main_window.background_image.clone();
+
+        // just for fields that can be copy
         let config = match WayMacConfig::parse_from_toml(toml_config) {
             Ok(config) => config,
             Err(err) => {
@@ -46,7 +51,7 @@ impl WaylandApp {
         };
 
         application(
-            move || boot(&config),
+            move || boot(&config, &bg_image_path),
             WaylandApp::namespace,
             WaylandApp::update,
             WaylandApp::view::<Theme, Renderer>,

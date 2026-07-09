@@ -3,11 +3,13 @@ use std::thread::spawn;
 
 use iced::Length::Fill;
 use iced::widget::container::Style;
+use iced::widget::image;
+use iced::widget::row;
 use iced::widget::scrollable::{Direction, Scrollbar};
 use iced::widget::text_input::Style as TextInputStyle;
 use iced::widget::text_input::default as text_input_default;
 use iced::widget::{Id as IcedId, column, container, operation::focus, text, text_input};
-use iced::widget::{Text, rule, scrollable};
+use iced::widget::{Stack, Text, rule, scrollable, stack};
 use iced::{Background, Border, Color, Element, Length, Size, Subscription, Task};
 
 use iced::{
@@ -175,105 +177,115 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
 
 //TODO: implement view function
 pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
-    container(
-        // TODO: implement a stack for having image/color as base-layer and the rest above
-        container(column![
-            //TODO: Separate launcher  widgets in different functions
-            text_input("", &state.user_input)
-                .on_input(Message::UserInputChanged)
-                .id(LAUNCHER_TEXT_INPUT_ID)
-                .line_height(state.config.input_bar.size.height)
-                .width(state.config.input_bar.size.width)
-                .font(state.config.input_bar.font)
-                .style(|theme, status| TextInputStyle {
-                    background: (|| match state.config.input_bar.background {
-                        Some(bg) => bg,
-                        None => Background::Color(Color::default()),
-                    })(),
-                    border: (|| match state.config.input_bar.border {
-                        Some(bor) => bor,
-                        None => Border {
-                            width: 0.,
-                            ..Default::default()
-                        },
-                    })(),
-                    value: state.config.input_bar.text_color,
-                    ..text_input_default(theme, status)
-                }),
-            scrollable(
-                column(
-                    state
-                        .ui_desktop_entries
-                        .as_ref()
-                        .unwrap_or(&mut Box::new(Vec::new()))
-                        .iter()
-                        .filter_map(|entry| {
-                            let desktop_entry_text: Text = text(entry.name.clone())
-                                .font(state.config.entry.font)
-                                .height(Length::Fixed(state.config.entry.size.height))
-                                .into();
+    container(Stack::from_vec(vec![
+        (|| match &state.bg_image_path {
+            Some(path) => image(path),
+            None => image(""),
+        })()
+        .into(),
+        container(
+            // TODO: implement a stack for having image/color as base-layer and the rest above
+            container(column![
+                //TODO: Separate launcher  widgets in different functions
+                text_input("", &state.user_input)
+                    .on_input(Message::UserInputChanged)
+                    .id(LAUNCHER_TEXT_INPUT_ID)
+                    .line_height(state.config.input_bar.size.height)
+                    .width(state.config.input_bar.size.width)
+                    .font(state.config.input_bar.font)
+                    .style(|theme, status| TextInputStyle {
+                        background: (|| match state.config.input_bar.background {
+                            Some(bg) => bg,
+                            None => Background::Color(Color::default()),
+                        })(),
+                        border: (|| match state.config.input_bar.border {
+                            Some(bor) => bor,
+                            None => Border {
+                                width: 0.,
+                                ..Default::default()
+                            },
+                        })(),
+                        value: state.config.input_bar.text_color,
+                        ..text_input_default(theme, status)
+                    }),
+                scrollable(
+                    column(
+                        state
+                            .ui_desktop_entries
+                            .as_ref()
+                            .unwrap_or(&mut Box::new(Vec::new()))
+                            .iter()
+                            .filter_map(|entry| {
+                                let desktop_entry_text: Text = text(entry.name.clone())
+                                    .font(state.config.entry.font)
+                                    .height(Length::Fixed(state.config.entry.size.height))
+                                    .into();
 
-                            if entry.is_focus {
-                                return Some(
+                                if entry.is_focus {
+                                    return Some(
+                                        desktop_entry_text
+                                            .color(match state.config.entry.specific {
+                                                ContainerType::Entry {
+                                                    focus_text_color, ..
+                                                } => focus_text_color,
+                                                _ => {
+                                                    error!(
+                                                        "Error while doing specific container type"
+                                                    );
+                                                    exit(1);
+                                                }
+                                            })
+                                            .width(Length::Fill)
+                                            .font(state.config.entry.font)
+                                            .into(),
+                                    );
+                                }
+
+                                Some(
                                     desktop_entry_text
-                                        .color(match state.config.entry.specific {
-                                            ContainerType::Entry {
-                                                focus_text_color, ..
-                                            } => focus_text_color,
-                                            _ => {
-                                                error!("Error while doing specific container type");
-                                                exit(1);
-                                            }
-                                        })
+                                        .color(state.config.entry.text_color)
                                         .width(Length::Fill)
-                                        .font(state.config.entry.font)
                                         .into(),
-                                );
-                            }
-
-                            Some(
-                                desktop_entry_text
-                                    .color(state.config.entry.text_color)
-                                    .width(Length::Fill)
-                                    .into(),
-                            )
-                        }),
+                                )
+                            }),
+                    )
+                    .spacing(match state.config.main_window.specific {
+                        ContainerType::MainWindow { spacing, .. } => spacing,
+                        _ => {
+                            error!("Error while doing specific container type");
+                            exit(1);
+                        }
+                    })
                 )
-                .spacing(match state.config.main_window.specific {
-                    ContainerType::MainWindow { spacing, .. } => spacing,
-                    _ => {
-                        error!("Error while doing specific container type");
-                        exit(1);
-                    }
-                })
-            )
-            .direction(Direction::Vertical(Scrollbar::hidden()))
-            .id(LAUNCHER_SCROLLABLE_ID)
-            .width(state.config.entry.size.width)
-        ])
-        .id(LAUNCHER_CONTAINER_ID)
-        .width(state.config.main_window.size.width)
-        .height(state.config.main_window.size.height)
-        .padding(match state.config.main_window.specific {
-            ContainerType::MainWindow { padding, .. } => padding,
-            _ => {
-                error!("Error while doing specific container type");
-                exit(1);
-            }
-        })
-        //TODO: make text_color being exchangble for the toml config
-        .style(|_| Style {
-            background: state.config.main_window.background,
-            border: (|| match state.config.main_window.border {
-                Some(bor) => bor,
-                None => Border {
-                    width: 0.,
-                    ..Default::default()
-                },
-            })(),
-            ..Default::default()
-        }),
-    )
+                .direction(Direction::Vertical(Scrollbar::hidden()))
+                .id(LAUNCHER_SCROLLABLE_ID)
+                .width(state.config.entry.size.width)
+            ])
+            .id(LAUNCHER_CONTAINER_ID)
+            .width(state.config.main_window.size.width)
+            .height(state.config.main_window.size.height)
+            .padding(match state.config.main_window.specific {
+                ContainerType::MainWindow { padding, .. } => padding,
+                _ => {
+                    error!("Error while doing specific container type");
+                    exit(1);
+                }
+            })
+            //TODO: make text_color being exchangble for the toml config
+            .style(|_| Style {
+                background: state.config.main_window.background,
+                border: (|| match state.config.main_window.border {
+                    Some(bor) => bor,
+                    None => Border {
+                        width: 0.,
+                        ..Default::default()
+                    },
+                })(),
+                ..Default::default()
+            }),
+        )
+        .into(),
+    ]))
     .width(Fill)
     .height(Fill)
     .center_x(state.window_size.width)
@@ -281,10 +293,12 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
     .into()
 }
 
-pub fn boot(config: &WayMacConfig) -> (LauncherState, Task<Message>) {
+//TODO: accept the big config with the static size var and the dynamic
+pub fn boot(config: &WayMacConfig, bg_img_path: &Option<String>) -> (LauncherState, Task<Message>) {
     (
         LauncherState {
             config: *config,
+            bg_image_path: bg_img_path.clone(),
             ..Default::default()
         },
         focus(IcedId::new(LAUNCHER_TEXT_INPUT_ID)),
@@ -302,7 +316,8 @@ pub fn subscription(_: &LauncherState) -> Subscription<Message> {
 //TODO: declare LauncherState fields
 #[derive(Default)]
 pub struct LauncherState {
-    config: WayMacConfig, // will neve go for the default (TAKE THAT IN MIND)
+    config: WayMacConfig, // will never go for the default (TAKE THAT IN MIND)
+    bg_image_path: Option<String>,
     user_input: String,
     filtering_cached_entry: bool,
     focus_desktop_entry_id: usize,
