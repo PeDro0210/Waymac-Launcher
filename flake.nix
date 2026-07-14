@@ -1,10 +1,17 @@
 {
-  description = "A nix flake for working with vanilla rust";
+  description = "Cross compiling a rust program using rust-overlay";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-25.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+
     crane.url = "github:ipetkov/crane";
+
     flake-utils.url = "github:numtide/flake-utils";
+
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -12,90 +19,90 @@
       nixpkgs,
       crane,
       flake-utils,
+      rust-overlay,
       ...
     }:
-
     flake-utils.lib.eachDefaultSystem (
-      system:
+      localSystem:
       let
+        # Replace with the system you want to build for
+        crossSystem = "x86_64-linux";
 
-        pkgs = nixpkgs.legacyPackages.${system};
-        craneLib = crane.mkLib pkgs;
+        pkgs = import nixpkgs {
+          inherit crossSystem localSystem;
+          overlays = [ (import rust-overlay) ];
+        };
 
-        linux_libs =
-          if pkgs.stdenv.isLinux then
-            with pkgs;
-            [
+        craneLib = (crane.mkLib pkgs).overrideToolchain (p: p.rust-bin.stable.latest.default);
 
-              xorg.libX11
-              xorg.libXcursor
-              xorg.libXi
-              xorg.libXrandr
-              libxkbcommon
+        crateExpression =
+          {
+            openssl,
+            libiconv,
+            lib,
+            pkg-config,
+            stdenv,
+          }:
+          craneLib.buildPackage {
+            src = craneLib.cleanCargoSource ./.;
+            strictDeps = true;
 
-              alsa-lib
-              wayland # To use the wayland feature
-            ]
-          else
-            [
+            nativeBuildInputs = [
+              pkgs.expat
+              pkgs.fontconfig
+              pkgs.freetype
+              pkgs.freetype.dev
+              pkgs.libGL
+              pkg-config
+              pkgs.vulkan-loader
+              pkgs.xorg.libX11
+              pkgs.xorg.libXcursor
+              pkgs.xorg.libXi
+              pkgs.xorg.libXrandr
+              pkgs.libxkbcommon
+
+              pkgs.alsa-lib
+              pkgs.wayland # To use the wayland feature
 
             ];
 
-        buildInputs =
-          with pkgs;
-          [
-            expat
-            fontconfig
-            freetype
-            freetype.dev
-            libGL
-            pkg-config
-            vulkan-loader
+            buildInputs = [
+              # Add additional build inputs here
+              pkgs.xorg.libX11
+              pkgs.xorg.libXcursor
+              pkgs.xorg.libXi
+              pkgs.xorg.libXrandr
+              pkgs.libxkbcommon
 
-          ]
-          ++ linux_libs;
+              pkgs.alsa-lib
+              pkgs.wayland # To use the wayland feature
 
-        nativeBuildInputs = with pkgs; [
-          glfw
-          cmake
-          clang
-          cargo
-          rustc
-        ];
+              openssl
+            ];
 
-        linkFlag = buildInputs;
+            LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath [
+              # Add additional build inputs here
+              pkgs.xorg.libX11
+              pkgs.xorg.libXcursor
+              pkgs.xorg.libXi
+              pkgs.xorg.libXrandr
+              pkgs.libxkbcommon
 
-        LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath linkFlag}";
-      in
-      {
+              pkgs.alsa-lib
+              pkgs.wayland # To use the wayland feature
 
-        # declaring the build with the naerskLib flake
-        packages.default = craneLib.buildPackage {
-          inherit nativeBuildInputs buildInputs LD_LIBRARY_PATH;
-          src = ./.;
-
-          env = {
-            RUSTFLAGS = "-C link-args=-Wl,-rpath,${pkgs.lib.makeLibraryPath linkFlag}";
+              openssl
+            ]}";
           };
 
+        waymac_launcher = pkgs.callPackage crateExpression { };
+      in
+      {
+        checks = {
+          inherit waymac_launcher;
         };
 
-        templates.default.path = ./.;
-
-        devShell = pkgs.mkShell {
-          inherit nativeBuildInputs buildInputs LD_LIBRARY_PATH;
-
-          packages = with pkgs; [
-            cargo
-            bacon
-            rust-analyzer
-            clippy
-            rustfmt
-            taplo # lsp for cargo.toml
-          ];
-
-        };
-
+        packages.default = waymac_launcher;
       }
     );
 }
