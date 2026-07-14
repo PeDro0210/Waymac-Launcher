@@ -2,10 +2,8 @@
   description = "A nix flake for working with vanilla rust";
 
   inputs = {
-    self.submodules = true;
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-25.11";
     crane.url = "github:ipetkov/crane";
-
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -75,8 +73,6 @@
         packages.default = craneLib.buildPackage {
           inherit nativeBuildInputs buildInputs LD_LIBRARY_PATH;
           src = ./.;
-
-          gitSubModules = true;
 
           env = {
             RUSTFLAGS = "-C link-args=-Wl,-rpath,${pkgs.lib.makeLibraryPath linkFlag}";
