@@ -1,101 +1,134 @@
 {
-  description = "A nix flake for working with vanilla rust";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-25.11";
     crane.url = "github:ipetkov/crane";
-    flake-utils.url = "github:numtide/flake-utils";
   };
 
   outputs =
     {
       nixpkgs,
       crane,
-      flake-utils,
       ...
     }:
-
-    flake-utils.lib.eachDefaultSystem (
-      system:
-      let
-
-        pkgs = nixpkgs.legacyPackages.${system};
-        craneLib = crane.mkLib pkgs;
-
-        linux_libs =
-          if pkgs.stdenv.isLinux then
-            with pkgs;
-            [
-
-              xorg.libX11
-              xorg.libXcursor
-              xorg.libXi
-              xorg.libXrandr
-              libxkbcommon
-
-              alsa-lib
-              wayland # To use the wayland feature
-            ]
-          else
-            [
-
-            ];
-
-        buildInputs =
-          with pkgs;
+    let
+      forAllSystems =
+        function:
+        nixpkgs.lib.genAttrs
           [
-            expat
-            fontconfig
-            freetype
-            freetype.dev
-            libGL
-            pkg-config
-            vulkan-loader
-
+            "x86_64-linux"
+            "aarch64-darwin"
           ]
-          ++ linux_libs;
+          (
+            system:
+            let
+              pkgs = nixpkgs.legacyPackages.${system};
+              linux_libs =
+                if pkgs.stdenv.isLinux then
+                  with pkgs;
+                  [
 
-        nativeBuildInputs = with pkgs; [
-          glfw
-          cmake
-          clang
-          cargo
-          rustc
-        ];
+                    xorg.libX11
+                    xorg.libXcursor
+                    xorg.libXi
+                    xorg.libXrandr
+                    libxkbcommon
 
-        linkFlag = buildInputs;
+                    alsa-lib
+                    wayland # To use the wayland feature
+                  ]
+                else
+                  [
 
-        LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath linkFlag}";
-      in
-      {
+                  ];
 
-        # declaring the build with the naerskLib flake
-        packages.default = craneLib.buildPackage {
-          inherit nativeBuildInputs buildInputs LD_LIBRARY_PATH;
-          src = ./.;
+              buildInputs =
+                with pkgs;
+                [
+                  expat
+                  fontconfig
+                  freetype
+                  freetype.dev
+                  libGL
+                  pkg-config
+                  vulkan-loader
 
-          env = {
-            RUSTFLAGS = "-C link-args=-Wl,-rpath,${pkgs.lib.makeLibraryPath linkFlag}";
-          };
+                ]
+                ++ linux_libs;
 
-        };
+              nativeBuildInputs = with pkgs; [
+                glfw
+                cmake
+                clang
+                cargo
+                rustc
+              ];
 
-        templates.default.path = ./.;
+            in
+            function {
+              inherit
+                pkgs
+                buildInputs
+                nativeBuildInputs
+                ;
 
-        devShell = pkgs.mkShell {
-          inherit nativeBuildInputs buildInputs LD_LIBRARY_PATH;
+            }
+          );
+    in
+    {
 
-          packages = with pkgs; [
-            cargo
-            bacon
-            rust-analyzer
-            clippy
-            rustfmt
-            taplo # lsp for cargo.toml
-          ];
+      # declaring the build with the naerskLib flake
+      packages = forAllSystems (
+        {
+          pkgs,
+          nativeBuildInputs,
+          buildInputs,
+        }:
+        {
+          default =
+            let
+              craneLib = crane.mkLib pkgs;
+            in
+            craneLib.buildPackage {
+              inherit nativeBuildInputs buildInputs;
+              src = ./.;
 
-        };
+              env = {
+                RUSTFLAGS = "-C link-args=-Wl,-rpath,${pkgs.lib.makeLibraryPath buildInputs}";
+              };
 
-      }
-    );
+            };
+        }
+      );
+
+      templates.default.path = ./.;
+
+      devShells = forAllSystems (
+        {
+          pkgs,
+          buildInputs,
+          nativeBuildInputs,
+        }:
+        {
+          default =
+            let
+              LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath buildInputs}";
+            in
+            pkgs.mkShell {
+              inherit nativeBuildInputs buildInputs LD_LIBRARY_PATH;
+
+              packages = with pkgs; [
+                cargo
+                bacon
+                rust-analyzer
+                clippy
+                rustfmt
+                taplo # lsp for cargo.toml
+              ];
+
+            };
+        }
+      );
+
+    };
 }
