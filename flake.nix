@@ -23,6 +23,7 @@
             system:
             let
               pkgs = nixpkgs.legacyPackages.${system};
+
               linux_libs =
                 if pkgs.stdenv.isLinux then
                   with pkgs;
@@ -52,7 +53,6 @@
                   libGL
                   pkg-config
                   vulkan-loader
-
                 ]
                 ++ linux_libs;
 
@@ -62,6 +62,7 @@
                 clang
                 cargo
                 rustc
+                makeWrapper
               ];
 
             in
@@ -88,6 +89,7 @@
           default =
             let
               craneLib = crane.mkLib pkgs;
+              lib = pkgs.lib;
             in
             craneLib.buildPackage {
               inherit nativeBuildInputs buildInputs;
@@ -96,6 +98,11 @@
               env = {
                 RUSTFLAGS = "-C link-args=-Wl,-rpath,${pkgs.lib.makeLibraryPath buildInputs}";
               };
+
+              InstallPhase = ''
+                makeWrapper $out/bin/waymac_launcher $wrapperfile
+                --set PATH ${lib.makeBinPath buildInputs}
+              '';
 
             };
         }
