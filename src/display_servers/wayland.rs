@@ -67,7 +67,7 @@ impl WaylandApp {
                 )),
                 exclusive_zone: 350,
                 anchor: Anchor::Left | Anchor::Right,
-                keyboard_interactivity: KeyboardInteractivity::OnDemand,
+                keyboard_interactivity: KeyboardInteractivity::Exclusive,
                 start_mode,
                 ..Default::default()
             },
