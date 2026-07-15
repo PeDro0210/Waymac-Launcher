@@ -100,8 +100,7 @@
               };
 
               InstallPhase = ''
-                makeWrapper $out/bin/waymac_launcher $wrapperfile
-                --set LD_LIBRARY_PATH ${lib.makeBinPath buildInputs}
+                wrapProgram $out/bin/waymac_launcher --prefix PATH : ${lib.makeBinPath buildInputs}
               '';
 
             };
