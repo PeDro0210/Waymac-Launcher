@@ -96,13 +96,15 @@
               src = ./.;
 
               env = {
-                RUSTFLAGS = "-C link-args=-Wl,-rpath,${pkgs.lib.makeLibraryPath buildInputs}";
+                RUSTFLAGS = "-C link-args=-Wl,-rpath,${lib.makeLibraryPath buildInputs}";
               };
 
-              InstallPhase = ''
-                wrapProgram $out/bin/waymac_launcher --prefix PATH : ${lib.makeBinPath buildInputs}
-              '';
+              installPhase = ''
+                mkdir -p $out/bin
+                cp target/release/waymac_launcher $out/bin/waymac_launcher
 
+                wrapProgram $out/bin/waymac_launcher --prefix PATH : ${lib.makeBinPath buildInputs} --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath buildInputs}
+              '';
             };
         }
       );
