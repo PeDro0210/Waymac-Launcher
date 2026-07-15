@@ -78,7 +78,7 @@
     in
     {
 
-      # declaring the build with the naerskLib flake
+      #TODO: make a darwin and linux different packages
       packages = forAllSystems (
         {
           pkgs,
