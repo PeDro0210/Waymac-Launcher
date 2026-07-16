@@ -28,7 +28,6 @@
                 if pkgs.stdenv.isLinux then
                   with pkgs;
                   [
-
                     dex
                     xorg.libX11
                     xorg.libXcursor

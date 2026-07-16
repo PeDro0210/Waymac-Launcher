@@ -11,7 +11,7 @@ mod util;
 
 use clap::Parser as ArgParser;
 use log::{error, info};
-use std::{env, error::Error as StdError, ffi::OsString};
+use std::{env, error::Error as StdError};
 
 use crate::{
     data::{DEFAULT_CONFIG_PATH_EXTENSION, DEFAULT_DEBUG_DUMP_PATH_EXTENSION},

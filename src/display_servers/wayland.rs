@@ -1,7 +1,11 @@
 use std::error::Error as StdError;
 use std::process::exit;
 
+use crate::config::{app::WayMacConfig, toml::TomlConfig};
 use iced::{Element, Task};
+use iced_core::theme::Style;
+
+use iced::Color;
 
 #[cfg(target_os = "linux")]
 use iced_layershell::{
@@ -26,8 +30,6 @@ pub struct WaylandApp;
 impl WaylandApp {
     pub fn run(arg: &'static Args) -> Result<(), Box<dyn StdError>> {
         //For knowing in which screen to output
-
-        use crate::config::{app::WayMacConfig, toml::TomlConfig};
 
         let binded_output_name = std::env::args().nth(1);
         let start_mode = match binded_output_name {
@@ -65,14 +67,19 @@ impl WaylandApp {
                     config.main_window.size.width as u32,
                     config.main_window.size.height as u32,
                 )),
-                exclusive_zone: 350,
                 anchor: Anchor::Left | Anchor::Right,
                 keyboard_interactivity: KeyboardInteractivity::Exclusive,
                 start_mode,
+                events_transparent: true,
                 ..Default::default()
             },
             ..Default::default()
-        }) // this one
+        })
+        .style(|status, theme| Style {
+            background_color: Color::TRANSPARENT,
+            text_color: Color::WHITE,
+        })
+        // this one
         // are just for debugging
         .run()?;
 

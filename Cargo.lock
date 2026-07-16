@@ -4642,6 +4642,7 @@ dependencies = [
  "freedesktop-file-parser",
  "ftail",
  "iced",
+ "iced_core",
  "iced_layershell",
  "log",
  "serde",
