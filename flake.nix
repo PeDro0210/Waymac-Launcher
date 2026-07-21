@@ -90,6 +90,7 @@
             let
               craneLib = crane.mkLib pkgs;
               lib = pkgs.lib;
+              iced_backend = "tiny-skia";
             in
             craneLib.buildPackage {
               inherit nativeBuildInputs buildInputs;
@@ -103,9 +104,8 @@
                 mkdir -p $out/bin
                 cp target/release/waymac_launcher $out/bin/waymac_launcher
 
-                wrapProgram $out/bin/waymac_launcher --prefix PATH : ${lib.makeBinPath buildInputs} --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath buildInputs}
+                wrapProgram $out/bin/waymac_launcher --prefix PATH : ${lib.makeBinPath buildInputs} --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath buildInputs} --set ICED_BACKEND "${iced_backend}"
 
-                mv $out/bin/.waymac_launcher-wrapped $out/bin/waymac_launcher
               '';
             };
         }

@@ -47,6 +47,11 @@ impl WayMacApp {
             env::var_os("XDG_SESSION_TYPE").unwrap_or_default()
         );
 
+        info!(
+            "ICED_BACKEND: {:?}",
+            env::var_os("ICED_BACKEND").unwrap_or_default()
+        );
+
         match get_supported_display_server_target() {
             SupportedDisplayServer::Wayland =>
             {
