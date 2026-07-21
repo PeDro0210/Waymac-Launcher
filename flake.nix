@@ -104,6 +104,8 @@
                 cp target/release/waymac_launcher $out/bin/waymac_launcher
 
                 wrapProgram $out/bin/waymac_launcher --prefix PATH : ${lib.makeBinPath buildInputs} --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath buildInputs}
+
+                mv $out/bin/.waymac_launcher-wrapped $out/bin/waymac_launcher
               '';
             };
         }
