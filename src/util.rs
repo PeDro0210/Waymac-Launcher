@@ -1,5 +1,3 @@
-use std::{env::home_dir, error::Error, ffi::OsString};
-
 use crate::Args;
 
 pub fn expand_args_paths(args: Args) -> Args {

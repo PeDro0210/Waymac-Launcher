@@ -70,7 +70,6 @@ impl WaylandApp {
                 anchor: Anchor::Left | Anchor::Right,
                 keyboard_interactivity: KeyboardInteractivity::Exclusive,
                 start_mode,
-                events_transparent: true,
                 ..Default::default()
             },
             ..Default::default()
