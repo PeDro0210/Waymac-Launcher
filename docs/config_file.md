@@ -12,19 +12,31 @@ Simple customization is kind of a pretty important point for WayMac, but take in
   - height: unsigned number
   - width: unsigned number
 
-  - padding: unsigned number 
-  - spacing: unsigned number
+  - padding: unsigned decimal number 
+  - spacing: unsigned decimal number
 
   - text-color: hex-val (cascades)
   - font: <font name in system> (cascades and it will fallback to system font)
 
-  - location: "center" | "top" | "bottom" | "right" | "left" (can be chained together)
+  - location: "center" | "top" | "bottom" | "right" | "left" (can be chained together) [Needed but not implemented yet]
 
   - background-image: <path to image> (optional, can be use in case of wanting gradients)
-  - background-color: hex-val (solid color)
+  - background-colors:  various hex-val (solid colors)
 
-  - border-image: <path to image> (optional)
-  - border-radius: unsigned number
+  - gradient_angle: unsigned decimal number (optional)
+
+  (borders are optional)
+  - border.color: hex-val  (solid colors)
+  - border.radius: unsigned number
+  - border.width: unsigned number
+
+  - top_left_radius: unsigned decimal number
+  - bottom_left_radius: unsigned decimal number
+  - top_right_radius: unsigned decimal number
+  - bottom_right_radius: unsigned decimal number
+
+
+
 
 - inputbar:
   - height: unsigned number (limited by main_window)
@@ -39,6 +51,17 @@ Simple customization is kind of a pretty important point for WayMac, but take in
   - border-image: <path to image> (optional)
   - border-radius: unsigned number
 
+  (borders are optional)
+  - border.color: hex-val  (solid colors)
+  - border.radius: unsigned number
+  - border.width: unsigned number
+
+  - top_left_radius: unsigned decimal number
+  - bottom_left_radius: unsigned decimal number
+  - top_right_radius: unsigned decimal number
+  - bottom_right_radius: unsigned decimal number
+
+
 - entry:
   - height: unsigned number (limited by main_window)
   - width: unsigned number (limited by main_window)
@@ -50,8 +73,14 @@ Simple customization is kind of a pretty important point for WayMac, but take in
   - background-image: <path to image> (optional, can be use in case of wanting gradients)
   - background-color: hex-val (solid color)
 
-  - border-image: <path to image> (optional)
-  - border-radius: unsigned number
+  (borders are optional)
+  - border.color: hex-val  (solid colors)
+  - border.radius: unsigned number
+  - border.width: unsigned number
+
+  - top_left_radius: unsigned decimal number
+  - bottom_left_radius: unsigned decimal number
+  - top_right_radius: unsigned decimal number bottom_right_radius: unsigned decimal number
 
 > [about dimensions]
 > most number values which accommodate for a proportion or anything similar are restrain by iced way of handling
