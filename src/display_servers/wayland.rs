@@ -41,16 +41,21 @@ impl WaylandApp {
 
         //TODO: implement a big parsing config function
 
-        let bg_image_path = toml_config.main_window.background_image.clone();
-
         // just for fields that can be copy
-        let config = match WayMacConfig::parse_from_toml(toml_config) {
+        let config = match WayMacConfig::parse_from_toml(&toml_config.as_ref()) {
             Ok(config) => config,
             Err(err) => {
                 error!("Error: {err:?}");
                 exit(1);
             }
         };
+
+        // in case of it to failed, we just fallback to the default for all, for making the error window
+        let bg_image_path = toml_config
+            .unwrap_or_default()
+            .main_window
+            .background_image
+            .clone();
 
         application(
             move || boot(&config, &bg_image_path),

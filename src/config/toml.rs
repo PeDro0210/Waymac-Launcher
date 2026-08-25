@@ -4,10 +4,10 @@ use serde::Deserialize;
 
 use log::error;
 
-use crate::config::app::Location;
+use crate::config::{AppConfigError, app::Location};
 
 // for parsing Toml file to the WayMac config
-#[derive(Deserialize)]
+#[derive(Deserialize, Default)]
 pub struct TomlConfig {
     pub main_window: MainWindow,
     pub inputbar: InputBar,
@@ -15,7 +15,7 @@ pub struct TomlConfig {
 }
 
 impl TomlConfig {
-    pub fn from_path(path: &str) -> Self {
+    pub fn from_path(path: &str) -> Result<Self, AppConfigError> {
         let toml_string_file = &mut String::new();
 
         let mut toml_file = if let Ok(mut file) = File::open(path) {
@@ -29,10 +29,10 @@ impl TomlConfig {
         let _ = toml_file.read_to_string(toml_string_file);
 
         match toml::from_str::<TomlConfig>(toml_string_file.as_str()) {
-            Ok(config) => config,
+            Ok(toml_config) => Ok(toml_config),
             Err(err) => {
                 error!("{err}");
-                exit(1);
+                Err(AppConfigError::TomlConfigParsingError)
             }
         }
     }
@@ -40,7 +40,7 @@ impl TomlConfig {
 
 // not a simple way to be explicit with things in here
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Default)]
 pub struct MainWindow {
     pub height: u32,
     pub width: u32,
@@ -62,7 +62,7 @@ pub struct MainWindow {
     pub border: Option<Border>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Default)]
 pub struct InputBar {
     pub line_height: u32,
     pub width: u32,
@@ -75,7 +75,7 @@ pub struct InputBar {
     pub border: Option<Border>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Default)]
 pub struct Entry {
     pub height: u32,
     pub width: u32,

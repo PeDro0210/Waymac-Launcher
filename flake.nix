@@ -105,6 +105,7 @@
 
                 wrapProgram $out/bin/waymac_launcher --prefix PATH : ${lib.makeBinPath buildInputs} --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath buildInputs}
 
+
               '';
             };
         }

@@ -1,3 +1,6 @@
+mod containers;
+mod util;
+
 use std::process::exit;
 use std::thread::spawn;
 
@@ -22,6 +25,7 @@ use iced::{
 use iced_layershell::to_layer_message;
 use log::{error, info, trace};
 
+use crate::app_launcher;
 use crate::app_launcher::{DesktopEntry, get_desktop_entry, launch_application};
 use crate::common::util::change_focus;
 use crate::config::app::{ContainerType, WayMacConfig};
@@ -29,7 +33,6 @@ use crate::data::{
     LAUNCHER_CONTAINER_ID, LAUNCHER_SCROLLABLE_ID, LAUNCHER_TEXT_INPUT_ID, MAIN_ENTRY_FOCUS_IDX,
 };
 
-mod util;
 //TODO: refactor this in the future
 
 /* GLOBAL UPDATE AND VIEW*/
@@ -175,117 +178,10 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
     }
 }
 
-//TODO: implement view function
+//TODO: implement componenent in case of error
 pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
-    container(Stack::from_vec(vec![
-        // TODO: implement a stack for having image/color as base-layer and the rest above
-        container(column![
-            //TODO: Separate launcher  widgets in different functions
-            text_input("", &state.user_input)
-                .on_input(Message::UserInputChanged)
-                .id(LAUNCHER_TEXT_INPUT_ID)
-                .line_height(state.config.input_bar.size.height)
-                .width(state.config.input_bar.size.width)
-                .font(state.config.input_bar.font)
-                .style(|theme, status| TextInputStyle {
-                    background: (|| match state.config.input_bar.background {
-                        Some(bg) => bg,
-                        None => Background::Color(Color::default()),
-                    })(),
-                    border: (|| match state.config.input_bar.border {
-                        Some(bor) => bor,
-                        None => Border {
-                            width: 0.,
-                            ..Default::default()
-                        },
-                    })(),
-                    value: state.config.input_bar.text_color,
-                    ..text_input_default(theme, status)
-                }),
-            scrollable(
-                column(
-                    state
-                        .ui_desktop_entries
-                        .as_ref()
-                        .unwrap_or(&mut Box::new(Vec::new()))
-                        .iter()
-                        .filter_map(|entry| {
-                            let desktop_entry_text: Text = text(entry.name.clone())
-                                .font(state.config.entry.font)
-                                .height(Length::Fixed(state.config.entry.size.height))
-                                .into();
-
-                            if entry.is_focus {
-                                return Some(
-                                    desktop_entry_text
-                                        .color(match state.config.entry.specific {
-                                            ContainerType::Entry {
-                                                focus_text_color, ..
-                                            } => focus_text_color,
-                                            _ => {
-                                                error!("Error while doing specific container type");
-                                                exit(1);
-                                            }
-                                        })
-                                        .width(Length::Fill)
-                                        .font(state.config.entry.font)
-                                        .into(),
-                                );
-                            }
-
-                            Some(
-                                desktop_entry_text
-                                    .color(state.config.entry.text_color)
-                                    .width(Length::Fill)
-                                    .into(),
-                            )
-                        }),
-                )
-                .spacing(match state.config.main_window.specific {
-                    ContainerType::MainWindow { spacing, .. } => spacing,
-                    _ => {
-                        error!("Error while doing specific container type");
-                        exit(1);
-                    }
-                })
-            )
-            .direction(Direction::Vertical(Scrollbar::hidden()))
-            .id(LAUNCHER_SCROLLABLE_ID)
-            .width(state.config.entry.size.width)
-        ])
-        .id(LAUNCHER_CONTAINER_ID)
-        .style(|_| Style {
-            background: state.config.main_window.background,
-            border: (|| match state.config.main_window.border {
-                Some(bor) => bor,
-                None => Border {
-                    width: 0.,
-                    ..Default::default()
-                },
-            })(),
-            ..Default::default()
-        })
-        .width(state.config.main_window.size.width)
-        .height(state.config.main_window.size.height)
-        .padding(match state.config.main_window.specific {
-            ContainerType::MainWindow { padding, .. } => padding,
-            _ => {
-                error!("Error while doing specific container type");
-                exit(1);
-            }
-        })
-        .into(),
-        (|| match &state.bg_image_path {
-            Some(path) => image(shellexpand::tilde(path).to_string()).expand(true),
-            None => image(""),
-        })()
-        .into(),
-    ]))
-    .width(Fill)
-    .height(Fill)
-    .center_x(state.window_size.width)
-    .center_y(state.window_size.height)
-    .into()
+    //TODO: impl error render
+    containers::app_launcher::view::<Theme, Renderer>(state)
 }
 
 //TODO: accept the big config with the static size var and the dynamic

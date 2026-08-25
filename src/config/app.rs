@@ -8,17 +8,11 @@ use serde::Deserialize;
 
 use log::{debug, error, warn};
 
+use crate::config::AppConfigError;
 use crate::config::toml::{Border as RawBorder, Entry, InputBar, MainWindow, TomlConfig};
 use crate::config::util::ColorHEX;
 
 type TextConfig = (Font, Color);
-
-//TODO: remove pub keyword when done debugging
-#[derive(Debug)]
-pub enum AppConfigError {
-    ColorParsingError,
-    TextConfigParsingError,
-}
 
 // config struct for using directly in WayMacApp
 #[derive(Default, Clone, Copy)]
@@ -94,8 +88,10 @@ impl WayMacConfig {
     }
 
     fn parse_text_config(toml: &TomlConfig) -> Result<TextConfig, AppConfigError> {
-        let raw_main_font = &toml.main_window.font;
-        let raw_main_text_color = &toml.main_window.text_color;
+        let main_window = &toml.main_window;
+
+        let raw_main_font = &main_window.font;
+        let raw_main_text_color = &main_window.text_color;
 
         //TODO: manage font error
         let main_font = Font::with_name(Box::leak(raw_main_font.clone().into_boxed_str())); //leak for
@@ -188,20 +184,31 @@ impl WayMacConfig {
         })
     }
 
-    pub fn parse_from_toml(toml: TomlConfig) -> Result<Self, AppConfigError> {
-        let (main_font, text_color) = WayMacConfig::parse_text_config(&toml)?;
+    pub fn parse_from_toml(
+        toml: &Result<&TomlConfig, &AppConfigError>,
+    ) -> Result<Self, AppConfigError> {
+        if let Err(_) = &toml {
+            return Err(AppConfigError::TextConfigParsingError);
+        }
+        let toml_unwrapped = toml.unwrap();
+
+        let (main_font, text_color) = WayMacConfig::parse_text_config(&toml_unwrapped)?;
         debug!("MAIN FONT: {:?}, TEXT COLOR: {:?}", main_font, text_color);
 
         return Ok(WayMacConfig {
             main_font,
             text_color,
             main_window: WayMacConfig::parse_main_window(
-                &toml.main_window,
+                &toml_unwrapped.main_window,
                 &main_font,
                 &text_color,
             )?,
-            input_bar: WayMacConfig::parse_input_bar(&toml.inputbar, &main_font, &text_color)?,
-            entry: WayMacConfig::parse_entry(&toml.entry, &main_font, &text_color)?,
+            input_bar: WayMacConfig::parse_input_bar(
+                &toml_unwrapped.inputbar,
+                &main_font,
+                &text_color,
+            )?,
+            entry: WayMacConfig::parse_entry(&toml_unwrapped.entry, &main_font, &text_color)?,
         });
     }
 }
@@ -221,8 +228,9 @@ pub enum ContainerType {
     },
 }
 
-#[derive(Deserialize, Clone, Copy)]
+#[derive(Deserialize, Clone, Copy, Default)]
 pub enum Location {
+    #[default]
     Center,
     Top,
     Bottom,
