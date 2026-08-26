@@ -4,6 +4,8 @@
 pub const DEFAULT_CONFIG_PATH_EXTENSION: &str = "~/.config/waymac/waymac.toml";
 
 pub const DEFAULT_DEBUG_DUMP_PATH_EXTENSION: &str = "~/.local/state/waymac.log";
+
+pub const DEFAULT_FALLBACK_CONFIG_PATH_EXTENSION: &str = "~/.local/share/wamymac.toml";
 // this have take in mind being used with the push method of the PathBuf
 
 /*Configs default variables*/
@@ -26,6 +28,10 @@ pub const MAIN_ENTRY_FOCUS_IDX: usize = 0;
 pub const ENTRY_ELEMENTS_HEIGHT: f32 = 25.;
 
 /*Widgets various*/
+
+/*Error Collector*/
+pub const STDOUT_POSTFIX_WAYMAC: &str = "--WAYMAC_ERROR--";
+/*Error Collector*/
 
 /*Widgets Colors*/
 

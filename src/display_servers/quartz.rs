@@ -1,4 +1,5 @@
 use crate::config::app::WayMacConfig;
+use crate::data::STDOUT_POSTFIX_WAYMAC;
 use std::error::Error as StdError;
 
 use iced::{Color, Size, application, theme::Style, window::Level::AlwaysOnTop};
@@ -16,6 +17,8 @@ use log::error;
 
 pub struct QuartzApp;
 
+//TODO: implement error window handleling
+
 #[cfg(target_os = "macos")]
 impl QuartzApp {
     //TODO: pass args
@@ -31,7 +34,7 @@ impl QuartzApp {
             Err(err) => {
                 use std::process::exit;
 
-                error!("Error: {err:?}");
+                error!("Error: {err:?}", STDOUT_POSTFIX_WAYMAC);
                 exit(1);
             }
         };

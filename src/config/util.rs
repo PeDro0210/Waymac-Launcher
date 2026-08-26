@@ -4,6 +4,8 @@ use fhex::FromHex;
 use iced::Color;
 use log::{error, trace};
 
+use crate::data::STDOUT_POSTFIX_WAYMAC;
+
 #[derive(Debug)]
 pub enum ColorHexError {
     NotPrefix,
@@ -19,14 +21,20 @@ pub trait ColorHEX {
 impl ColorHEX for Color {
     fn from_raw_hex(raw_hex: &str) -> Result<Color, ColorHexError> {
         if !raw_hex.starts_with("#") {
-            error!("Raw color {raw_hex} doesn't have '#' prefix");
+            error!(
+                "Raw color {raw_hex} doesn't have '#' prefix, {}",
+                STDOUT_POSTFIX_WAYMAC
+            );
             return Err(ColorHexError::NotPrefix);
         }
 
         let raw_hex_no_prefix = raw_hex.strip_prefix("#").ok_or(ColorHexError::NotPrefix)?;
 
         if raw_hex_no_prefix.len() != 6 {
-            error!("Raw color {raw_hex} is not correct size");
+            error!(
+                "Raw color {raw_hex} is not correct size {}",
+                STDOUT_POSTFIX_WAYMAC
+            );
             return Err(ColorHexError::NotCorrectLenght);
         }
 

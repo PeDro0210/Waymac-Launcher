@@ -11,11 +11,12 @@ use log::{debug, error, warn};
 use crate::config::AppConfigError;
 use crate::config::toml::{Border as RawBorder, Entry, InputBar, MainWindow, TomlConfig};
 use crate::config::util::ColorHEX;
+use crate::data::{DEFAULT_FALLBACK_CONFIG_PATH_EXTENSION, STDOUT_POSTFIX_WAYMAC};
 
 type TextConfig = (Font, Color);
 
 // config struct for using directly in WayMacApp
-#[derive(Default, Clone, Copy)]
+#[derive(Clone, Copy)]
 pub struct WayMacConfig {
     pub main_font: Font,
     pub text_color: Color,
@@ -24,12 +25,56 @@ pub struct WayMacConfig {
     pub entry: ContainerConfig,
 }
 
+// default WayMacConfig will be the fall back in case of failing the config
+impl Default for WayMacConfig {
+    // will be burned for ease of use
+    fn default() -> Self {
+        WayMacConfig {
+            main_font: Font::default(),
+            text_color: Color::default(),
+            main_window: ContainerConfig {
+                size: Size {
+                    width: 350.,
+                    height: 350.,
+                },
+                specific: ContainerType::MainWindow {
+                    location: Location::Center,
+                    padding: 0.,
+                    spacing: 0.,
+                },
+                ..Default::default()
+            },
+            input_bar: ContainerConfig {
+                size: Size {
+                    height: 1.,
+                    width: 350.,
+                },
+                specific: ContainerType::InputBar,
+                ..Default::default()
+            },
+            entry: ContainerConfig {
+                size: Size {
+                    width: 350.,
+                    height: 25.,
+                },
+                specific: ContainerType::Entry {
+                    focus_text_color: Color::default(),
+                },
+                ..Default::default()
+            },
+        }
+    }
+}
+
 impl WayMacConfig {
     fn manage_color_parsing(raw_color: &str) -> Result<Color, AppConfigError> {
         match Color::from_raw_hex(raw_color) {
             Ok(color) => Ok(color),
             Err(err) => {
-                error!("{err:?} while trying to parse color: {}", raw_color);
+                error!(
+                    "{err:?} while trying to parse color: {} {}",
+                    raw_color, STDOUT_POSTFIX_WAYMAC
+                );
                 return Err(AppConfigError::TextConfigParsingError);
             }
         }

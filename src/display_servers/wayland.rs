@@ -43,11 +43,8 @@ impl WaylandApp {
 
         // just for fields that can be copy
         let config = match WayMacConfig::parse_from_toml(&toml_config.as_ref()) {
-            Ok(config) => config,
-            Err(err) => {
-                error!("Error: {err:?}");
-                exit(1);
-            }
+            Ok(waymac_config) => waymac_config,
+            Err(_err) => WayMacConfig::default(),
         };
 
         // in case of it to failed, we just fallback to the default for all, for making the error window

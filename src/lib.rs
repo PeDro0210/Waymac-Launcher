@@ -2,6 +2,7 @@ mod app_launcher;
 
 mod common;
 pub mod config;
+pub mod error_collector;
 
 mod display_servers;
 

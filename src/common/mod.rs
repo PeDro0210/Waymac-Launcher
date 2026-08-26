@@ -4,16 +4,9 @@ mod util;
 use std::process::exit;
 use std::thread::spawn;
 
-use iced::Length::Fill;
-use iced::widget::container::Style;
-use iced::widget::image;
-use iced::widget::row;
 use iced::widget::scrollable::{Direction, Scrollbar};
-use iced::widget::text_input::Style as TextInputStyle;
-use iced::widget::text_input::default as text_input_default;
-use iced::widget::{Id as IcedId, column, container, operation::focus, text, text_input};
-use iced::widget::{Stack, Text, rule, scrollable, stack};
-use iced::{Background, Border, Color, Element, Length, Size, Subscription, Task};
+use iced::widget::{Id as IcedId, operation::focus};
+use iced::{Element, Size, Subscription, Task};
 
 use iced::{
     event,
