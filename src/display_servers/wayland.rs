@@ -31,6 +31,8 @@ impl WaylandApp {
     pub fn run(arg: &'static Args) -> Result<(), Box<dyn StdError>> {
         //For knowing in which screen to output
 
+        use crate::error_collector;
+
         let binded_output_name = std::env::args().nth(1);
         let start_mode = match binded_output_name {
             Some(output) => StartMode::TargetScreen(output),
@@ -55,7 +57,13 @@ impl WaylandApp {
             .clone();
 
         application(
-            move || boot(&config, &bg_image_path),
+            move || {
+                boot(
+                    &config,
+                    &bg_image_path,
+                    error_collector::find_errors_in_stdout(&arg.debug_dump_path),
+                )
+            },
             WaylandApp::namespace,
             WaylandApp::update,
             WaylandApp::view::<Theme, Renderer>,

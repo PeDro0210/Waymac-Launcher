@@ -1,9 +1,8 @@
 use ftail::Ftail;
-use log::info;
 use std::{
     error::Error as StdError,
-    fs::{File, canonicalize, exists},
-    path::{Path, PathBuf},
+    fs::{File, exists},
+    path::Path,
 };
 
 // general Ftail initializer for console log and to a file if given

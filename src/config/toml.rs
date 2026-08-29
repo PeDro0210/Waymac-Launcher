@@ -25,8 +25,8 @@ impl TomlConfig {
             let _ = file.read_to_string(toml_string_file);
             file
         } else {
-            error!("Couldn't open '{path}'");
-            exit(1);
+            error!("Couldn't open '{path}' for toml config");
+            return Err(AppConfigError::TomlConfigParsingError);
         };
 
         let _ = toml_file.read_to_string(toml_string_file);

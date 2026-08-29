@@ -11,7 +11,7 @@ use log::{debug, error, warn};
 use crate::config::AppConfigError;
 use crate::config::toml::{Border as RawBorder, Entry, InputBar, MainWindow, TomlConfig};
 use crate::config::util::ColorHEX;
-use crate::data::{DEFAULT_FALLBACK_CONFIG_PATH_EXTENSION, STDOUT_POSTFIX_WAYMAC};
+use crate::data::STDOUT_POSTFIX_WAYMAC;
 
 type TextConfig = (Font, Color);
 

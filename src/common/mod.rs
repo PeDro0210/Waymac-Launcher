@@ -4,7 +4,6 @@ mod util;
 use std::process::exit;
 use std::thread::spawn;
 
-use iced::widget::scrollable::{Direction, Scrollbar};
 use iced::widget::{Id as IcedId, operation::focus};
 use iced::{Element, Size, Subscription, Task};
 
@@ -16,15 +15,13 @@ use iced::{
 
 #[cfg(target_os = "linux")]
 use iced_layershell::to_layer_message;
-use log::{error, info, trace};
+use log::trace;
 
-use crate::app_launcher;
 use crate::app_launcher::{DesktopEntry, get_desktop_entry, launch_application};
 use crate::common::util::change_focus;
-use crate::config::app::{ContainerType, WayMacConfig};
-use crate::data::{
-    LAUNCHER_CONTAINER_ID, LAUNCHER_SCROLLABLE_ID, LAUNCHER_TEXT_INPUT_ID, MAIN_ENTRY_FOCUS_IDX,
-};
+use crate::config::app::WayMacConfig;
+use crate::data::{LAUNCHER_TEXT_INPUT_ID, MAIN_ENTRY_FOCUS_IDX};
+use crate::error_collector::WaymacErrorVector;
 
 //TODO: refactor this in the future
 
@@ -178,11 +175,16 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
 }
 
 //TODO: accept the big config with the static size var and the dynamic
-pub fn boot(config: &WayMacConfig, bg_img_path: &Option<String>) -> (LauncherState, Task<Message>) {
+pub fn boot(
+    config: &WayMacConfig,
+    bg_img_path: &Option<String>,
+    errors_detected: WaymacErrorVector,
+) -> (LauncherState, Task<Message>) {
     (
         LauncherState {
             config: *config,
             bg_image_path: bg_img_path.clone(),
+            errors_detected,
             ..Default::default()
         },
         focus(IcedId::new(LAUNCHER_TEXT_INPUT_ID)),
@@ -208,6 +210,7 @@ pub struct LauncherState {
     desktop_entries: Option<Vec<DesktopEntry>>,
     cached_desktop_entries: Option<Box<Vec<DesktopEntry>>>,
     ui_desktop_entries: Option<Box<Vec<DesktopEntry>>>,
+    errors_detected: WaymacErrorVector,
     window_size: Size,
 } // cause of the pattern that layer_shell uses, we need to declare an
 // struct which get's in charge of most of our variables.
