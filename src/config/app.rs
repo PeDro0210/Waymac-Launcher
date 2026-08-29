@@ -42,6 +42,7 @@ impl Default for WayMacConfig {
                     padding: 0.,
                     spacing: 0.,
                 },
+                background: Some(Background::Color(Color::BLACK)),
                 ..Default::default()
             },
             input_bar: ContainerConfig {

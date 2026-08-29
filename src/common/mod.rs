@@ -125,6 +125,10 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                         exit(1);
                     }
                     Key::Named(Named::Enter) => {
+                        if state.errors_detected.len() > 0 {
+                            return Task::done(Message::OnError);
+                        }
+
                         let selected_entry = state
                             .ui_desktop_entries
                             .as_ref()
@@ -153,14 +157,20 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
             _ => Task::none(),
         },
         Message::OnOpen(win_event) => match win_event {
-            Opened { size, .. } => Task::batch(vec![
-                Task::perform(get_desktop_entry(), Message::DesktopEntriesFetched),
-                Task::done((|| {
-                    state.focus_desktop_entry_id = MAIN_ENTRY_FOCUS_IDX;
-                    state.window_size = size;
-                    Message::ToogleFocusDesktopEntry(MAIN_ENTRY_FOCUS_IDX, true)
-                })()),
-            ]),
+            Opened { size, .. } => {
+                if state.errors_detected.len() > 0 {
+                    return Task::done(Message::OnError);
+                }
+
+                Task::batch(vec![
+                    Task::perform(get_desktop_entry(), Message::DesktopEntriesFetched),
+                    Task::done((|| {
+                        state.focus_desktop_entry_id = MAIN_ENTRY_FOCUS_IDX;
+                        state.window_size = size;
+                        Message::ToogleFocusDesktopEntry(MAIN_ENTRY_FOCUS_IDX, true)
+                    })()),
+                ])
+            }
             _ => Task::none(),
         },
 
@@ -170,7 +180,9 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
 
 //TODO: implement componenent in case of error
 pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
-    //TODO: impl error render
+    if state.errors_detected.len() > 0 {
+        return containers::error::view::<Theme, Renderer>(state);
+    }
     containers::app_launcher::view::<Theme, Renderer>(state)
 }
 
@@ -228,4 +240,6 @@ pub enum Message {
     OnOpen(iced::window::Event),
 
     ToogleFocusDesktopEntry(usize, bool),
+
+    OnError,
 }
