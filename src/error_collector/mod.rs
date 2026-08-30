@@ -22,13 +22,13 @@ pub fn find_errors_in_stdout(log_path: &String) -> WaymacErrorVector {
     let _ = file.read_to_string(content);
 
     let re = regex!(
-        r"([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9])\s([0-9][0-9]:[0-9][0-9]:[0-9][0-9])\s(ERROR)(\s)([\w]|::+)+(\s)(.*)"
+        r"(([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\s[0-9][0-9]:[0-9][0-9]:[0-9][0-9]\sERROR\s([\w]|::+)+\s)((.|\s)+))(--WAYMAC_ERROR--)"
     );
 
     let mut errors = vec![];
-    for (_, [_, _, _, _, _, _, one_line_error]) in re.captures_iter(content).map(|c| c.extract()) {
-        trace!("error lines: {one_line_error}");
-        errors.push(one_line_error.to_string());
+    for (_, [_, _, _, error_detected, _, _]) in re.captures_iter(content).map(|c| c.extract()) {
+        trace!("error lines: {error_detected}");
+        errors.push(error_detected.to_string());
     }
 
     return errors;

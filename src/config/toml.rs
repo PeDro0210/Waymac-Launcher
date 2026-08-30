@@ -34,7 +34,7 @@ impl TomlConfig {
         match toml::from_str::<TomlConfig>(toml_string_file.as_str()) {
             Ok(toml_config) => Ok(toml_config),
             Err(err) => {
-                error!("{err}, {}", STDOUT_POSTFIX_WAYMAC);
+                error!("{err} {}", STDOUT_POSTFIX_WAYMAC);
                 Err(AppConfigError::TomlConfigParsingError)
             }
         }

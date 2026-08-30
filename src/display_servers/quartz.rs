@@ -34,7 +34,7 @@ impl QuartzApp {
             Err(err) => {
                 use std::process::exit;
 
-                error!("Error: {err:?}", STDOUT_POSTFIX_WAYMAC);
+                error!("Error: {err:?} {}", STDOUT_POSTFIX_WAYMAC);
                 exit(1);
             }
         };

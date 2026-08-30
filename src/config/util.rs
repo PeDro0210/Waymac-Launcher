@@ -22,7 +22,7 @@ impl ColorHEX for Color {
     fn from_raw_hex(raw_hex: &str) -> Result<Color, ColorHexError> {
         if !raw_hex.starts_with("#") {
             error!(
-                "Raw color {raw_hex} doesn't have '#' prefix, {}",
+                "Raw color {raw_hex} doesn't have '#' prefix {}",
                 STDOUT_POSTFIX_WAYMAC
             );
             return Err(ColorHexError::NotPrefix);
