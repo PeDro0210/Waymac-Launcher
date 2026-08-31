@@ -11,8 +11,8 @@ use crate::config::toml::TomlConfig;
 use crate::common::{boot, subscription, update, view};
 use iced::{Renderer, Theme};
 
-#[cfg(target_os = "macos")]
 use crate::error_collector;
+#[cfg(target_os = "macos")]
 use core_graphics::display::CGDisplay;
 use log::error;
 
