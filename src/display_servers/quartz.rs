@@ -12,6 +12,7 @@ use crate::common::{boot, subscription, update, view};
 use iced::{Renderer, Theme};
 
 #[cfg(target_os = "macos")]
+use crate::error_collector;
 use core_graphics::display::CGDisplay;
 use log::error;
 
@@ -27,21 +28,26 @@ impl QuartzApp {
 
         let toml_config = TomlConfig::from_path(arg.config_path.as_str());
 
-        let bg_image_path = toml_config.main_window.background_image.clone();
-
-        let config = match WayMacConfig::parse_from_toml(toml_config) {
-            Ok(config) => config,
-            Err(err) => {
-                use std::process::exit;
-
-                error!("Error: {err:?} {}", STDOUT_POSTFIX_WAYMAC);
-                exit(1);
-            }
+        let config = match WayMacConfig::parse_from_toml(&toml_config.as_ref()) {
+            Ok(waymac_config) => waymac_config,
+            Err(_err) => WayMacConfig::default(),
         };
+
+        let bg_image_path = toml_config
+            .unwrap_or_default()
+            .main_window
+            .background_image
+            .clone();
 
         //TODO: setup correctly for config take in mind
         application(
-            move || boot(&config, &bg_image_path),
+            move || {
+                boot(
+                    &config,
+                    &bg_image_path,
+                    error_collector::find_errors_in_stdout(&arg.debug_dump_path),
+                )
+            },
             update,
             view::<Theme, Renderer>,
         )

@@ -3,9 +3,11 @@ use std::process::exit;
 
 use crate::config::{app::WayMacConfig, toml::TomlConfig};
 use iced::{Element, Task};
-use iced_core::theme::Style;
 
 use iced::Color;
+
+#[cfg(target_os = "linux")]
+use iced_core::theme::Style;
 
 #[cfg(target_os = "linux")]
 use iced_layershell::{
