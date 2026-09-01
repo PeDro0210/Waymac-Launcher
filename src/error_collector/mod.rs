@@ -15,9 +15,6 @@ pub fn find_errors_in_stdout(log_path: &String) -> WaymacErrorVector {
         }
     };
 
-    // not letting anything interfer with the writing for the log
-    let _ = file.lock().unwrap();
-
     let content = &mut String::new();
     let _ = file.read_to_string(content);
 

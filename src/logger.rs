@@ -1,7 +1,7 @@
 use ftail::Ftail;
 use std::{
     error::Error as StdError,
-    fs::{File, exists},
+    fs::{File, exists, remove_file as rm},
     path::Path,
 };
 
@@ -12,6 +12,8 @@ pub fn init_logger(log_path: Option<&str>) -> Result<(), Box<dyn StdError>> {
     if let Some(path) = log_path {
         match exists(path) {
             Ok(_) => {
+                rm(path);
+                File::create_new(Path::new(path))?;
                 logger
                     .single_file_env_level(Path::new(path), false)
                     .init()?;
