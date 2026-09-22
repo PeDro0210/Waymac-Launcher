@@ -1,10 +1,12 @@
 use iced::Task;
+use iced::futures::join;
 use iced::widget::operation::AbsoluteOffset;
 use iced::widget::{Id as IcedId, operation::scroll_by};
 
 use log::info;
 
 use crate::common::{LauncherState, Message};
+use crate::config::app::Location;
 use crate::data::{ENTRY_ELEMENTS_HEIGHT, LAUNCHER_SCROLLABLE_ID};
 
 // given an offset (mostly set by the scroll), change the focus entry in the launcher
@@ -48,4 +50,9 @@ pub fn change_focus(state: &mut LauncherState, offset: i32) -> Task<Message> {
             },
         ),
     ]);
+}
+
+// given the location enum, returns the new pure window location for all containers
+pub fn set_window_location(location: Location) -> (f32, f32) {
+    todo!()
 }

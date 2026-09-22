@@ -14,6 +14,7 @@ use iced::{Renderer, Theme};
 use crate::error_collector;
 #[cfg(target_os = "macos")]
 use core_graphics::display::CGDisplay;
+use log::debug;
 use log::error;
 
 pub struct QuartzApp;
