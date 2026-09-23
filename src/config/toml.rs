@@ -49,6 +49,7 @@ pub struct MainWindow {
     pub width: u32,
 
     pub padding: f32,
+    pub margin: f32,
     pub spacing: f32,
 
     pub text_color: String, // will be parse for RGB triplet

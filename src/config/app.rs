@@ -39,6 +39,7 @@ impl Default for WayMacConfig {
                 },
                 specific: ContainerType::MainWindow {
                     location: Location::Center,
+                    margin: 0.,
                     padding: 0.,
                     spacing: 0.,
                 },
@@ -171,6 +172,7 @@ impl WayMacConfig {
             border,
             specific: ContainerType::MainWindow {
                 location: toml.location,
+                margin: toml.margin,
                 padding: toml.padding,
                 spacing: toml.spacing,
             },
@@ -266,6 +268,7 @@ pub enum ContainerType {
         // location depending the layer
         location: Location,
         padding: f32,
+        margin: f32,
         spacing: f32,
     },
     InputBar,

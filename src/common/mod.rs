@@ -4,6 +4,7 @@ mod util;
 use std::process::exit;
 use std::thread::spawn;
 
+use iced::widget::container;
 use iced::widget::{Id as IcedId, operation::focus};
 use iced::{Element, Size, Subscription, Task};
 
@@ -182,9 +183,16 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
 //TODO: implement componenent in case of error
 pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
     if state.errors_detected.len() > 0 {
-        return containers::error::view::<Theme, Renderer>(state);
+        return containers::error::view::<Theme, Renderer>(state); // it won't even parse the margin
     }
-    containers::app_launcher::view::<Theme, Renderer>(state)
+    container(containers::app_launcher::view::<Theme, Renderer>(state))
+        .padding(match state.config.main_window.specific {
+            ContainerType::MainWindow { margin, .. } => margin,
+            _ => {
+                panic!("Can't happen")
+            }
+        })
+        .into()
 }
 
 //TODO: accept the big config with the static size var and the dynamic
@@ -198,7 +206,6 @@ pub fn boot(
             config: *config,
             bg_image_path: bg_img_path.clone(),
             errors_detected,
-
             ..Default::default()
         },
         focus(IcedId::new(LAUNCHER_TEXT_INPUT_ID)),
