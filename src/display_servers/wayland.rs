@@ -1,6 +1,8 @@
 use std::error::Error as StdError;
 use std::process::exit;
 
+#[cfg(target_os = "linux")]
+use crate::config::app::Location;
 use crate::config::{app::WayMacConfig, toml::TomlConfig};
 use iced::{Element, Task};
 
@@ -33,7 +35,7 @@ impl WaylandApp {
     pub fn run(arg: &'static Args) -> Result<(), Box<dyn StdError>> {
         //For knowing in which screen to output
 
-        use crate::error_collector;
+        use crate::{config::app::ContainerType, error_collector};
 
         let binded_output_name = std::env::args().nth(1);
         let start_mode = match binded_output_name {
@@ -76,10 +78,17 @@ impl WaylandApp {
             layer_settings: LayerShellSettings {
                 layer: Top,
                 size: Some((
-                    config.main_window.size.width as u32,
-                    config.main_window.size.height as u32,
+                    (config.main_window.size.width) as u32,
+                    (config.main_window.size.height) as u32,
                 )),
-                anchor: Anchor::Left | Anchor::Right,
+                anchor: match config.main_window.specific {
+                    ContainerType::MainWindow { location, .. } => {
+                        WaylandApp::location_mapping(location)
+                    }
+                    _ => {
+                        panic!("Can't happen")
+                    }
+                },
                 keyboard_interactivity: KeyboardInteractivity::Exclusive,
                 start_mode,
                 ..Default::default()
@@ -107,5 +116,17 @@ impl WaylandApp {
 
     fn view<Theme, Renderer>(state: &LauncherState) -> Element<Message> {
         view::<Theme, Renderer>(state)
+    }
+
+    fn location_mapping(location: Location) -> Anchor {
+        use iced::advanced::graphics::text::cosmic_text::skrifa::raw::tables::loca::Loca;
+
+        match location {
+            Location::Center => Anchor::Left | Anchor::Right,
+            Location::Top => Anchor::Top,
+            Location::Bottom => Anchor::Bottom,
+            Location::Right => Anchor::Right,
+            Location::Left => Anchor::Left,
+        }
     }
 }

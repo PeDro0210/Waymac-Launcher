@@ -1,7 +1,8 @@
-use iced::Task;
+use clap::error::RichFormatter;
 use iced::futures::join;
 use iced::widget::operation::AbsoluteOffset;
 use iced::widget::{Id as IcedId, operation::scroll_by};
+use iced::{Size, Task};
 
 use log::info;
 
@@ -50,9 +51,4 @@ pub fn change_focus(state: &mut LauncherState, offset: i32) -> Task<Message> {
             },
         ),
     ]);
-}
-
-// given the location enum, returns the new pure window location for all containers
-pub fn set_window_location(location: Location) -> (f32, f32) {
-    todo!()
 }

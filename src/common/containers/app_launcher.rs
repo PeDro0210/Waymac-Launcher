@@ -124,7 +124,5 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
     ]))
     .width(Fill)
     .height(Fill)
-    .center_x(state.window_size.width)
-    .center_y(state.window_size.height)
     .into()
 }

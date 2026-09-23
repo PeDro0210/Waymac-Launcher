@@ -19,7 +19,8 @@ use log::trace;
 
 use crate::app_launcher::{DesktopEntry, get_desktop_entry, launch_application};
 use crate::common::util::change_focus;
-use crate::config::app::WayMacConfig;
+use crate::config::app::{ContainerType, WayMacConfig};
+use crate::config::toml::MainWindow;
 use crate::data::{LAUNCHER_TEXT_INPUT_ID, MAIN_ENTRY_FOCUS_IDX};
 use crate::error_collector::WaymacErrorVector;
 
@@ -197,6 +198,7 @@ pub fn boot(
             config: *config,
             bg_image_path: bg_img_path.clone(),
             errors_detected,
+
             ..Default::default()
         },
         focus(IcedId::new(LAUNCHER_TEXT_INPUT_ID)),
