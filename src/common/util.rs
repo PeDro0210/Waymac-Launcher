@@ -2,7 +2,7 @@ use clap::error::RichFormatter;
 use iced::futures::join;
 use iced::widget::operation::AbsoluteOffset;
 use iced::widget::{Id as IcedId, operation::scroll_by};
-use iced::{Size, Task};
+use iced::{Padding, Size, Task};
 
 use log::info;
 
@@ -51,4 +51,41 @@ pub fn change_focus(state: &mut LauncherState, offset: i32) -> Task<Message> {
             },
         ),
     ]);
+}
+
+// Just for MACOS
+pub fn location_mapping(location: Location, window_size: Size, margin: f32) -> Padding {
+    match location {
+        Location::Center => Padding {
+            top: window_size.height + margin,
+            right: margin,
+            bottom: margin,
+            left: window_size.width * 2. + margin,
+        },
+        Location::Top => Padding {
+            top: margin,
+            right: margin,
+            bottom: margin,
+            left: window_size.width * 2.,
+        },
+        //TODO: fix the positions basesd on the size of the main window for the offset
+        Location::Bottom => Padding {
+            top: window_size.height * 2.2 + margin, // meh, close enough... will improve later
+            right: margin,
+            bottom: margin,
+            left: window_size.width * 2. + margin,
+        },
+        Location::Right => Padding {
+            top: window_size.height,
+            right: margin,
+            bottom: margin,
+            left: window_size.width * 3.9 + margin,
+        },
+        Location::Left => Padding {
+            top: window_size.height + margin,
+            right: margin,
+            bottom: margin,
+            left: margin,
+        },
+    }
 }

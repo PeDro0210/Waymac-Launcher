@@ -6,7 +6,7 @@ use std::thread::spawn;
 
 use iced::widget::container;
 use iced::widget::{Id as IcedId, operation::focus};
-use iced::{Element, Size, Subscription, Task};
+use iced::{Element, Padding, Size, Subscription, Task};
 
 use iced::{
     event,
@@ -19,7 +19,7 @@ use iced_layershell::to_layer_message;
 use log::trace;
 
 use crate::app_launcher::{DesktopEntry, get_desktop_entry, launch_application};
-use crate::common::util::change_focus;
+use crate::common::util::{change_focus, location_mapping};
 use crate::config::app::{ContainerType, WayMacConfig};
 use crate::config::toml::MainWindow;
 use crate::data::{LAUNCHER_TEXT_INPUT_ID, MAIN_ENTRY_FOCUS_IDX};
@@ -185,13 +185,20 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
     if state.errors_detected.len() > 0 {
         return containers::error::view::<Theme, Renderer>(state); // it won't even parse the margin
     }
-    container(containers::app_launcher::view::<Theme, Renderer>(state))
+    // depending on target
+    #[cfg(target_os = "linux")]
+    return container(containers::app_launcher::view::<Theme, Renderer>(state))
         .padding(match state.config.main_window.specific {
             ContainerType::MainWindow { margin, .. } => margin,
             _ => {
                 panic!("Can't happen")
             }
         })
+        .into();
+
+    #[cfg(target_os = "macos")]
+    container(containers::app_launcher::view::<Theme, Renderer>(state))
+        .padding(state.window_padding_for_margins.unwrap())
         .into()
 }
 
@@ -206,6 +213,21 @@ pub fn boot(
             config: *config,
             bg_image_path: bg_img_path.clone(),
             errors_detected,
+            window_padding_for_margins: Some(location_mapping(
+                match config.main_window.specific {
+                    ContainerType::MainWindow { location, .. } => location,
+                    _ => {
+                        panic!("Can't happen")
+                    }
+                },
+                config.main_window.size,
+                match config.main_window.specific {
+                    ContainerType::MainWindow { margin, .. } => margin,
+                    _ => {
+                        panic!("Can't happen")
+                    }
+                },
+            )),
             ..Default::default()
         },
         focus(IcedId::new(LAUNCHER_TEXT_INPUT_ID)),
@@ -232,6 +254,7 @@ pub struct LauncherState {
     cached_desktop_entries: Option<Box<Vec<DesktopEntry>>>,
     ui_desktop_entries: Option<Box<Vec<DesktopEntry>>>,
     errors_detected: WaymacErrorVector,
+    window_padding_for_margins: Option<Padding>, //Just for MACOS target
     window_size: Size,
 } // cause of the pattern that layer_shell uses, we need to declare an
 // struct which get's in charge of most of our variables.

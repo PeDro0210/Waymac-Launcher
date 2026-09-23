@@ -1,5 +1,7 @@
 mod utils;
 
+use log::{debug, info, warn};
+use std::process::Command;
 use std::{
     fs::{File, ReadDir, read_dir},
     io::Error as StdError,
@@ -7,10 +9,6 @@ use std::{
     process::exit,
     vec::Vec,
 };
-
-use std::process::Command;
-
-use log::{debug, info, warn};
 
 #[cfg(target_os = "linux")]
 use xdg::BaseDirectories;

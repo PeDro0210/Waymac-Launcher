@@ -2,6 +2,10 @@ use crate::config::app::WayMacConfig;
 use crate::data::STDOUT_POSTFIX_WAYMAC;
 use std::error::Error as StdError;
 
+#[cfg(target_os = "macos")]
+use iced::Padding;
+#[cfg(target_os = "macos")]
+use iced::keyboard::Location;
 use iced::{Color, Size, application, theme::Style, window::Level::AlwaysOnTop};
 
 #[cfg(target_os = "macos")]
