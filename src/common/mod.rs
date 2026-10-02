@@ -217,9 +217,7 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
         Some(margins) => container(containers::app_launcher::view::<Theme, Renderer>(state))
             .padding(margins)
             .into(),
-        None => container(containers::app_launcher::view::<Theme, Renderer>(state))
-            .padding(Padding::default())
-            .into(),
+        None => container("").padding(Padding::default()).into(),
     }
 }
 
