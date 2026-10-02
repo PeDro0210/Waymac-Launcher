@@ -4,7 +4,14 @@ mod util;
 use std::process::exit;
 use std::thread::spawn;
 
+#[cfg(target_os = "macos")]
+use iced::Color;
+#[cfg(target_os = "macos")]
+use iced::advanced::graphics::mesh::SolidVertex2D;
+#[cfg(target_os = "macos")]
+use iced::overlay::menu::Catalog;
 use iced::widget::container;
+use iced::widget::container::Style;
 use iced::widget::{Id as IcedId, operation::focus};
 use iced::{Element, Padding, Size, Subscription, Task};
 
@@ -217,7 +224,13 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
         Some(margins) => container(containers::app_launcher::view::<Theme, Renderer>(state))
             .padding(margins)
             .into(),
-        None => container("").padding(Padding::default()).into(),
+        // takes a bit longer loading, cause the widget loads first, but without dimentions so it
+        // doesn't appear on screen, while waiting for the margins assignment
+        None => container(containers::app_launcher::view::<Theme, Renderer>(state))
+            .padding(Padding::default())
+            .width(0)
+            .height(0)
+            .into(),
     }
 }
 
