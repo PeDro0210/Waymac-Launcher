@@ -169,6 +169,22 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                     Task::done((|| {
                         state.focus_desktop_entry_id = MAIN_ENTRY_FOCUS_IDX;
                         state.window_size = size;
+                        state.window_padding_for_margins = Some(location_mapping(
+                            match state.config.main_window.specific {
+                                ContainerType::MainWindow { location, .. } => location,
+                                _ => {
+                                    panic!("Can't happen")
+                                }
+                            },
+                            state.window_size,
+                            match state.config.main_window.specific {
+                                ContainerType::MainWindow { margin, .. } => margin,
+                                _ => {
+                                    panic!("Can't happen")
+                                }
+                            },
+                            state.config.main_window.size,
+                        ));
                         Message::ToogleFocusDesktopEntry(MAIN_ENTRY_FOCUS_IDX, true)
                     })()),
                 ])
@@ -197,9 +213,14 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
         .into();
 
     #[cfg(target_os = "macos")]
-    container(containers::app_launcher::view::<Theme, Renderer>(state))
-        .padding(state.window_padding_for_margins.unwrap())
-        .into()
+    match state.window_padding_for_margins {
+        Some(margins) => container(containers::app_launcher::view::<Theme, Renderer>(state))
+            .padding(margins)
+            .into(),
+        None => container(containers::app_launcher::view::<Theme, Renderer>(state))
+            .padding(Padding::default())
+            .into(),
+    }
 }
 
 //TODO: accept the big config with the static size var and the dynamic
@@ -213,21 +234,6 @@ pub fn boot(
             config: *config,
             bg_image_path: bg_img_path.clone(),
             errors_detected,
-            window_padding_for_margins: Some(location_mapping(
-                match config.main_window.specific {
-                    ContainerType::MainWindow { location, .. } => location,
-                    _ => {
-                        panic!("Can't happen")
-                    }
-                },
-                config.main_window.size,
-                match config.main_window.specific {
-                    ContainerType::MainWindow { margin, .. } => margin,
-                    _ => {
-                        panic!("Can't happen")
-                    }
-                },
-            )),
             ..Default::default()
         },
         focus(IcedId::new(LAUNCHER_TEXT_INPUT_ID)),

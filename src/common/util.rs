@@ -4,7 +4,7 @@ use iced::widget::operation::AbsoluteOffset;
 use iced::widget::{Id as IcedId, operation::scroll_by};
 use iced::{Padding, Size, Task};
 
-use log::info;
+use log::{debug, info};
 
 use crate::common::{LauncherState, Message};
 use crate::config::app::Location;
@@ -54,38 +54,48 @@ pub fn change_focus(state: &mut LauncherState, offset: i32) -> Task<Message> {
 }
 
 // Just for MACOS
-pub fn location_mapping(location: Location, window_size: Size, margin: f32) -> Padding {
+pub fn location_mapping(
+    location: Location,
+    window_size: Size,
+    margin: f32,
+    launceher_size: Size,
+) -> Padding {
+    // window height does have an offset relative to the island
+    debug!(
+        "height: {}, widht: {}",
+        window_size.height, window_size.width
+    );
     match location {
         Location::Center => Padding {
-            top: window_size.height + margin,
-            right: margin,
-            bottom: margin,
-            left: window_size.width * 2. + margin,
+            top: (window_size.height / 2.) - (launceher_size.height / 2.),
+            bottom: 0.,
+            left: (window_size.width / 2.) - (launceher_size.width / 2.),
+            right: 0.,
         },
         Location::Top => Padding {
             top: margin,
             right: margin,
             bottom: margin,
-            left: window_size.width * 2.,
+            left: (window_size.width / 2.) - (launceher_size.width / 2.),
         },
         //TODO: fix the positions basesd on the size of the main window for the offset
         Location::Bottom => Padding {
-            top: window_size.height * 2.2 + margin, // meh, close enough... will improve later
+            top: (window_size.height) - (launceher_size.height), // meh, close enough... will improve later
             right: margin,
             bottom: margin,
-            left: window_size.width * 2. + margin,
-        },
-        Location::Right => Padding {
-            top: window_size.height,
-            right: margin,
-            bottom: margin,
-            left: window_size.width * 3.9 + margin,
+            left: (window_size.width / 2.) - (launceher_size.width / 2.),
         },
         Location::Left => Padding {
-            top: window_size.height + margin,
+            top: (window_size.height / 2.) - (launceher_size.height / 2.),
             right: margin,
             bottom: margin,
-            left: margin,
+            left: 0.,
+        },
+        Location::Right => Padding {
+            top: (window_size.height / 2.) - (launceher_size.height / 2.),
+            right: margin,
+            bottom: margin,
+            left: (window_size.width) - (launceher_size.width),
         },
     }
 }
