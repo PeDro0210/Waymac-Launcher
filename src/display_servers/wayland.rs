@@ -29,6 +29,8 @@ use log::error;
 
 pub struct WaylandApp;
 
+//TODO: do a wrapper for view
+
 #[cfg(target_os = "linux")]
 // Implementation for the just initialzation for the daemon
 impl WaylandApp {

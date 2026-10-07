@@ -4,20 +4,19 @@ mod util;
 use std::process::exit;
 use std::thread::spawn;
 
-#[cfg(target_os = "macos")]
 use iced::Color;
-#[cfg(target_os = "macos")]
 use iced::advanced::graphics::mesh::SolidVertex2D;
-#[cfg(target_os = "macos")]
 use iced::overlay::menu::Catalog;
 use iced::widget::container;
 use iced::widget::container::Style;
 use iced::widget::{Id as IcedId, operation::focus};
+use iced::window::Settings;
 use iced::{Element, Padding, Size, Subscription, Task};
 
 use iced::{
     event,
     keyboard::{Event::KeyPressed, Key, key::Named},
+    window,
     window::Event::Opened,
 };
 
@@ -165,46 +164,43 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
             }
             _ => Task::none(),
         },
-        Message::OnOpen(win_event) => match win_event {
-            Opened { size, .. } => {
-                if state.errors_detected.len() > 0 {
-                    return Task::done(Message::OnError);
-                }
-
-                Task::batch(vec![
-                    Task::perform(get_desktop_entry(), Message::DesktopEntriesFetched),
-                    Task::done((|| {
-                        state.focus_desktop_entry_id = MAIN_ENTRY_FOCUS_IDX;
-                        state.window_size = size;
-                        state.window_padding_for_margins = Some(location_mapping(
-                            match state.config.main_window.specific {
-                                ContainerType::MainWindow { location, .. } => location,
-                                _ => {
-                                    panic!("Can't happen")
-                                }
-                            },
-                            state.window_size,
-                            match state.config.main_window.specific {
-                                ContainerType::MainWindow { margin, .. } => margin,
-                                _ => {
-                                    panic!("Can't happen")
-                                }
-                            },
-                            state.config.main_window.size,
-                        ));
-                        Message::ToogleFocusDesktopEntry(MAIN_ENTRY_FOCUS_IDX, true)
-                    })()),
-                ])
+        Message::WindowOpened(id) => {
+            if state.errors_detected.len() > 0 {
+                return Task::done(Message::OnError);
             }
-            _ => Task::none(),
-        },
+
+            Task::batch(vec![
+                Task::perform(get_desktop_entry(), Message::DesktopEntriesFetched),
+                Task::done((|| {
+                    state.focus_desktop_entry_id = MAIN_ENTRY_FOCUS_IDX;
+                    state.window_size = state.config.main_window.size;
+                    state.window_padding_for_margins = Some(location_mapping(
+                        match state.config.main_window.specific {
+                            ContainerType::MainWindow { location, .. } => location,
+                            _ => {
+                                panic!("Can't happen")
+                            }
+                        },
+                        state.window_size,
+                        match state.config.main_window.specific {
+                            ContainerType::MainWindow { margin, .. } => margin,
+                            _ => {
+                                panic!("Can't happen")
+                            }
+                        },
+                        state.config.main_window.size,
+                    ));
+                    Message::ToogleFocusDesktopEntry(MAIN_ENTRY_FOCUS_IDX, true)
+                })()),
+            ])
+        }
 
         _ => Task::none(),
     }
 }
 
 //TODO: implement componenent in case of error
-pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
+pub fn view<Theme, Renderer>(state: &LauncherState, id: window::Id) -> Element<'_, Message> {
     if state.errors_detected.len() > 0 {
         return containers::error::view::<Theme, Renderer>(state); // it won't even parse the margin
     }
@@ -240,6 +236,13 @@ pub fn boot(
     bg_img_path: &Option<String>,
     errors_detected: WaymacErrorVector,
 ) -> (LauncherState, Task<Message>) {
+    let (_, open) = window::open(Settings {
+        level: window::Level::AlwaysOnTop,
+        decorations: false,
+        transparent: true,
+        resizable: false,
+        ..Default::default()
+    });
     (
         LauncherState {
             config: *config,
@@ -247,14 +250,13 @@ pub fn boot(
             errors_detected,
             ..Default::default()
         },
-        focus(IcedId::new(LAUNCHER_TEXT_INPUT_ID)),
+        open.map(Message::WindowOpened),
     )
 }
 
 pub fn subscription(_: &LauncherState) -> Subscription<Message> {
     event::listen_with(|event, _status, _id| match event {
         iced::Event::Keyboard(k) => Some(Message::KeyboardEvent(k)),
-        iced::Event::Window(e) => Some(Message::OnOpen(e)),
         _ => None,
     })
 }
@@ -286,7 +288,7 @@ pub enum Message {
     UserInputFocus,
 
     KeyboardEvent(iced::keyboard::Event),
-    OnOpen(iced::window::Event),
+    WindowOpened(window::Id),
 
     ToogleFocusDesktopEntry(usize, bool),
 
