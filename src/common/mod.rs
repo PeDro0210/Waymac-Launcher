@@ -173,33 +173,33 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
             Task::batch(vec![
                 Task::perform(get_desktop_entry(), Message::DesktopEntriesFetched),
                 focus(IcedId::new(LAUNCHER_TEXT_INPUT_ID)),
-                window::monitor_size(id).and_then(|monitor_size: Size| {
-                    Task::done(Message::SetWindowSize(monitor_size))
-                }),
-                Task::done((|| {
-                    state.focus_desktop_entry_id = MAIN_ENTRY_FOCUS_IDX;
+                window::monitor_size(id)
+                    .and_then(|monitor_size: Size| Task::done(Message::SetWindowSize(monitor_size)))
+                    .chain(Task::done((|| {
+                        state.focus_desktop_entry_id = MAIN_ENTRY_FOCUS_IDX;
 
-                    state.window_padding_for_margins = Some(location_mapping(
-                        match state.config.main_window.specific {
-                            ContainerType::MainWindow { location, .. } => location,
-                            _ => {
-                                panic!("Can't happen")
-                            }
-                        },
-                        state.window_size,
-                        match state.config.main_window.specific {
-                            ContainerType::MainWindow { margin, .. } => margin,
-                            _ => {
-                                panic!("Can't happen")
-                            }
-                        },
-                        state.config.main_window.size,
-                    ));
-                    Message::ToogleFocusDesktopEntry(MAIN_ENTRY_FOCUS_IDX, true)
-                })()),
+                        state.window_padding_for_margins = Some(location_mapping(
+                            match state.config.main_window.specific {
+                                ContainerType::MainWindow { location, .. } => location,
+                                _ => {
+                                    panic!("Can't happen")
+                                }
+                            },
+                            state.window_size,
+                            match state.config.main_window.specific {
+                                ContainerType::MainWindow { margin, .. } => margin,
+                                _ => {
+                                    panic!("Can't happen")
+                                }
+                            },
+                            state.config.main_window.size,
+                        ));
+                        Message::ToogleFocusDesktopEntry(MAIN_ENTRY_FOCUS_IDX, true)
+                    })())),
             ])
         }
         Message::SetWindowSize(size) => {
+            debug!("WINDOW_SIZE: {size:?}");
             state.window_size = size;
             Task::none()
         }
