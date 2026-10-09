@@ -173,28 +173,11 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
             Task::batch(vec![
                 Task::perform(get_desktop_entry(), Message::DesktopEntriesFetched),
                 focus(IcedId::new(LAUNCHER_TEXT_INPUT_ID)),
+                window::monitor_size(id).and_then(|monitor_size: Size| {
+                    Task::done(Message::SetWindowSize(monitor_size))
+                }),
                 Task::done((|| {
                     state.focus_desktop_entry_id = MAIN_ENTRY_FOCUS_IDX;
-
-                    let mut monitor_size: (f32, f32) = (0., 0.);
-
-                    let _ = window::monitor_size(id).map(move |monitor_size_closure| {
-                        match monitor_size_closure {
-                            Some(size) => {
-                                monitor_size.0 = size.height;
-                                monitor_size.1 = size.width;
-                            }
-                            None => {}
-                        }
-                    });
-
-                    debug!("MONITOR_SIZE: {} {}", monitor_size.0, monitor_size.1);
-
-                    // just a dummy for having a size for the meantime
-                    state.window_size = Size {
-                        height: monitor_size.0,
-                        width: monitor_size.1,
-                    };
 
                     state.window_padding_for_margins = Some(location_mapping(
                         match state.config.main_window.specific {
@@ -216,7 +199,10 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                 })()),
             ])
         }
-
+        Message::SetWindowSize(size) => {
+            state.window_size = size;
+            Task::none()
+        }
         _ => Task::none(),
     }
 }
@@ -329,6 +315,7 @@ pub enum Message {
     UserInputFocus,
 
     KeyboardEvent(iced::keyboard::Event),
+    SetWindowSize(Size),
     WindowOpened(window::Id),
 
     ToogleFocusDesktopEntry(usize, bool),
