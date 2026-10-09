@@ -180,7 +180,10 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
 
                     let _ = window::monitor_size(id).map(move |monitor_size_closure| {
                         match monitor_size_closure {
-                            Some(size) => monitor_size = (size.height, size.width),
+                            Some(size) => {
+                                monitor_size.0 = size.height;
+                                monitor_size.1 = size.width;
+                            }
                             None => {}
                         }
                     });
