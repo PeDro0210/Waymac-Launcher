@@ -30,6 +30,8 @@ pub struct QuartzApp;
 impl QuartzApp {
     //TODO: pass args
     pub fn run(arg: &'static Args) -> Result<(), Box<dyn StdError>> {
+        use iced::application::ThemeFn;
+
         let display_pre_info = CGDisplay::main();
 
         let toml_config = TomlConfig::from_path(arg.config_path.as_str());
@@ -85,6 +87,10 @@ impl QuartzApp {
             update,
             view::<Theme, Renderer>,
         )
+        .style(|_, _| Style {
+            background_color: Color::TRANSPARENT,
+            text_color: Color::WHITE,
+        })
         .subscription(subscription)
         .run()?;
         Ok(())

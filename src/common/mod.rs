@@ -4,13 +4,14 @@ mod util;
 use std::process::exit;
 use std::thread::spawn;
 
-use iced::Color;
+use iced::Length;
 use iced::advanced::graphics::mesh::SolidVertex2D;
 use iced::overlay::menu::Catalog;
-use iced::widget::container;
 use iced::widget::container::Style;
 use iced::widget::{Id as IcedId, operation::focus};
+use iced::widget::{container, operation};
 use iced::window::Settings;
+use iced::{Color, Window};
 use iced::{Element, Padding, Size, Subscription, Task};
 
 use iced::{
@@ -171,9 +172,13 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
 
             Task::batch(vec![
                 Task::perform(get_desktop_entry(), Message::DesktopEntriesFetched),
+                focus(IcedId::new(LAUNCHER_TEXT_INPUT_ID)),
                 Task::done((|| {
                     state.focus_desktop_entry_id = MAIN_ENTRY_FOCUS_IDX;
+
+                    // just a dummy for having a size for the meantime
                     state.window_size = state.config.main_window.size;
+
                     state.window_padding_for_margins = Some(location_mapping(
                         match state.config.main_window.specific {
                             ContainerType::MainWindow { location, .. } => location,
