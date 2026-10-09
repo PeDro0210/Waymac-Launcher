@@ -23,7 +23,7 @@ use iced::{
 
 #[cfg(target_os = "linux")]
 use iced_layershell::to_layer_message;
-use log::trace;
+use log::{debug, trace};
 
 use crate::app_launcher::{DesktopEntry, get_desktop_entry, launch_application};
 use crate::common::util::{change_focus, location_mapping};
@@ -176,8 +176,22 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                 Task::done((|| {
                     state.focus_desktop_entry_id = MAIN_ENTRY_FOCUS_IDX;
 
+                    let mut monitor_size: (f32, f32) = (0., 0.);
+
+                    let _ = window::monitor_size(id).map(move |monitor_size_closure| {
+                        match monitor_size_closure {
+                            Some(size) => monitor_size = (size.height, size.width),
+                            None => {}
+                        }
+                    });
+
+                    debug!("MONITOR_SIZE: {} {}", monitor_size.0, monitor_size.1);
+
                     // just a dummy for having a size for the meantime
-                    state.window_size = state.config.main_window.size;
+                    state.window_size = Size {
+                        height: monitor_size.0,
+                        width: monitor_size.1,
+                    };
 
                     state.window_padding_for_margins = Some(location_mapping(
                         match state.config.main_window.specific {
@@ -209,6 +223,7 @@ pub fn view<Theme, Renderer>(state: &LauncherState, id: window::Id) -> Element<'
     if state.errors_detected.len() > 0 {
         return containers::error::view::<Theme, Renderer>(state); // it won't even parse the margin
     }
+
     // depending on target
     #[cfg(target_os = "linux")]
     return container(containers::app_launcher::view::<Theme, Renderer>(state))
@@ -235,7 +250,9 @@ pub fn view<Theme, Renderer>(state: &LauncherState, id: window::Id) -> Element<'
     }
 }
 
+// different opens
 //TODO: accept the big config with the static size var and the dynamic
+#[cfg(target_os = "macos")]
 pub fn boot(
     config: &WayMacConfig,
     bg_img_path: &Option<String>,
@@ -259,6 +276,22 @@ pub fn boot(
     )
 }
 
+#[cfg(target_os = "linux")]
+pub fn boot(
+    config: &WayMacConfig,
+    bg_img_path: &Option<String>,
+    errors_detected: WaymacErrorVector,
+) -> (LauncherState, Task<Message>) {
+    (
+        LauncherState {
+            config: *config,
+            bg_image_path: bg_img_path.clone(),
+            errors_detected,
+            ..Default::default()
+        },
+        Task::done(Message::WindowOpened(iced::window::Id::unique())),
+    )
+}
 pub fn subscription(_: &LauncherState) -> Subscription<Message> {
     event::listen_with(|event, _status, _id| match event {
         iced::Event::Keyboard(k) => Some(Message::KeyboardEvent(k)),

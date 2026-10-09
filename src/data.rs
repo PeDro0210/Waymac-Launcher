@@ -18,6 +18,7 @@ pub const LAUNCHER_CONTAINER_ID: &str = "LauncherID";
 
 pub const LAUNCHER_SCROLLABLE_ID: &str = "LauncherScrollableID";
 
+pub const DUMMY_VALUE_FOR_BOOT: u32 = 0;
 /*Widgets Ids*/
 
 /*Widgets various*/

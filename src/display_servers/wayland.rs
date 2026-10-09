@@ -13,7 +13,7 @@ use iced_core::theme::Style;
 
 #[cfg(target_os = "linux")]
 use iced_layershell::{
-    Settings, application,
+    Settings, application, daemon,
     reexport::{Anchor, KeyboardInteractivity, Layer::Top},
     settings::{LayerShellSettings, StartMode},
 };
@@ -62,7 +62,7 @@ impl WaylandApp {
             .background_image
             .clone();
 
-        application(
+        daemon(
             move || {
                 boot(
                     &config,
@@ -116,8 +116,8 @@ impl WaylandApp {
         update(state, msg)
     }
 
-    fn view<Theme, Renderer>(state: &LauncherState) -> Element<Message> {
-        view::<Theme, Renderer>(state)
+    fn view<Theme, Renderer>(state: &LauncherState, id: iced::window::Id) -> Element<Message> {
+        view::<Theme, Renderer>(state, id)
     }
 
     fn location_mapping(location: Location) -> Anchor {
