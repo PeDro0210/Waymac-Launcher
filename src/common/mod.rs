@@ -86,6 +86,7 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                 return Task::future(async move { desktop_filter_join.join().unwrap() });
             }
 
+            //JUST FOR DEBUGGIn
             Task::none()
         }
 
@@ -175,8 +176,8 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
             Task::batch(vec![
                 Task::perform(get_desktop_entry(), Message::DesktopEntriesFetched),
                 focus(IcedId::new(LAUNCHER_TEXT_INPUT_ID)),
-                window::size(id)
-                    .then(move |window_size: Size| {
+                window::monitor_size(id)
+                    .and_then(move |window_size: Size| {
                         Task::done(Message::SetWindowSize(id, window_size))
                     })
                     .chain(Task::done((|| {
@@ -187,7 +188,6 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
             ])
         }
         Message::SetWindowSize(id, size) => {
-            debug!("WINDOW_SIZE: {size:?}");
             state.window_size = size;
             state.window_padding_for_margins = Some(location_mapping(
                 match state.config.main_window.specific {
@@ -205,7 +205,7 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                 },
                 state.config.main_window.size,
             ));
-            Task::none()
+            move_to(id, Point { x: 0., y: 0. }).chain(resize(id, size))
         }
         //TODO: setup set margin after the window size is acquiared
         _ => Task::none(),
@@ -218,6 +218,7 @@ pub fn view<Theme, Renderer>(state: &LauncherState, id: window::Id) -> Element<'
         return containers::error::view::<Theme, Renderer>(state); // it won't even parse the margin
     }
 
+    debug!("WINDOW_SIZE: {:?}", state.window_size);
     // depending on target
     #[cfg(target_os = "linux")]
     return container(containers::app_launcher::view::<Theme, Renderer>(state))
@@ -234,14 +235,6 @@ pub fn view<Theme, Renderer>(state: &LauncherState, id: window::Id) -> Element<'
         Some(margins) => container(containers::app_launcher::view::<Theme, Renderer>(state))
             // just for seeing the size for the window that acts as a the part behind the layershell
             // shell
-            .style(|_| Style {
-                border: Border {
-                    color: Color::WHITE,
-                    width: 1.5,
-                    ..Default::default()
-                },
-                ..Default::default()
-            })
             .padding(margins)
             .into(),
         // takes a bit longer loading, cause the widget loads first, but without dimentions so it
