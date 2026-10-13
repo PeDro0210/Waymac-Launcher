@@ -182,7 +182,6 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                     })
                     .chain(Task::done((|| {
                         state.focus_desktop_entry_id = MAIN_ENTRY_FOCUS_IDX;
-
                         Message::ToogleFocusDesktopEntry(MAIN_ENTRY_FOCUS_IDX, true)
                     })())),
             ])
@@ -203,7 +202,8 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                     None => Task::none(),
                 }
             }
-            window::Event::Resized(_) => {
+            window::Event::Resized(size) => {
+                state.window_size = size;
                 state.window_padding_for_margins = Some(location_mapping(
                     match state.config.main_window.specific {
                         ContainerType::MainWindow { location, .. } => location,
