@@ -58,44 +58,44 @@ pub fn location_mapping(
     location: Location,
     window_size: Size,
     margin: f32,
-    launceher_size: Size,
+    launcher_size: Size,
 ) -> Padding {
     // window height does have an offset relative to the island
     debug!(
-        "height: {}, widht: {}",
+        "height: {}, widht: {} in location mapping",
         window_size.height, window_size.width
     );
     match location {
         Location::Center => Padding {
-            top: (window_size.height / 2.) - (launceher_size.height / 2.),
-            bottom: 0.,
-            left: (window_size.width / 2.) - (launceher_size.width / 2.),
-            right: 0.,
+            top: (window_size.height / 2.) - (launcher_size.height / 2.),
+            bottom: margin,
+            left: (window_size.width / 2.) - (launcher_size.width / 2.),
+            right: margin,
         },
         Location::Top => Padding {
             top: margin,
             right: margin,
             bottom: margin,
-            left: (window_size.width / 2.) - (launceher_size.width / 2.),
+            left: (window_size.width / 2.) - (launcher_size.width / 2.),
         },
         //TODO: fix the positions basesd on the size of the main window for the offset
         Location::Bottom => Padding {
-            top: (window_size.height) - (launceher_size.height), // meh, close enough... will improve later
+            top: (window_size.height) - (launcher_size.height), // meh, close enough... will improve later
             right: margin,
             bottom: margin,
-            left: (window_size.width / 2.) - (launceher_size.width / 2.),
+            left: (window_size.width / 2.) - (launcher_size.width / 2.),
         },
         Location::Left => Padding {
-            top: (window_size.height / 2.) - (launceher_size.height / 2.),
+            top: (window_size.height / 2.) - (launcher_size.height / 2.),
             right: margin,
             bottom: margin,
             left: 0.,
         },
         Location::Right => Padding {
-            top: (window_size.height / 2.) - (launceher_size.height / 2.),
+            top: (window_size.height / 2.) - (launcher_size.height / 2.),
             right: margin,
             bottom: margin,
-            left: (window_size.width) - (launceher_size.width),
+            left: (window_size.width) - (launcher_size.width),
         },
     }
 }
