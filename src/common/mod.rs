@@ -189,24 +189,42 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
         }
         Message::SetWindowSize(id, size) => {
             state.window_size = size;
-            state.window_padding_for_margins = Some(location_mapping(
-                match state.config.main_window.specific {
-                    ContainerType::MainWindow { location, .. } => location,
-                    _ => {
-                        panic!("Can't happen")
-                    }
-                },
-                state.window_size,
-                match state.config.main_window.specific {
-                    ContainerType::MainWindow { margin, .. } => margin,
-                    _ => {
-                        panic!("Can't happen")
-                    }
-                },
-                state.config.main_window.size,
-            ));
+            state.window_id = Some(id);
             move_to(id, Point { x: 0., y: 0. }).chain(resize(id, size))
         }
+        // just trying stuff
+        Message::WindowEvent(event) => match event {
+            window::Event::Moved(_) => {
+                let id = state.window_id.clone();
+
+                match id {
+                    Some(id) => window::monitor_size(id)
+                        .and_then(move |window_size: Size| resize(id, window_size)),
+                    None => Task::none(),
+                }
+            }
+            window::Event::Resized(_) => {
+                state.window_padding_for_margins = Some(location_mapping(
+                    match state.config.main_window.specific {
+                        ContainerType::MainWindow { location, .. } => location,
+                        _ => {
+                            panic!("Can't happen")
+                        }
+                    },
+                    state.window_size,
+                    match state.config.main_window.specific {
+                        ContainerType::MainWindow { margin, .. } => margin,
+                        _ => {
+                            panic!("Can't happen")
+                        }
+                    },
+                    state.config.main_window.size,
+                ));
+
+                Task::none()
+            }
+            _ => Task::none(),
+        },
         //TODO: setup set margin after the window size is acquiared
         _ => Task::none(),
     }
@@ -236,6 +254,15 @@ pub fn view<Theme, Renderer>(state: &LauncherState, id: window::Id) -> Element<'
             // just for seeing the size for the window that acts as a the part behind the layershell
             // shell
             .padding(margins)
+            // Just for window debugging
+            .style(|_| Style {
+                border: Border {
+                    color: Color::WHITE,
+                    width: 1.5,
+                    ..Default::default()
+                },
+                ..Default::default()
+            })
             .into(),
         // takes a bit longer loading, cause the widget loads first, but without dimentions so it
         // doesn't appear on screen, while waiting for the margins assignment
@@ -291,6 +318,7 @@ pub fn boot(
 pub fn subscription(_: &LauncherState) -> Subscription<Message> {
     event::listen_with(|event, _status, _id| match event {
         iced::Event::Keyboard(k) => Some(Message::KeyboardEvent(k)),
+        iced::Event::Window(e) => Some(Message::WindowEvent(e)),
         _ => None,
     })
 }
@@ -309,6 +337,8 @@ pub struct LauncherState {
     errors_detected: WaymacErrorVector,
     window_padding_for_margins: Option<Padding>, //Just for MACOS target
     window_size: Size,
+
+    window_id: Option<window::Id>,
 } // cause of the pattern that layer_shell uses, we need to declare an
 // struct which get's in charge of most of our variables.
 
@@ -322,6 +352,8 @@ pub enum Message {
     UserInputFocus,
 
     KeyboardEvent(iced::keyboard::Event),
+    WindowEvent(iced::window::Event),
+
     SetWindowSize(window::Id, Size),
     WindowOpened(window::Id),
 
