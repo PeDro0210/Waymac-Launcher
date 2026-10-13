@@ -4,15 +4,17 @@ mod util;
 use std::process::exit;
 use std::thread::spawn;
 
-use iced::Length;
+#[cfg(target_os = "macos")]
+use iced::Border;
 use iced::advanced::graphics::mesh::SolidVertex2D;
 use iced::overlay::menu::Catalog;
 use iced::widget::container::Style;
 use iced::widget::{Id as IcedId, operation::focus};
 use iced::widget::{container, operation};
-use iced::window::Settings;
+use iced::window::{Settings, move_to, position, resize};
 use iced::{Color, Window};
 use iced::{Element, Padding, Size, Subscription, Task};
+use iced::{Length, Point};
 
 use iced::{
     event,
@@ -174,7 +176,9 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                 Task::perform(get_desktop_entry(), Message::DesktopEntriesFetched),
                 focus(IcedId::new(LAUNCHER_TEXT_INPUT_ID)),
                 window::monitor_size(id)
-                    .and_then(|monitor_size: Size| Task::done(Message::SetWindowSize(monitor_size)))
+                    .and_then(move |monitor_size: Size| {
+                        Task::done(Message::SetWindowSize(id, monitor_size))
+                    })
                     .chain(Task::done((|| {
                         state.focus_desktop_entry_id = MAIN_ENTRY_FOCUS_IDX;
 
@@ -198,11 +202,12 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                     })())),
             ])
         }
-        Message::SetWindowSize(size) => {
+        Message::SetWindowSize(id, size) => {
             debug!("WINDOW_SIZE: {size:?}");
             state.window_size = size;
-            Task::none()
+            resize(id, size).chain((|| move_to(id, Point { x: 0., y: 0. }))())
         }
+
         _ => Task::none(),
     }
 }
@@ -227,14 +232,22 @@ pub fn view<Theme, Renderer>(state: &LauncherState, id: window::Id) -> Element<'
     #[cfg(target_os = "macos")]
     match state.window_padding_for_margins {
         Some(margins) => container(containers::app_launcher::view::<Theme, Renderer>(state))
+            // just for seeing the size for the window that acts as a the part behind the layershell
+            // shell
+            .style(|_| Style {
+                border: Border {
+                    color: Color::WHITE,
+                    width: 1.5,
+                    ..Default::default()
+                },
+                ..Default::default()
+            })
             .padding(margins)
             .into(),
         // takes a bit longer loading, cause the widget loads first, but without dimentions so it
         // doesn't appear on screen, while waiting for the margins assignment
         None => container(containers::app_launcher::view::<Theme, Renderer>(state))
             .padding(Padding::default())
-            .width(0)
-            .height(0)
             .into(),
     }
 }
@@ -252,6 +265,7 @@ pub fn boot(
         decorations: false,
         transparent: true,
         resizable: false,
+        position: window::Position::Centered,
         ..Default::default()
     });
     (
@@ -315,7 +329,7 @@ pub enum Message {
     UserInputFocus,
 
     KeyboardEvent(iced::keyboard::Event),
-    SetWindowSize(Size),
+    SetWindowSize(window::Id, Size),
     WindowOpened(window::Id),
 
     ToogleFocusDesktopEntry(usize, bool),
