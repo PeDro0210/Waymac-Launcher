@@ -75,7 +75,6 @@ impl WaylandApp {
             WaylandApp::view::<Theme, Renderer>,
         )
         .subscription(subscription)
-        //TODO: pass launcher config to the layer settings
         .settings(Settings {
             layer_settings: LayerShellSettings {
                 layer: Top,
@@ -97,19 +96,17 @@ impl WaylandApp {
             },
             ..Default::default()
         })
-        .style(|status, theme| Style {
+        .style(|state, theme| Style {
             background_color: Color::TRANSPARENT,
             text_color: Color::WHITE,
         })
-        // this one
-        // are just for debugging
         .run()?;
 
         Ok(())
     }
 
     fn namespace() -> String {
-        String::from("XWay - Wayland App")
+        String::from("Waymasc - Wayland App")
     }
 
     fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
@@ -121,8 +118,6 @@ impl WaylandApp {
     }
 
     fn location_mapping(location: Location) -> Anchor {
-        use iced::advanced::graphics::text::cosmic_text::skrifa::raw::tables::loca::Loca;
-
         match location {
             Location::Center => Anchor::Left | Anchor::Right,
             Location::Top => Anchor::Top,

@@ -1,7 +1,6 @@
 mod containers;
 mod util;
 
-use std::process::exit;
 use std::thread::spawn;
 
 #[cfg(target_os = "macos")]
@@ -11,8 +10,8 @@ use iced::overlay::menu::Catalog;
 use iced::widget::container::Style;
 use iced::widget::{Id as IcedId, operation::focus};
 use iced::widget::{container, operation};
-use iced::window::{Settings, move_to, position, resize};
-use iced::{Color, Window};
+use iced::window::{Id, Settings, move_to, position, resize};
+use iced::{Color, Window, exit};
 use iced::{Element, Padding, Size, Subscription, Task};
 use iced::{Length, Point};
 
@@ -30,7 +29,6 @@ use log::{debug, trace};
 use crate::app_launcher::{DesktopEntry, get_desktop_entry, launch_application};
 use crate::common::util::{change_focus, location_mapping};
 use crate::config::app::{ContainerType, WayMacConfig};
-use crate::config::toml::MainWindow;
 use crate::data::{LAUNCHER_TEXT_INPUT_ID, MAIN_ENTRY_FOCUS_IDX};
 use crate::error_collector::WaymacErrorVector;
 
@@ -134,7 +132,7 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                 }
                 match key {
                     Key::Named(Named::Escape) => {
-                        exit(1);
+                        return exit();
                     }
                     Key::Named(Named::Enter) => {
                         if state.errors_detected.len() > 0 {
@@ -150,6 +148,8 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                         if let Some(selected_entry) = selected_entry {
                             let _ = launch_application(selected_entry);
                         }
+
+                        return Task::none();
                     }
                     Key::Named(Named::Backspace) => {
                         // for not looking at the user_input while deleating
@@ -232,6 +232,8 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
 
 //TODO: implement componenent in case of error
 pub fn view<Theme, Renderer>(state: &LauncherState, id: window::Id) -> Element<'_, Message> {
+    debug!("window id: {id:?}");
+
     if state.errors_detected.len() > 0 {
         return containers::error::view::<Theme, Renderer>(state); // it won't even parse the margin
     }
@@ -255,14 +257,6 @@ pub fn view<Theme, Renderer>(state: &LauncherState, id: window::Id) -> Element<'
             // shell
             .padding(margins)
             // Just for window debugging
-            .style(|_| Style {
-                border: Border {
-                    color: Color::WHITE,
-                    width: 1.5,
-                    ..Default::default()
-                },
-                ..Default::default()
-            })
             .into(),
         // takes a bit longer loading, cause the widget loads first, but without dimentions so it
         // doesn't appear on screen, while waiting for the margins assignment
@@ -312,7 +306,7 @@ pub fn boot(
             errors_detected,
             ..Default::default()
         },
-        Task::done(Message::WindowOpened(iced::window::Id::unique())),
+        window::oldest().and_then(|id| Task::done(Message::WindowOpened(id))),
     )
 }
 pub fn subscription(_: &LauncherState) -> Subscription<Message> {
