@@ -21,7 +21,7 @@ use iced::{
 };
 
 #[cfg(target_os = "linux")]
-use iced_layershell::to_layer_message;
+use iced_exwlshell::to_layer_message;
 use log::{debug, trace};
 
 use crate::app_launcher::{DesktopEntry, get_desktop_entry, launch_application};

@@ -12,10 +12,10 @@ use iced::Color;
 use iced_core::theme::Style;
 
 #[cfg(target_os = "linux")]
-use iced_layershell::{
-    Settings, application, daemon,
+use iced_exwlshell::{
+    ExWlSettings, daemon,
     reexport::{Anchor, KeyboardInteractivity, Layer::Top},
-    settings::{LayerShellSettings, StartMode},
+    settings::{LayerShellSettings, LayerSize, StartMode},
 };
 
 use iced::{Renderer, Theme};
@@ -75,13 +75,13 @@ impl WaylandApp {
             WaylandApp::view::<Theme, Renderer>,
         )
         .subscription(subscription)
-        .settings(Settings {
+        .wl_settings(ExWlSettings {
             layer_settings: LayerShellSettings {
                 layer: Top,
-                size: Some((
+                size: LayerSize::px(
                     (config.main_window.size.width) as u32,
                     (config.main_window.size.height) as u32,
-                )),
+                ),
                 anchor: match config.main_window.specific {
                     ContainerType::MainWindow { location, .. } => {
                         WaylandApp::location_mapping(location)
