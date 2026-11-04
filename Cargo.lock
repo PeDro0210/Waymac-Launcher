@@ -1772,8 +1772,9 @@ dependencies = [
 
 [[package]]
 name = "iced_exdevtools"
-version = "0.18.0-beta1"
-source = "git+https://github.com/waycrate/exwlshelleventloop.git#5bb31bb28e8dffcfa7d4ee75f813e62bedb4b406"
+version = "0.18.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c7b29378f814a5458c9f1d0bf927d0c42159a9ca0912dc296edd8b267c115b3d"
 dependencies = [
  "iced_debug",
  "iced_devtools",
@@ -1820,8 +1821,9 @@ dependencies = [
 
 [[package]]
 name = "iced_layershell"
-version = "0.18.0-beta1"
-source = "git+https://github.com/waycrate/exwlshelleventloop.git#5bb31bb28e8dffcfa7d4ee75f813e62bedb4b406"
+version = "0.18.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "79bb5126427f0d16c37f0336a4c2c800b428c3438e244e75322de8e671b51a5d"
 dependencies = [
  "enumflags2",
  "futures",
@@ -1846,8 +1848,9 @@ dependencies = [
 
 [[package]]
 name = "iced_layershell_macros"
-version = "0.18.0-beta1"
-source = "git+https://github.com/waycrate/exwlshelleventloop.git#5bb31bb28e8dffcfa7d4ee75f813e62bedb4b406"
+version = "0.18.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9d591978798f06cc6b46fee575174decf7d33e96977829153e104c1b265e7633"
 dependencies = [
  "darling",
  "manyhow",
@@ -2211,8 +2214,9 @@ dependencies = [
 
 [[package]]
 name = "layershellev"
-version = "0.18.0-beta1"
-source = "git+https://github.com/waycrate/exwlshelleventloop.git#5bb31bb28e8dffcfa7d4ee75f813e62bedb4b406"
+version = "0.18.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "88f48eaa0c702d491d6411620eca91eae3beecc018e79402708f97e1cc948ad8"
 dependencies = [
  "calloop 0.14.4",
  "calloop-wayland-source 0.4.1",
@@ -4520,13 +4524,13 @@ dependencies = [
 
 [[package]]
 name = "waycrate_xkbkeycode"
-version = "0.18.0-beta1"
-source = "git+https://github.com/waycrate/exwlshelleventloop.git#5bb31bb28e8dffcfa7d4ee75f813e62bedb4b406"
+version = "0.18.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4e8b2edb13e0c700b910f62ba561c80bd1d5f881dd66efbfe254a221c35ad26c"
 dependencies = [
  "calloop 0.14.4",
  "log",
  "memmap2",
- "smol_str 0.2.2",
  "wayland-backend",
  "wayland-client",
  "winit-common",

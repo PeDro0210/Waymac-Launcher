@@ -26,7 +26,7 @@ core-graphics = "0.25.0"
 
 
 [target.'cfg(target_os = "linux")'.dependencies]
-iced_layershell = { git = "https://github.com/waycrate/exwlshelleventloop.git" }
+iced_layershell = "0.18.0-beta1"
 freedesktop-file-parser = "0.3.1"
 iced_core = "0.14.0"
 xdg = "3.0.0"
