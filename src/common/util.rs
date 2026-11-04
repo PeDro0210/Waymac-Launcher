@@ -17,7 +17,7 @@ pub fn change_focus(state: &mut LauncherState, offset: i32) -> Task<Message> {
             val if (val < 0
                 || val
                     > (state
-                        .ui_desktop_entries
+                        .cached_desktop_entries
                         .clone()
                         .unwrap_or(Box::new(Vec::new()))
                         .len() as i32)

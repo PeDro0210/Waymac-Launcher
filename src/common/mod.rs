@@ -40,10 +40,9 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
 
     match msg {
         Message::DesktopEntriesFetched(desktop_entries) => {
+            //TODO: see a way for not having 3 copies in memory of desktop entries
             state.desktop_entries = Some(desktop_entries.to_vec());
             state.cached_desktop_entries = Some(desktop_entries);
-
-            state.ui_desktop_entries = state.cached_desktop_entries.clone();
 
             Task::none()
         }
@@ -105,8 +104,6 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                 state.cached_desktop_entries.as_mut().unwrap()[key] = entry_owned;
             }
 
-            state.ui_desktop_entries = state.cached_desktop_entries.clone();
-
             Task::none()
         }
 
@@ -140,7 +137,7 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                         }
 
                         let selected_entry = state
-                            .ui_desktop_entries
+                            .cached_desktop_entries
                             .as_ref()
                             .unwrap()
                             .get(state.focus_desktop_entry_id);
@@ -327,7 +324,6 @@ pub struct LauncherState {
     focus_desktop_entry_id: usize,
     desktop_entries: Option<Vec<DesktopEntry>>,
     cached_desktop_entries: Option<Box<Vec<DesktopEntry>>>,
-    ui_desktop_entries: Option<Box<Vec<DesktopEntry>>>,
     errors_detected: WaymacErrorVector,
     window_padding_for_margins: Option<Padding>, //Just for MACOS target
     window_size: Size,

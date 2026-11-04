@@ -46,7 +46,7 @@ pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
             scrollable(
                 column(
                     state
-                        .ui_desktop_entries
+                        .cached_desktop_entries
                         .as_ref()
                         .unwrap_or(&mut Box::new(Vec::new()))
                         .iter()
