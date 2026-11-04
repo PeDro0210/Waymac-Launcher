@@ -2,7 +2,7 @@ use std::default;
 
 use iced::border::Radius;
 use iced::gradient::{ColorStop, Linear};
-use iced::{Background, Color, Font, Size, advanced::graphics::Image, font};
+use iced::{Background, Color, Font, Size, font};
 use iced::{Border, Radians};
 use serde::Deserialize;
 

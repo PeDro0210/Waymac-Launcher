@@ -8,7 +8,7 @@ strip = "debuginfo"
 opt-level = 3
 
 [dependencies]
-iced = { version = "0.14", features = ["advanced", "tokio", "image"] }
+iced = { version = "0.14", features = ["tokio", "image", "tiny-skia"] }
 log = "0.4.29"
 ftail = "0.3.1"
 clap = { version = "4.6.0", features = ["derive"] }
@@ -19,14 +19,13 @@ shellexpand = "3.1.2"
 fhex = "2.0.2"
 regex = "1.13.1"
 
-
 [target.'cfg(target_os = "macos")'.dependencies]
 apple-bundles = "0.21.0"
 core-graphics = "0.25.0"
 
 
 [target.'cfg(target_os = "linux")'.dependencies]
-iced_layershell = "0.18.0-beta1"
+iced_layershell = "0.19.1"
 freedesktop-file-parser = "0.3.1"
 iced_core = "0.14.0"
 xdg = "3.0.0"

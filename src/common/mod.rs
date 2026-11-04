@@ -5,8 +5,6 @@ use std::thread::spawn;
 
 #[cfg(target_os = "macos")]
 use iced::Border;
-use iced::advanced::graphics::mesh::SolidVertex2D;
-use iced::overlay::menu::Catalog;
 use iced::widget::container::Style;
 use iced::widget::{Id as IcedId, operation::focus};
 use iced::widget::{container, operation};
