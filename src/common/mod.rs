@@ -1,11 +1,14 @@
 mod containers;
 mod util;
 
-use std::thread::spawn;
+use std::thread::{sleep, spawn};
+use std::time::Duration;
 
 #[cfg(target_os = "macos")]
 use iced::Border;
 use iced::widget::container::Style;
+#[cfg(target_os = "macos")]
+use iced::widget::text;
 use iced::widget::{Id as IcedId, operation::focus};
 use iced::widget::{container, operation};
 use iced::window::{Id, Settings, move_to, position, resize};
@@ -186,6 +189,26 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
             state.window_id = Some(id);
             move_to(id, Point { x: 0., y: 0. }).chain(resize(id, size))
         }
+        Message::SetWindowPadding(id) => {
+            state.window_padding_for_margins = Some(location_mapping(
+                match state.config.main_window.specific {
+                    ContainerType::MainWindow { location, .. } => location,
+                    _ => {
+                        panic!("Can't happen")
+                    }
+                },
+                state.window_size,
+                match state.config.main_window.specific {
+                    ContainerType::MainWindow { margin, .. } => margin,
+                    _ => {
+                        panic!("Can't happen")
+                    }
+                },
+                state.config.main_window.size,
+            ));
+
+            focus(IcedId::new(LAUNCHER_TEXT_INPUT_ID))
+        }
         // just trying stuff
         Message::WindowEvent(event) => match event {
             window::Event::Moved(_) => {
@@ -193,29 +216,13 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
 
                 match id {
                     Some(id) => window::monitor_size(id)
-                        .and_then(move |window_size: Size| resize(id, window_size)),
+                        .and_then(move |window_size: Size| resize(id, window_size))
+                        .chain(Task::done(Message::SetWindowPadding(id))),
                     None => Task::none(),
                 }
             }
             window::Event::Resized(size) => {
                 state.window_size = size;
-                state.window_padding_for_margins = Some(location_mapping(
-                    match state.config.main_window.specific {
-                        ContainerType::MainWindow { location, .. } => location,
-                        _ => {
-                            panic!("Can't happen")
-                        }
-                    },
-                    state.window_size,
-                    match state.config.main_window.specific {
-                        ContainerType::MainWindow { margin, .. } => margin,
-                        _ => {
-                            panic!("Can't happen")
-                        }
-                    },
-                    state.config.main_window.size,
-                ));
-
                 Task::none()
             }
             _ => Task::none(),
@@ -255,9 +262,7 @@ pub fn view<Theme, Renderer>(state: &LauncherState, id: window::Id) -> Element<'
             .into(),
         // takes a bit longer loading, cause the widget loads first, but without dimentions so it
         // doesn't appear on screen, while waiting for the margins assignment
-        None => container(containers::app_launcher::view::<Theme, Renderer>(state))
-            .padding(Padding::default())
-            .into(),
+        None => container(text("")).padding(Padding::default()).into(),
     }
 }
 
@@ -343,6 +348,7 @@ pub enum Message {
     WindowEvent(iced::window::Event),
 
     SetWindowSize(window::Id, Size),
+    SetWindowPadding(window::Id),
     WindowOpened(window::Id),
 
     ToogleFocusDesktopEntry(usize, bool),
