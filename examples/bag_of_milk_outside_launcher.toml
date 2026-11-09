@@ -1,0 +1,49 @@
+[main_window]
+height = 350
+width = 350
+
+padding = 4.5
+spacing = 1
+margin = 0
+
+text_color = "#F0E3D8"
+
+font = "Pixel Code"
+
+location = "Center"
+
+background_colors = ["#111012"]
+
+border.color = "#862A32"
+border.radius = 1.5
+border.width = 1
+
+border.top_left_radius = 0
+border.bottom_left_radius = 0
+border.top_right_radius = 0
+border.bottom_right_radius = 0
+
+
+[inputbar]
+line_height = 1
+width = 350
+
+border.color = "#862A32"
+border.radius = 0
+border.width = 1
+
+border.top_left_radius = 0
+border.bottom_left_radius = 0
+border.top_right_radius = 0
+border.bottom_right_radius = 0
+
+
+background_color = "#111012"
+
+[entry]
+height = 25
+width = 350
+
+focus_text_color = "#5D4E80"
+
+background_color = "#111012"

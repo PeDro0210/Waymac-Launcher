@@ -8,7 +8,7 @@
 - setup everything as a daemon for quicker opening []
 
 # BugFIXES
-- fix size arrangement for multiple windows quartz []
+- fix size arrangement for multiple windows quartz [x]
 
 
 # Really need TODO

@@ -1,0 +1,41 @@
+[main_window]
+height = 422
+width = 406
+
+padding = 10
+spacing = 0
+margin = 0
+
+text_color = "#F6F6F4"
+
+font = "Pixel Code"
+
+location = "Center"
+
+
+border.color = "#ff0000"
+border.radius = 0
+border.width = 0
+
+border.top_left_radius = 20
+border.bottom_left_radius = 20
+border.top_right_radius = 20
+border.bottom_right_radius = 20
+
+
+gradient_angle = 160
+background_colors = ["#A998BA", "#C99260"]
+background_image = "~/Dotfiles/quickshell/images/base-border.png"
+
+
+[inputbar]
+line_height = 1
+width = 350
+
+[entry]
+height = 25
+width = 350
+
+
+text_color = "#F6F6F4"
+focus_text_color = "#6F6E69"
