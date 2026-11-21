@@ -3,7 +3,11 @@
 // this have take in mind being used with the push method of the PathBuf
 pub const DEFAULT_CONFIG_PATH_EXTENSION: &str = "~/.config/waymac/waymac.toml";
 
-pub const DEFAULT_DEBUG_DUMP_PATH_EXTENSION: &str = "~/.local/state/waymac.log";
+pub const DEFAULT_WAYMAC_DUMPS_PATH: &str = "~/.local/state/waymac/";
+
+// think for being concat to the DEFAULT_WAYMAC_DUMPS_PATH
+pub const DEFAULT_DEBUG_DUMP_FILE_NAME: &str = "waymac.log";
+pub const DESKTOP_ENTRY_CACHE: &str = "dekstop_entries.toml";
 
 // this have take in mind being used with the push method of the PathBuf
 

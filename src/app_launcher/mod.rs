@@ -25,6 +25,10 @@ pub struct DesktopEntry {
     pub is_focus: bool,
 }
 
+pub async fn create_entries_file() {}
+
+pub async fn load_entries_file() {}
+
 //TODO: make matching for XDG and Macos
 pub async fn get_desktop_entry() -> Box<Vec<DesktopEntry>> {
     let mut desktop_entries: Vec<DesktopEntry> = Vec::new();
