@@ -33,7 +33,7 @@ struct Args {
     #[arg(short, long, default_value_t = DEFAULT_CONFIG_PATH_EXTENSION.to_string())]
     config_path: String,
 
-    #[arg(short, long,default_value_t = format!("{}{}", DEFAULT_WAYMAC_DUMPS_PATH,DEFAULT_DEBUG_DUMP_FILE_NAME))]
+    #[arg(short, long,default_value_t = format!("{DEFAULT_WAYMAC_DUMPS_PATH}{DEFAULT_DEBUG_DUMP_FILE_NAME}"))]
     debug_dump_path: String,
 }
 
@@ -43,7 +43,7 @@ impl WayMacApp {
     pub fn init() -> Result<(), Box<dyn StdError>> {
         let args = Box::new(expand_args_paths(Args::parse()));
 
-        create_default_dump_dir();
+        create_default_dump_dir()?;
 
         logger::init_logger(Some(args.debug_dump_path.as_str()))?;
 

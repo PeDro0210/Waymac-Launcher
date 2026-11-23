@@ -1,10 +1,13 @@
 mod utils;
 
-use log::{debug, info, warn};
+use log::{debug, error, info, warn};
+use serde::{Deserialize, Serialize};
+use std::fmt::format;
+use std::io::Write;
 use std::process::Command;
 use std::{
+    error::Error as StdError,
     fs::{File, ReadDir, read_dir},
-    io::Error as StdError,
     path::{Path, PathBuf},
     process::exit,
     vec::Vec,
@@ -14,20 +17,48 @@ use std::{
 use xdg::BaseDirectories;
 
 use utils::*;
-#[derive(Debug, Clone, Default)]
+
+use crate::data::{DEFAULT_WAYMAC_DUMPS_PATH, DESKTOP_ENTRY_CACHE};
+#[derive(Debug, Clone, Default, Deserialize, Serialize)]
 pub struct DesktopEntry {
     pub name: String,
     pub desktop_entry_path: Box<PathBuf>,
-    // TODO: search a way for fetching icons on demand and not in load
-    pub icon: Option<String>,
 
     // for ease of managing the DesktopEntry state in the view
     pub is_focus: bool,
+
+    // rank for how above the entry shows
+    pub rank: i32,
 }
 
-pub async fn create_entries_file() {}
+fn write_entries_file(entries: Vec<DesktopEntry>) -> Result<(), Box<dyn StdError>> {
+    let desktop_entry_cache_path =
+        shellexpand::tilde(format!("{DEFAULT_WAYMAC_DUMPS_PATH}{DESKTOP_ENTRY_CACHE}").as_str())
+            .to_string();
 
-pub async fn load_entries_file() {}
+    let mut entries_file_writer = File::create(desktop_entry_cache_path.clone())?;
+
+    let mut entries_cache_serialize = String::new();
+
+    for entry in entries {
+        let actual_string = format!(
+            "[{}]\ndesktop_entry_path = {} \nrank = {}\n",
+            entry.name,
+            entry.desktop_entry_path.to_str().unwrap(),
+            entry.rank,
+        );
+
+        entries_cache_serialize.push_str(&actual_string);
+    }
+
+    entries_file_writer.write(entries_cache_serialize.as_bytes())?;
+
+    Ok(())
+}
+
+pub async fn load_entries_file() -> Result<(), Box<dyn StdError>> {
+    todo!()
+}
 
 //TODO: make matching for XDG and Macos
 pub async fn get_desktop_entry() -> Box<Vec<DesktopEntry>> {
@@ -99,7 +130,28 @@ pub async fn get_desktop_entry() -> Box<Vec<DesktopEntry>> {
     };
 }
 
-pub fn launch_application(entry: &DesktopEntry) {
+pub fn launch_application(entry: &DesktopEntry, hyper_wrapped_entries: Option<Vec<DesktopEntry>>) {
+    let mut entries = hyper_wrapped_entries.unwrap().to_vec();
+
+    let change_entry = entries
+        .iter_mut()
+        .map(|comp_entry| {
+            if comp_entry.name == entry.name {
+                comp_entry.rank += 1;
+            }
+            return comp_entry.clone();
+        })
+        .collect();
+
+    match write_entries_file(change_entry) {
+        Ok(_) => {
+            info!("saved file");
+        }
+        Err(err) => {
+            error!("found {err}");
+        }
+    }
+
     match get_desktop_entry_target() {
         DesktopEntriesTarget::XDG => {
             #[cfg(target_os = "linux")]

@@ -12,16 +12,14 @@ pub fn expand_args_paths(args: Args) -> Args {
     }
 }
 
-pub fn create_default_dump_dir() {
-    let exist_dump_dir = exists(DEFAULT_WAYMAC_DUMPS_PATH);
+pub fn create_default_dump_dir() -> Result<(), Box<dyn StdError>> {
+    let expanded_waymac_dumps_path = &shellexpand::tilde(DEFAULT_WAYMAC_DUMPS_PATH).to_string();
 
-    if !exist_dump_dir.expect(
-        format!(
-            "Couldn't check for path '{}' which is needed for execution for 'waymac_launcher'",
-            DEFAULT_WAYMAC_DUMPS_PATH
-        )
-        .as_str(),
-    ) {
-        create_dir(DEFAULT_WAYMAC_DUMPS_PATH);
+    let exist_dump_dir = exists(expanded_waymac_dumps_path)?;
+
+    if !exist_dump_dir {
+        let _ = create_dir(expanded_waymac_dumps_path);
     }
+
+    Ok(())
 }

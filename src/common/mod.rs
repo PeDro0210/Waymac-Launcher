@@ -144,7 +144,8 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                             .get(state.focus_desktop_entry_id);
 
                         if let Some(selected_entry) = selected_entry {
-                            let _ = launch_application(selected_entry);
+                            let _ =
+                                launch_application(selected_entry, state.desktop_entries.clone());
                         }
 
                         return Task::none();
