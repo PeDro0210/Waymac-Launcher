@@ -3,7 +3,7 @@ mod utils;
 use log::{debug, error, info, warn};
 use serde::{Deserialize, Serialize};
 use std::fmt::format;
-use std::io::Write;
+use std::io::{Read, Write};
 use std::process::Command;
 use std::{
     error::Error as StdError,
@@ -19,6 +19,7 @@ use xdg::BaseDirectories;
 use utils::*;
 
 use crate::data::{DEFAULT_WAYMAC_DUMPS_PATH, DESKTOP_ENTRY_CACHE};
+
 #[derive(Debug, Clone, Default, Deserialize, Serialize)]
 pub struct DesktopEntry {
     pub name: String,
@@ -31,6 +32,12 @@ pub struct DesktopEntry {
     pub rank: i32,
 }
 
+#[derive(Debug, Clone, Default, Deserialize, Serialize)]
+struct CachedEntriesTOML {
+    entries_size: usize,
+    entries: Vec<DesktopEntry>,
+}
+
 fn write_entries_file(entries: Vec<DesktopEntry>) -> Result<(), Box<dyn StdError>> {
     let desktop_entry_cache_path =
         shellexpand::tilde(format!("{DEFAULT_WAYMAC_DUMPS_PATH}{DESKTOP_ENTRY_CACHE}").as_str())
@@ -38,31 +45,38 @@ fn write_entries_file(entries: Vec<DesktopEntry>) -> Result<(), Box<dyn StdError
 
     let mut entries_file_writer = File::create(desktop_entry_cache_path.clone())?;
 
-    let mut entries_cache_serialize = String::new();
+    let entries_toml = toml::to_string(&CachedEntriesTOML {
+        entries_size: entries.len(),
+        entries,
+    })?;
 
-    for entry in entries {
-        let actual_string = format!(
-            "[{}]\ndesktop_entry_path = {} \nrank = {}\n",
-            entry.name,
-            entry.desktop_entry_path.to_str().unwrap(),
-            entry.rank,
-        );
-
-        entries_cache_serialize.push_str(&actual_string);
-    }
-
-    entries_file_writer.write(entries_cache_serialize.as_bytes())?;
+    entries_file_writer.write(entries_toml.as_bytes())?;
 
     Ok(())
 }
 
-pub async fn load_entries_file() -> Result<(), Box<dyn StdError>> {
-    todo!()
+pub async fn load_entries_file() -> Result<Vec<DesktopEntry>, Box<dyn StdError>> {
+    let desktop_entry_cache_path =
+        shellexpand::tilde(format!("{DEFAULT_WAYMAC_DUMPS_PATH}{DESKTOP_ENTRY_CACHE}").as_str())
+            .to_string();
+
+    let string_entries = &mut String::new();
+
+    let mut entries_file = File::open(desktop_entry_cache_path)?;
+
+    entries_file.read_to_string(string_entries)?;
+
+    let entries = toml::from_str::<CachedEntriesTOML>(string_entries)?;
+
+    debug!("entries loaded: {entries:?}");
+
+    Ok(entries.entries)
 }
 
 //TODO: make matching for XDG and Macos
 pub async fn get_desktop_entry() -> Box<Vec<DesktopEntry>> {
     let mut desktop_entries: Vec<DesktopEntry> = Vec::new();
+    let mut new_desktop_entries_size: usize = 0;
 
     match get_desktop_entry_target() {
         DesktopEntriesTarget::XDG => {
@@ -75,6 +89,9 @@ pub async fn get_desktop_entry() -> Box<Vec<DesktopEntry>> {
                 xdg_data_dir.push(xdg_data_home_dir);
 
                 debug!("xdg data dirs: {:?}", xdg_data_dir);
+
+                // we do the iteration for checking if the new entries aren't needed and just
+                // falling back to the cache
 
                 // LMAO, THIS IS TO NESTED
                 // we iterate over all the applications for have a pretty robust entry
@@ -95,8 +112,12 @@ pub async fn get_desktop_entry() -> Box<Vec<DesktopEntry>> {
 
                         for application_dir_result in application_dir_results {
                             // append each different application entry in the big desktop_entries
-                            desktop_entries
-                                .append(&mut get_xdg_dir_entries(application_dir_result));
+                            match get_xdg_dir_entries(application_dir_result) {
+                                Ok(mut entries) => desktop_entries.append(&mut entries),
+                                Err(e) => {
+                                    error!("{e}");
+                                }
+                            }
                         }
                     }
 
@@ -133,6 +154,7 @@ pub async fn get_desktop_entry() -> Box<Vec<DesktopEntry>> {
 pub fn launch_application(entry: &DesktopEntry, hyper_wrapped_entries: Option<Vec<DesktopEntry>>) {
     let mut entries = hyper_wrapped_entries.unwrap().to_vec();
 
+    // for changing rank for entries
     let change_entry = entries
         .iter_mut()
         .map(|comp_entry| {

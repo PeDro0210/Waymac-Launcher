@@ -15,7 +15,11 @@ pub const DESKTOP_ENTRY_CACHE: &str = "dekstop_entries.toml";
 
 /*Widgets Ids*/
 
+use std::sync::LazyLock;
+
 use iced::Color;
+
+use crate::app_launcher::DesktopEntry;
 
 pub const LAUNCHER_TEXT_INPUT_ID: &str = "LauncherTextInputID";
 pub const LAUNCHER_CONTAINER_ID: &str = "LauncherID";
@@ -48,6 +52,10 @@ pub const ENTRY_FOCUS_COLOR: Color = Color {
 };
 
 /*Widgets Colors*/
+
+/*Entries extras*/
+
+/**/
 
 /* Mac related */
 
