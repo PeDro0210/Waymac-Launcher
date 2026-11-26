@@ -76,7 +76,6 @@ pub async fn load_entries_file() -> Result<Vec<DesktopEntry>, Box<dyn StdError>>
 //TODO: make matching for XDG and Macos
 pub async fn get_desktop_entry() -> Box<Vec<DesktopEntry>> {
     let mut desktop_entries: Vec<DesktopEntry> = Vec::new();
-    let mut new_desktop_entries_size: usize = 0;
 
     match get_desktop_entry_target() {
         DesktopEntriesTarget::XDG => {
@@ -99,39 +98,56 @@ pub async fn get_desktop_entry() -> Box<Vec<DesktopEntry>> {
                     // per path, search for an inner application directory, if it doesn't exist, we just
                     // skipped
                     if let Ok(path_inners) = xdg_path.read_dir() {
-                        // well search all the applications instances
-                        let application_dir_results = path_inners.filter(|path| match path {
-                            Ok(dir_entry) => dir_entry
-                                .path()
-                                .into_os_string()
-                                .into_string()
-                                .unwrap_or_default()
-                                .contains("applications"),
-                            Err(_) => false, //fallback in weird case of not being able to open
-                        });
-
-                        for application_dir_result in application_dir_results {
-                            // append each different application entry in the big desktop_entries
-                            match get_xdg_dir_entries(application_dir_result) {
-                                Ok(mut entries) => desktop_entries.append(&mut entries),
-                                Err(e) => {
-                                    error!("{e}");
+                        let mut application_dir_results = path_inners
+                            // well search all the applications instances
+                            .filter(|path| match path {
+                                Ok(dir_entry) => dir_entry
+                                    .path()
+                                    .into_os_string()
+                                    .into_string()
+                                    .unwrap_or_default()
+                                    .contains("applications"),
+                                Err(_) => false, //fallback in weird case of not being able to open
+                            })
+                            .flat_map(|dir_result| match get_xdg_dir_entries(dir_result) {
+                                Ok(entries) => entries,
+                                Err(err) => {
+                                    error!("{err}");
+                                    vec![]
                                 }
-                            }
-                        }
+                            })
+                            .collect::<Vec<DesktopEntry>>();
+
+                        debug!("application_dir: {application_dir_results:?}");
+
+                        desktop_entries.append(&mut application_dir_results);
                     }
 
                     // we open each of the desktop entrys and parse them to the struct
                 }
 
-                debug!("desktop_entries s {:?}", desktop_entries);
+                // now in case there's one new app
 
-                return Box::new(desktop_entries);
+                let cached_entries = match load_entries_file().await {
+                    Ok(entries) => entries,
+                    Err(_) => {
+                        error!("Couldn't load cached entries, ignoring ranking process");
+                        return Box::new(desktop_entries);
+                    }
+                };
+
+                if desktop_entries.len() > cached_entries.len() {
+                    // find new entry and push it
+
+                    debug!("desktop_entriess {:?}", desktop_entries);
+
+                    return Box::new(desktop_entries);
+                }
+
+                debug!("desktop_entriess {:?}", desktop_entries);
+
+                return Box::new(cached_entries);
             }
-
-            panic!(
-                "Desktop entry target was selected as XDG, when target linux is not being supported."
-            );
         }
         // TODO: add different paths for different dir with applications
         DesktopEntriesTarget::MacOS => {

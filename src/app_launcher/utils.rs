@@ -42,31 +42,33 @@ pub fn get_xdg_dir_entries(
     let mut dir_desktop_entries = Vec::new();
 
     let dir = dir_result?;
-    let dir_contents = read_dir(dir.path())?;
-    let dir = dir_contents;
-    for desktop_entry_result in dir {
-        let desktop_entry = desktop_entry_result.unwrap(); // if the desktop entry
-        // exists, if cause of something (if it panics I'll see what to change in case)
+    let dir_contents = read_dir(dir.path());
+    if let Ok(dir) = dir_contents {
+        for desktop_entry_result in dir {
+            let desktop_entry = desktop_entry_result.unwrap(); // if the desktop entry
+            // exists, if cause of something (if it panics I'll see what to change in case)
 
-        if let Ok(mut desktop_entry_file) = File::open(desktop_entry.path()) {
-            let file_contents = &mut String::new();
+            if let Ok(mut desktop_entry_file) = File::open(desktop_entry.path()) {
+                let file_contents = &mut String::new();
 
-            // getting the content from the entry
-            let _ = desktop_entry_file.read_to_string(file_contents);
+                // getting the content from the entry
+                let _ = desktop_entry_file.read_to_string(file_contents);
 
-            let desktop_file = freedesktop_file_parser::parse(file_contents).unwrap_or_default();
+                let desktop_file =
+                    freedesktop_file_parser::parse(file_contents).unwrap_or_default();
 
-            // for removing applications without a explict name
-            if desktop_file.entry.name.default.is_empty() {
-                continue;
+                // for removing applications without a explict name
+                if desktop_file.entry.name.default.is_empty() {
+                    continue;
+                }
+
+                dir_desktop_entries.push(DesktopEntry {
+                    name: desktop_file.entry.name.default,
+                    //TODO: available another process to fetch icons
+                    desktop_entry_path: Box::new(desktop_entry.path()),
+                    ..Default::default()
+                });
             }
-
-            dir_desktop_entries.push(DesktopEntry {
-                name: desktop_file.entry.name.default,
-                //TODO: available another process to fetch icons
-                desktop_entry_path: Box::new(desktop_entry.path()),
-                ..Default::default()
-            });
         }
     }
     return Ok(dir_desktop_entries);
