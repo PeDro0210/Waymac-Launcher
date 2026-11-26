@@ -40,7 +40,9 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
     //TODO: implement update function
 
     match msg {
-        Message::DesktopEntriesFetched(desktop_entries) => {
+        Message::DesktopEntriesFetched(mut desktop_entries) => {
+            desktop_entries.sort_by(|b, a| a.rank.cmp(&b.rank));
+
             //TODO: see a way for not having 3 copies in memory of desktop entries
             state.desktop_entries = Some(desktop_entries.to_vec());
             state.cached_desktop_entries = Some(desktop_entries);
