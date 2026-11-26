@@ -18,7 +18,7 @@ Simple customization is kind of a pretty important point for WayMac, but take in
   - text-color: hex-val (cascades)
   - font: <font name in system> (cascades and it will fallback to system font)
 
-  - location: "center" | "top" | "bottom" | "right" | "left" (can be chained together) [Needed but not implemented yet]
+  - location: "center" | "top" | "bottom" | "right" | "left" (can be chained together)
 
   - background-image: <path to image> (optional, can be use in case of wanting gradients)
   - background-colors:  various hex-val (solid colors)
