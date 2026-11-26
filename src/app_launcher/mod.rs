@@ -30,11 +30,13 @@ pub struct DesktopEntry {
 
     // rank for how above the entry shows
     pub rank: i32,
+
+    // for ordering respective time
+    pub time_created: i64,
 }
 
 #[derive(Debug, Clone, Default, Deserialize, Serialize)]
 struct CachedEntriesTOML {
-    entries_size: usize,
     entries: Vec<DesktopEntry>,
 }
 
@@ -45,17 +47,14 @@ fn write_entries_file(entries: Vec<DesktopEntry>) -> Result<(), Box<dyn StdError
 
     let mut entries_file_writer = File::create(desktop_entry_cache_path.clone())?;
 
-    let entries_toml = toml::to_string(&CachedEntriesTOML {
-        entries_size: entries.len(),
-        entries,
-    })?;
+    let entries_toml = toml::to_string(&CachedEntriesTOML { entries })?;
 
     entries_file_writer.write(entries_toml.as_bytes())?;
 
     Ok(())
 }
 
-pub async fn load_entries_file() -> Result<Vec<DesktopEntry>, Box<dyn StdError>> {
+pub fn load_entries_file() -> Result<Vec<DesktopEntry>, Box<dyn StdError>> {
     let desktop_entry_cache_path =
         shellexpand::tilde(format!("{DEFAULT_WAYMAC_DUMPS_PATH}{DESKTOP_ENTRY_CACHE}").as_str())
             .to_string();
@@ -128,7 +127,7 @@ pub async fn get_desktop_entry() -> Box<Vec<DesktopEntry>> {
 
                 // now in case there's one new app
 
-                let cached_entries = match load_entries_file().await {
+                let mut cached_entries = match load_entries_file() {
                     Ok(entries) => entries,
                     Err(_) => {
                         error!("Couldn't load cached entries, ignoring ranking process");
@@ -139,9 +138,24 @@ pub async fn get_desktop_entry() -> Box<Vec<DesktopEntry>> {
                 if desktop_entries.len() > cached_entries.len() {
                     // find new entry and push it
 
-                    debug!("desktop_entriess {:?}", desktop_entries);
+                    let mut sorted_desktop_entries_older_newer = desktop_entries.clone();
 
-                    return Box::new(desktop_entries);
+                    sorted_desktop_entries_older_newer
+                        .sort_by(|a, b| a.time_created.cmp(&b.time_created));
+
+                    // push the difference between programs with cached_entries and sorted
+
+                    let newer_entries_count = cached_entries.len() - desktop_entries.len();
+
+                    for entry in sorted_desktop_entries_older_newer
+                        .split_off(sorted_desktop_entries_older_newer.len() - newer_entries_count)
+                    {
+                        cached_entries.push(entry);
+                    }
+
+                    debug!("cached_entriess {:?}", cached_entries);
+
+                    return Box::new(cached_entries);
                 }
 
                 debug!("desktop_entriess {:?}", desktop_entries);

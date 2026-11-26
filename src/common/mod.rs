@@ -63,7 +63,7 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
             let desktop_entries_borrowed = state.desktop_entries.to_owned();
 
             let desktop_filter_join = spawn(move || {
-                let desktop_entries = Box::new(
+                let mut desktop_entries: Box<Vec<DesktopEntry>> = Box::new(
                     desktop_entries_borrowed
                         .unwrap_or_default()
                         .into_iter()
@@ -75,6 +75,9 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
                         })
                         .collect(),
                 );
+
+                desktop_entries.sort_by(|b, a| a.rank.cmp(&b.rank));
+
                 Message::DesktopEntriesChanged(desktop_entries)
             });
 
@@ -93,7 +96,6 @@ pub fn update(state: &mut LauncherState, msg: Message) -> Task<Message> {
             Task::none()
         }
 
-        //TODO: make that the selected entry just get's reference and doesn't copy all of them
         Message::ToogleFocusDesktopEntry(key, focus) => {
             // get the specific DesktopEntry and copying it
             let selected_entry = state.cached_desktop_entries.as_ref().unwrap().get(key);

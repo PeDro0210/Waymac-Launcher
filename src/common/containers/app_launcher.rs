@@ -19,9 +19,7 @@ use crate::data::{LAUNCHER_CONTAINER_ID, LAUNCHER_SCROLLABLE_ID, LAUNCHER_TEXT_I
 
 pub fn view<Theme, Renderer>(state: &LauncherState) -> Element<'_, Message> {
     container(Stack::from_vec(vec![
-        // TODO: implement a stack for having image/color as base-layer and the rest above
         container(column![
-            //TODO: Separate launcher  widgets in different functions
             text_input("", &state.user_input)
                 .on_input(Message::UserInputChanged)
                 .id(LAUNCHER_TEXT_INPUT_ID)

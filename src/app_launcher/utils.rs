@@ -36,6 +36,7 @@ pub fn check_xdg_dir_entries_size(dir_result: Result<DirEntry, Error>) -> Result
 }
 
 #[cfg(target_os = "linux")]
+use std::os::unix::fs::MetadataExt;
 pub fn get_xdg_dir_entries(
     dir_result: Result<DirEntry, Error>,
 ) -> Result<Vec<DesktopEntry>, Error> {
@@ -66,6 +67,7 @@ pub fn get_xdg_dir_entries(
                     name: desktop_file.entry.name.default,
                     //TODO: available another process to fetch icons
                     desktop_entry_path: Box::new(desktop_entry.path()),
+                    time_created: desktop_entry_file.metadata().unwrap().ctime(),
                     ..Default::default()
                 });
             }
